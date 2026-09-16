@@ -30,11 +30,9 @@
   <a href="https://github.com/zenstory-ai/oh-story-claudecode/discussions"><img alt="GitHub Discussions" src="https://img.shields.io/badge/GitHub%20Discussions-181717?style=for-the-badge&logo=github&logoColor=white"></a>
 </p>
 
-<!-- 60 秒演示视频：把 oh-story-demo.mp4 拖进任一 issue / PR 编辑框，GitHub 会返回
-     https://github.com/user-attachments/assets/<uuid> 形式的永久链接；把它填进下面 src，再删掉包着 video 的注释符号。 -->
-<!-- <video src="https://github.com/user-attachments/assets/REPLACE-WITH-UPLOADED-UUID" controls muted playsinline width="100%"></video> -->
+<video src="https://github.com/user-attachments/assets/ff60e467-1923-4134-b873-b210d9a23d6b" controls muted playsinline width="100%"></video>
 
-![OH STORY 本地写作工作台](demo/story-dashboard.png)
+<p align="center"><sub>真实录屏：在 Claude Code 里安装 → <code>/story-setup</code> → <code>/story-long-write 写第21章</code> → 字数不足时停下来问作者 → 提交追踪。61 分钟会话剪成 71 秒，跳过处有标注。</sub></p>
 
 ## 这是什么
 

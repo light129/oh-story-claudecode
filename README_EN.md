@@ -33,11 +33,9 @@
   <a href="https://github.com/zenstory-ai/oh-story-claudecode/discussions"><img alt="GitHub Discussions" src="https://img.shields.io/badge/GitHub%20Discussions-181717?style=for-the-badge&logo=github&logoColor=white"></a>
 </p>
 
-<!-- 60-second demo: drag oh-story-demo.mp4 into any issue / PR editor; GitHub returns a permanent
-     https://github.com/user-attachments/assets/<uuid> link. Put it in src below and remove the comment markers. -->
-<!-- <video src="https://github.com/user-attachments/assets/REPLACE-WITH-UPLOADED-UUID" controls muted playsinline width="100%"></video> -->
+<video src="https://github.com/user-attachments/assets/ff60e467-1923-4134-b873-b210d9a23d6b" controls muted playsinline width="100%"></video>
 
-![OH STORY local writing desk](demo/story-dashboard.png)
+<p align="center"><sub>Real screen recording: install inside Claude Code → <code>/story-setup</code> → <code>/story-long-write 写第21章</code> → the skill stops to ask the author when the chapter runs short → tracking commit. A 61-minute session cut to 71 seconds; skips are labelled.</sub></p>
 
 ## What it is
 
