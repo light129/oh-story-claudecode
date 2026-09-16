@@ -429,9 +429,7 @@ Contributions are welcome — new skills, knowledge base additions, market data 
 - **GitHub Discussions**: [ask questions, get help, share workflows](https://github.com/zenstory-ai/oh-story-claudecode/discussions).
 - **GitHub Issues**: [bugs, output-quality cases, and feature requests](https://github.com/zenstory-ai/oh-story-claudecode/issues/new/choose). Use the structured forms and include reproducible evidence or a concrete output sample.
 
-## Star history and contributors
-
-[![Star History Chart](https://api.star-history.com/svg?repos=zenstory-ai/oh-story-claudecode&type=Date)](https://www.star-history.com/#zenstory-ai/oh-story-claudecode&Date)
+## Contributors
 
 <a href="https://github.com/zenstory-ai/oh-story-claudecode/graphs/contributors"><img alt="Contributors" src="https://contrib.rocks/image?repo=zenstory-ai/oh-story-claudecode"></a>
 

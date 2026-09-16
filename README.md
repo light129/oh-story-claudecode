@@ -411,9 +411,7 @@ oh-story-claudecode 内置适配 Claude Code、Google Antigravity、OpenCode、Z
 - **GitHub Discussions**：[提问 / 求助 / 分享用法](https://github.com/zenstory-ai/oh-story-claudecode/discussions)，方便检索。
 - **GitHub Issues**：[Bug、输出质量 Case、功能请求](https://github.com/zenstory-ai/oh-story-claudecode/issues/new/choose)，请按结构化表单提供复现材料或具体输出证据。
 
-## Star 趋势与贡献者
-
-[![Star History Chart](https://api.star-history.com/svg?repos=zenstory-ai/oh-story-claudecode&type=Date)](https://www.star-history.com/#zenstory-ai/oh-story-claudecode&Date)
+## 贡献者
 
 <a href="https://github.com/zenstory-ai/oh-story-claudecode/graphs/contributors"><img alt="Contributors" src="https://contrib.rocks/image?repo=zenstory-ai/oh-story-claudecode"></a>
 
