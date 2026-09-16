@@ -67,30 +67,32 @@
         "前世MCN爆款运营经验",
         "天王级唱功与嗓音",
         "大师级导演能力",
-        "专业级钢琴演奏",
+        "专业级钢琴演奏（已现场落地）",
         "《离别开出花》伴奏",
         "约四十万元系统现金奖励"
       ],
-      "goal": "承接老兵故事，继续做出能落到真实人群的军宣作品",
+      "goal": "把老兵们迟到四十年的告别做成能落到真实人群的作品",
       "identity": "火箭军文工团宣传兵；军宣顶流创作者",
       "knowledge": [
-        "《诸君，且听龙吟》手机原版获高层确认",
         "《如愿》已经完成舆论反转并点击破亿",
-        "有老兵邀请他上门听故事"
+        "陈国栋一个班九人回三人、坟头被雪压平找不着",
+        "护工小刘录下了整场现场演出"
       ],
-      "location": "火箭军文工团",
+      "location": "干休所活动室",
       "open_threads": [
         "钟嘉嘉所谓只猜对一半仍未解释",
         "与钟嘉嘉的感情尚未说破",
-        "《离别开出花》和钢琴能力尚未进入新作品",
+        "《离别开出花》成片与发布尚未完成",
+        "护工录像会以什么形式流出",
         "吴伟公诉结果未落地"
       ],
       "relationships": [
         "与钟嘉嘉由工作伙伴转为暧昧升温",
         "获周薄森、张耀祖和齐首长赏识与力保",
+        "陈国栋向他托付二十七封信与战友记忆",
         "吴伟已落败并进入法律程序"
       ],
-      "state": "《如愿》点击破亿并获官方认证，声望到达新高点"
+      "state": "钢琴技能与《离别开出花》首次现场落地，获满屋老兵起立敬礼；护工录像流向未定"
     },
     "钟嘉嘉": {
       "abilities_resources": [
@@ -126,8 +128,8 @@
     ],
     "continuity_risks": [
       "第一卷卷界仍是候选方案，未确认前不要擅自开新卷。",
-      "第21章尚无细纲，不能直接写正文。",
-      "吴伟公诉、钟嘉嘉背景和军方培养安排仍未完整揭示。"
+      "吴伟公诉、钟嘉嘉背景和军方培养安排仍未完整揭示。",
+      "护工小刘录下的现场视频尚未发布，成片数据与系统结算留到第22章，不得提前写。"
     ],
     "long_term_constraints": [
       "军宣爽点必须通过作品效果、传播数据和围观反应链兑现，不能只靠系统播报。",
@@ -136,19 +138,15 @@
       "钟嘉嘉未公开的军方培养安排属于作者真相，正文揭示前不能当成读者已知。"
     ],
     "next_chapter_commitments": [
-      "先补第21章细纲，再承接老兵邀请、新歌伴奏和钢琴能力。"
+      "承接护工小刘录下的现场视频流向，兑现《离别开出花》成片数据与系统任务结算"
     ],
     "position": {
-      "scene": "火箭军文工团，钟嘉嘉送来老兵书法礼后",
-      "story_time": "《如愿》点击破亿后的第二天",
+      "scene": "干休所活动室，现场演出结束、护工手机仍举着",
+      "story_time": "《如愿》破亿后的第三天",
       "volume": "第一卷·军宣整顿（候选）",
       "volume_start_chapter": 1
     },
     "recent_chapters": [
-      {
-        "chapter": 18,
-        "summary": "《如愿》破千万并获官方媒体转发，吴伟封号且收到公诉通知。"
-      },
       {
         "chapter": 19,
         "summary": "军营、校园和老兵家庭同时观看《如愿》，作品影响从热搜落到真实人群。"
@@ -156,6 +154,10 @@
       {
         "chapter": 20,
         "summary": "《如愿》点击破亿，江晨获得《离别开出花》伴奏和钢琴能力，钟嘉嘉送来老兵书法礼。"
+      },
+      {
+        "chapter": 21,
+        "summary": "江晨赴干休所践约，听陈国栋讲完一个班九人只回来三人的往事后，用文工团旧钢琴现场弹唱《离别开出花》，满屋老兵起立敬礼；护工小刘全程录像，视频尚未发布。"
       }
     ]
   },
@@ -262,11 +264,11 @@
     "F054": {
       "id": "F054",
       "importance": "高",
-      "planned_resolution_chapter": null,
+      "planned_resolution_chapter": 21,
       "planted_chapter": 20,
-      "status": "已埋",
-      "summary": "一位老兵邀请江晨上门听当年的故事，为后续创作提供入口",
-      "updated_chapter": 20
+      "status": "已回收",
+      "summary": "老兵陈国栋的上门邀约已兑现：江晨到干休所听完当年一个班九人回三人的往事",
+      "updated_chapter": 21
     },
     "F055": {
       "id": "F055",
@@ -274,23 +276,32 @@
       "planned_resolution_chapter": null,
       "planted_chapter": 20,
       "status": "已埋",
-      "summary": "《离别开出花》伴奏已经到手，下一首作品尚未启动",
-      "updated_chapter": 20
+      "summary": "《离别开出花》已在干休所现场首演，但成片与全网发布尚未完成",
+      "updated_chapter": 21
     },
     "F056": {
       "id": "F056",
       "importance": "高",
-      "planned_resolution_chapter": null,
+      "planned_resolution_chapter": 21,
       "planted_chapter": 20,
+      "status": "已回收",
+      "summary": "专业级钢琴演奏能力已在干休所现场首次落地",
+      "updated_chapter": 21
+    },
+    "F057": {
+      "id": "F057",
+      "importance": "高",
+      "planned_resolution_chapter": null,
+      "planted_chapter": 21,
       "status": "已埋",
-      "summary": "专业级钢琴演奏能力已经获得，尚未在公开作品或表演中落地",
-      "updated_chapter": 20
+      "summary": "护工小刘用手机录下整场《离别开出花》现场，视频尚未发布，江晨看见了没有阻止",
+      "updated_chapter": 21
     }
   },
   "imported_through_chapter": 20,
-  "last_committed_chapter": 20,
+  "last_committed_chapter": 21,
   "schema_version": 4,
-  "state_revision": 0,
+  "state_revision": 1,
   "timeline": {
     "E001": {
       "characters": [
@@ -471,6 +482,45 @@
       "reveal_status": "未揭示",
       "story_time": "第十章看片会后",
       "updated_chapter": 20
+    },
+    "E014": {
+      "characters": [
+        "江晨",
+        "陈国栋"
+      ],
+      "first_recorded_chapter": 21,
+      "id": "E014",
+      "objective_fact": "陈国栋向江晨展示二十七封未寄出的信与合影，讲述当年一个班九人只回来三人、走的那天雪太大连坟头都找不着",
+      "reader_knowledge": "读者与江晨同步听完全部口述，包括王铁柱、四川娃与那块红布",
+      "reveal_chapter": 21,
+      "reveal_status": "已揭示",
+      "story_time": "《如愿》破亿后的第三天",
+      "updated_chapter": 21
+    },
+    "E015": {
+      "characters": [
+        "江晨",
+        "陈国栋",
+        "护工小刘"
+      ],
+      "first_recorded_chapter": 21,
+      "id": "E015",
+      "objective_fact": "江晨在干休所活动室用文工团旧钢琴现场弹唱《离别开出花》，老人们从起哄到集体起立敬礼；护工小刘全程录像未发布",
+      "reader_knowledge": "读者看到完整反应链与敬礼，也看到江晨注意到录像却没有阻止",
+      "reveal_chapter": 21,
+      "reveal_status": "已揭示",
+      "story_time": "同日下午",
+      "updated_chapter": 21
+    }
+  },
+  "wordcount_records": {
+    "21": {
+      "actual": 2204,
+      "body_sha256": "8ff7c397cd032b4ce0beac0a822d88ad13a86fe235b65f2bcd6d3e814d458bf7",
+      "metric": "visible_chars_v1",
+      "resolution": "within_user_band",
+      "status": "internal_pass",
+      "target": 2500
     }
   }
 }

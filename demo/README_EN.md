@@ -89,8 +89,8 @@ Per-chapter extraction (events / characters / settings / foreshadowing / timelin
 |---|---|
 | [`长篇/…/正文/第021章_离别开出花.md`](长篇/让你管账号，你高燃混剪炸全网/正文/第021章_离别开出花.md) | Chapter 21, continued by `/story-long-write` (2,204 chars, all four checks green) |
 | [`长篇/…/大纲/细纲_第021章.md`](长篇/让你管账号，你高燃混剪炸全网/大纲/细纲_第021章.md) | Its blueprint, 9/9 in `check-outline-contract.js` |
+| [`长篇/…/.deslop-whitelist`](长篇/让你管账号，你高燃混剪炸全网/.deslop-whitelist) · [`追踪/逐章记录/第021章.md`](长篇/让你管账号，你高燃混剪炸全网/追踪/逐章记录/第021章.md) | Book-local style whitelist; the chapter-21 tracking record (with its retirement log) |
 | [`去AI味对照/`](去AI味对照/README_EN.md) | Real scan output from the `/story-deslop` checker: 9 findings on an AI-flavored sample vs zero on the clean rewrite |
 
-> The files under `追踪/` still reflect chapter 20. Chapter 21's prose and blueprint were produced and
-> verified following the skill's workflow, but the structured tracking state was not written back
-> (`_tracking-state.json` is maintained by the skill itself and not hand-edited).
+> `追踪/` has been advanced to chapter 21 through `storyctl.py chapter commit` (`state_revision` 0 → 1); every derived
+> view is re-rendered from `_tracking-state.json`. `.deslop-whitelist` registers the book's own "……" and end-divider and exempts style checks only.

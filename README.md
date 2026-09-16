@@ -30,6 +30,10 @@
   <a href="https://github.com/zenstory-ai/oh-story-claudecode/discussions"><img alt="GitHub Discussions" src="https://img.shields.io/badge/GitHub%20Discussions-181717?style=for-the-badge&logo=github&logoColor=white"></a>
 </p>
 
+<!-- 60 秒演示视频：把 oh-story-demo.mp4 拖进任一 issue / PR 编辑框，GitHub 会返回
+     https://github.com/user-attachments/assets/<uuid> 形式的永久链接；把它填进下面 src，再删掉包着 video 的注释符号。 -->
+<!-- <video src="https://github.com/user-attachments/assets/REPLACE-WITH-UPLOADED-UUID" controls muted playsinline width="100%"></video> -->
+
 ![OH STORY 本地写作工作台](demo/story-dashboard.png)
 
 ## 这是什么
@@ -73,8 +77,8 @@ npx skills add zenstory-ai/oh-story-claudecode -y -g
 ### 续写状态卡：为什么几百章不会崩
 
 下面这本是项目作者自己的长篇，用 `/story-import` 把已发布的前 20 章反向重建成可续写工程。
-下面是**第 21 章落笔前**的状态卡（当时正文停在第 20 章）。`/story-long-write` 不靠对话记忆，
-它把连续性写进 `追踪/上下文.md`，下一章只读这一份——固定 7 栏、硬上限 12KB，不进正文 prompt：
+下面是**写第 21 章之前**的状态卡。`/story-long-write` 不靠对话记忆，它把连续性写进
+`追踪/上下文.md`，下一章只读这一份——固定 7 栏、硬上限 12KB，不进正文 prompt：
 
 ```markdown
 ## 当前位置
@@ -96,27 +100,55 @@ npx skills add zenstory-ai/oh-story-claudecode -y -g
 **「作者真相」和「读者已知」是分开记的**——这是角色提前知道答案、伏笔写飞的主要来源。
 完整文件：[`demo/长篇/.../追踪/上下文.md`](demo/长篇/让你管账号，你高燃混剪炸全网/追踪/上下文.md)
 
-### 续写第 21 章：门禁是怎么把关的
+### 续写第 21 章：从门禁到回写，一条链走完
 
-接着上面的状态卡，`/story-long-write 写第21章` 的实际产出与全部检查结果：
+接着上面的状态卡，`/story-long-write 写第21章` 的实际产出与每一道检查：
 
 ```text
-细纲门禁  check-outline-contract.js    ok=true    9/9 项通过
-字数口径  visible_chars_v1             2204 字    目标 2500 · 内部带 pass · 用户带 pass
-AI 句式   check-ai-patterns.js         0 命中     exit 0
-退化扫描  check-degeneration.js        0 命中     exit 0
+细纲门禁   check-outline-contract.js   ok=true · 9/9 项（第一版缺 8 个字段、情节点没做成表格，exit 1 打回）
+章级检查   storyctl.py chapter check   字数 2204 / 目标 2500 · 内部带 pass
+             ├ check-ai-patterns.js     0 命中
+             ├ check-degeneration.js    0 命中
+             └ normalize-punctuation    5 处 blocking → 在书级 .deslop-whitelist 登记「……」与章末分隔线后 0 处
+追踪提交   storyctl.py chapter commit  tracking_committed=true · state_revision 0 → 1
+派生视图   tracking_commit.py check    上下文.md / 伏笔.md / 角色状态/ / 时间线/ / 逐章记录/ 全部由 state 重生成，逐字一致
 ```
 
-写正文前 `guard-outline-before-prose.sh` 会拦住缺细纲的章节。第 21 章的细纲先过了
-`check-outline-contract.js` 的 9 项结构验收——包括「情节点必须是五列表格」「每个情节点都要写清
-执行边界的『禁』与『放』」——才允许落笔。第一版细纲就因为缺 8 个字段、情节点没做成表格被
-exit 1 打回。
+写正文前 `guard-outline-before-prose.sh` 会拦住缺细纲的章节；细纲本身要先过 9 项结构验收——
+包括「情节点必须是五列表格」「每个情节点写清『禁』与『放』」——才允许落笔。
 
-> 同一套扫描跑在作者手写的第 18、19 章上，各有 1–2 处 AI 句式命中；第 21 章是 0。
+标点那一步值得说明：`……` 留白和章末分隔线是这本书前 20 章的既定文风（见 `设定/文风.md`），
+检查器不理解作者意图，所以 skill 提供了书级 `.deslop-whitelist`——一行一个字面片段，只豁免风格检查，
+事实、字数、截断、工程词照报。这是文档写明的机制（`references/style-resolution.md`），不是绕过。
+
+提交之后，追踪状态是工具从 `_tracking-state.json` 整份重新渲染的，**手改派生文件会被 `check` 拒绝**。
+对照上面的状态卡，回写实际改了什么：
+
+```diff
+ ## 当前位置
+-- 当前章：第20章   故事时间：《如愿》点击破亿后的第二天
++- 当前章：第21章   故事时间：《如愿》破亿后的第三天
+ ## 活跃伏笔
+-- F054｜一位老兵邀请江晨上门听当年的故事，为后续创作提供入口｜埋第20章｜回收章未定｜高
++- F055｜《离别开出花》已在干休所现场首演，但成片与全网发布尚未完成｜埋第20章｜回收章未定｜高
++- F057｜护工小刘用手机录下整场《离别开出花》现场，视频尚未发布，江晨看见了没有阻止｜埋第21章｜回收章未定｜高
+ ## 下一章承诺
+-- 先补第21章细纲，再承接老兵邀请、新歌伴奏和钢琴能力。
++- 承接护工小刘录下的现场视频流向，兑现《离别开出花》成片数据与系统任务结算
+ ## 连贯性风险
+-- 第21章尚无细纲，不能直接写正文。
++- 护工小刘录下的现场视频尚未发布，成片数据与系统结算留到第22章，不得提前写。
+```
+
+F054、F056 转为「已回收｜回收第21章」，从热上下文退出；被退役的那条风险写进了
+`逐章记录/第021章.md` 的「本章退役登记」，随时可回查——**状态不会静默消失**。
+
+> 同一套 AI 句式扫描跑在作者手写的第 18、19 章上，各有 1–2 处命中；第 21 章是 0。
 > 这不说明机器写得比人好，只说明这几条 lint 是确定性的，对谁都一样。
 
 成品：[`正文/第021章_离别开出花.md`](demo/长篇/让你管账号，你高燃混剪炸全网/正文/第021章_离别开出花.md)
 · [`大纲/细纲_第021章.md`](demo/长篇/让你管账号，你高燃混剪炸全网/大纲/细纲_第021章.md)
+· [`追踪/逐章记录/第021章.md`](demo/长篇/让你管账号，你高燃混剪炸全网/追踪/逐章记录/第021章.md)
 
 ### 拆文报告：评分要给得出理由
 
@@ -378,6 +410,12 @@ oh-story-claudecode 内置适配 Claude Code、Google Antigravity、OpenCode、Z
 - **Telegram 群**：<https://t.me/ohstoryclaudecode> —— 日常交流、踩坑、新功能讨论。
 - **GitHub Discussions**：[提问 / 求助 / 分享用法](https://github.com/zenstory-ai/oh-story-claudecode/discussions)，方便检索。
 - **GitHub Issues**：[Bug、输出质量 Case、功能请求](https://github.com/zenstory-ai/oh-story-claudecode/issues/new/choose)，请按结构化表单提供复现材料或具体输出证据。
+
+## Star 趋势与贡献者
+
+[![Star History Chart](https://api.star-history.com/svg?repos=zenstory-ai/oh-story-claudecode&type=Date)](https://www.star-history.com/#zenstory-ai/oh-story-claudecode&Date)
+
+<a href="https://github.com/zenstory-ai/oh-story-claudecode/graphs/contributors"><img alt="Contributors" src="https://contrib.rocks/image?repo=zenstory-ai/oh-story-claudecode"></a>
 
 ## 致谢
 
