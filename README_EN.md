@@ -46,7 +46,7 @@ It installs as 13 skills into the coding agent you already use; the writing mode
 
 - **The file system is the memory** — settings, outlines, prose and continuity tracking are maintained as separate files. A several-hundred-chapter novel does not lean on conversation memory, and context compaction does not lose your foreshadowing.
 - **Deterministic checks and gates** — writing prose without a chapter blueprint is blocked; after each write, truncation, engineering vocabulary and word-count debt are scanned automatically. 7 specialist agents, 8 hooks and 100+ methodology files load on demand.
-- **9 hosts** — Claude Code · Codex CLI · Google Antigravity · OpenCode · ZCode · OpenClaw · Reasonix, plus generic Web AI / agent environments that can read project files.
+- **Runs in 9 coding agents** — Claude Code · Codex CLI · Google Antigravity · OpenCode · ZCode · OpenClaw · Reasonix, plus generic Web AI / agent environments that can read project files.
 - **Target platforms** — Qidian, Fanqie, Jinjiang, Qimao, Zhihu Yanyan and other long/short-form Chinese platforms.
 
 > **Trope = a reliable delivery of emotion.**
@@ -75,7 +75,7 @@ Then run `/story-setup` from your writing-project root (`$story-setup` in Codex)
 
 ## See what it produces
 
-These are files the skills actually wrote, not mockups. Full samples: **[demo/](demo/README_EN.md)**.
+Every file below was written by the skills; full samples in **[demo/](demo/README_EN.md)**.
 
 ### The continuity card: why several hundred chapters hold together
 
@@ -129,8 +129,7 @@ states what the writer may and may not invent" — before writing is allowed.
 The punctuation step deserves a note. The `……` pause and the end-of-chapter divider are this book's
 established style across its first 20 chapters (`设定/文风.md`). The checker cannot read intent, so
 the skill provides a book-local `.deslop-whitelist`: one literal per line, exempting only style
-checks — facts, word count, truncation and engineering vocabulary are still reported. That is the
-documented mechanism (`references/style-resolution.md`), not a bypass.
+checks — facts, word count, truncation and engineering vocabulary are still reported (mechanism: `references/style-resolution.md`).
 
 After the commit, tracking state is re-rendered in full from `_tracking-state.json`; **hand-editing a
 derived view is rejected by `check`**. Against the card above, this is what the write-back changed:
@@ -154,10 +153,6 @@ derived view is rejected by `check`**. Against the card above, this is what the 
 F054 and F056 flipped to "paid off｜ch.21" and left the hot context; the retired risk line was written
 into `逐章记录/第021章.md` under "本章退役登记", so it can always be traced — **state never vanishes silently**.
 
-> The same AI-pattern scan on chapters 18 and 19, written by hand, returns 1–2 hits each;
-> chapter 21 returns 0. That does not make the machine the better writer — these lints are
-> deterministic and apply to everyone equally.
-
 Output: [`正文/第021章_离别开出花.md`](demo/长篇/让你管账号，你高燃混剪炸全网/正文/第021章_离别开出花.md)
 · [`大纲/细纲_第021章.md`](demo/长篇/让你管账号，你高燃混剪炸全网/大纲/细纲_第021章.md)
 · [`追踪/逐章记录/第021章.md`](demo/长篇/让你管账号，你高燃混剪炸全网/追踪/逐章记录/第021章.md)
@@ -166,7 +161,7 @@ Output: [`正文/第021章_离别开出花.md`](demo/长篇/让你管账号，�
 
 `/story-long-analyze` on the first 23 chapters of *Coiling Dragon* (~62k characters, a Qidian classic
 used purely as analysis input), scored against
-the taste of a Fanqie male-oriented progression-fantasy reader — a low score describes fit, not literary merit:
+the taste of a Fanqie male-oriented progression-fantasy reader:
 
 | Dimension | Score | Note (excerpt) |
 |------|------|------|
@@ -191,7 +186,7 @@ anchored to the source text and tagged with emotion type and intensity (−9 to 
 | 「霍总还不打算让沈暮月母子进门吗？」<br>「没必要，私生子而已。」<br>我正准备推门而入，听到这话，手停在了半空。 | **N1 Overhears "just a bastard child" at the door**<br>type{information} · emotion{shock}{−7}<br>technique{open on conflict + information gap} |
 | 霍庭煜对我没有爱。<br>我默然抽回了手。<br>该放弃自己的执念了。 | **N2 Accepts he does not love her; resolves to let go**<br>type{emotion} · emotion{bitterness}{−5} |
 
-The report does not only flatter. In the same output, `写作手法.md` names what the original costs:
+In the same output, `写作手法.md` names what the original costs:
 
 > **POV cost**: the male lead's turn is never dramatised; the interior monologue at N47 dumps
 > "long forgiven, sleepless, deeply in love" all at once — telling rather than showing, the standard
@@ -200,10 +195,9 @@ The report does not only flatter. In the same output, `写作手法.md` names wh
 `/story-short-write` then reads these technique notes to draft a new story in the same genre.
 Full output: [`demo/拆文库/曾将爱意私藏/`](demo/拆文库/曾将爱意私藏/)
 
-### De-AI editing: not a guess, a rule-by-rule match
+### De-AI editing: rule-by-rule matching
 
-The local check in `/story-deslop` is a writing lint. It does not judge whether a passage "feels
-AI-written" — it matches known sentence templates and returns the line, the span and a rewrite
+The local check in `/story-deslop` is a writing lint. It matches known sentence templates and returns the line, the span and a rewrite
 direction. Scanning a hand-constructed AI-flavored sample returns 9 findings (7 blocking):
 
 ```text

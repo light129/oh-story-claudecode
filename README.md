@@ -43,7 +43,7 @@ Oh Story 覆盖长篇与短篇网络小说的全流程：**扫榜选材 → 拆�
 
 - **用文件系统当记忆** — 设定、大纲、正文、追踪各自独立维护。几百章的长篇不靠对话记忆硬撑，压缩上下文也不会丢伏笔。
 - **确定性检查与门禁** — 写正文前没有细纲会被拦下；写完自动扫截断、工程词和字数欠账。7 个专业 Agent、8 个自动化 hook、100+ 份写作方法论按需加载。
-- **9 个宿主** — Claude Code · Codex CLI · Google Antigravity · OpenCode · ZCode · OpenClaw · Reasonix，以及能读取项目文件的通用 Web AI / Agent 环境。
+- **装进 9 款编程 Agent** — Claude Code · Codex CLI · Google Antigravity · OpenCode · ZCode · OpenClaw · Reasonix，以及能读取项目文件的通用 Web AI / Agent 环境。
 - **面向的平台** — 起点、番茄、晋江、七猫、知乎盐言等长短篇平台。
 
 > **套路 = 确定性的情绪满足**
@@ -67,12 +67,12 @@ npx skills add zenstory-ai/oh-story-claudecode -y -g
 
 装好后，在写作项目根运行 `/story-setup`（Codex 用 `$story-setup`）部署 hooks / agents / references，**然后新开会话**。升级后同样重跑一次 `/story-setup`。
 
-> 各宿主的部署差异、已知限制与安装排查（Windows `ENOENT`、Antigravity `agy -p`、目录残留等）见 **[宿主部署与安装排查](docs/hosts.md)**。
+> 各 Agent 的部署差异、已知限制与安装排查（Windows `ENOENT`、Antigravity `agy -p`、目录残留等）见 **[各编程 Agent 的部署与安装排查](docs/hosts.md)**。
 > 最新版本 **v0.7.10**（2026-09-09）；变更见 [CHANGELOG.md](CHANGELOG.md) 与 [Releases](https://github.com/zenstory-ai/oh-story-claudecode/releases)。
 
 ## 看看它的输出
 
-这些是 skill 真实跑出来的文件，不是示意图。完整样例可直接翻 **[demo/](demo/README.md)**。
+下面每一份都是 skill 跑出来的文件，完整样例在 **[demo/](demo/README.md)**。
 
 ### 续写状态卡：为什么几百章不会崩
 
@@ -119,7 +119,7 @@ npx skills add zenstory-ai/oh-story-claudecode -y -g
 
 标点那一步值得说明：`……` 留白和章末分隔线是这本书前 20 章的既定文风（见 `设定/文风.md`），
 检查器不理解作者意图，所以 skill 提供了书级 `.deslop-whitelist`——一行一个字面片段，只豁免风格检查，
-事实、字数、截断、工程词照报。这是文档写明的机制（`references/style-resolution.md`），不是绕过。
+事实、字数、截断、工程词照报（机制见 `references/style-resolution.md`）。
 
 提交之后，追踪状态是工具从 `_tracking-state.json` 整份重新渲染的，**手改派生文件会被 `check` 拒绝**。
 对照上面的状态卡，回写实际改了什么：
@@ -143,17 +143,13 @@ npx skills add zenstory-ai/oh-story-claudecode -y -g
 F054、F056 转为「已回收｜回收第21章」，从热上下文退出；被退役的那条风险写进了
 `逐章记录/第021章.md` 的「本章退役登记」，随时可回查——**状态不会静默消失**。
 
-> 同一套 AI 句式扫描跑在作者手写的第 18、19 章上，各有 1–2 处命中；第 21 章是 0。
-> 这不说明机器写得比人好，只说明这几条 lint 是确定性的，对谁都一样。
-
 成品：[`正文/第021章_离别开出花.md`](demo/长篇/让你管账号，你高燃混剪炸全网/正文/第021章_离别开出花.md)
 · [`大纲/细纲_第021章.md`](demo/长篇/让你管账号，你高燃混剪炸全网/大纲/细纲_第021章.md)
 · [`追踪/逐章记录/第021章.md`](demo/长篇/让你管账号，你高燃混剪炸全网/追踪/逐章记录/第021章.md)
 
 ### 拆文报告：评分要给得出理由
 
-`/story-long-analyze` 拆《盘龙》开篇 23 章（约 6.2 万字，起点经典，仅作拆解素材），按番茄男频升级流口味打分——
-低分是对体质的客观描述，不是文学评价：
+`/story-long-analyze` 拆《盘龙》开篇 23 章（约 6.2 万字，起点经典，仅作拆解素材），按番茄男频升级流读者口味打分：
 
 | 维度 | 评分 | 说明（节选） |
 |------|------|------|
@@ -176,7 +172,7 @@ F054、F056 转为「已回收｜回收第21章」，从热上下文退出；被
 | 「霍总还不打算让沈暮月母子进门吗？」<br>「没必要，私生子而已。」<br>我正准备推门而入，听到这话，手停在了半空。 | **N1 门口偷听到「私生子而已」**<br>类型{信息} · 情绪{震惊}{−7}<br>手法{开篇即冲突+信息差} |
 | 霍庭煜对我没有爱。<br>我默然抽回了手。<br>该放弃自己的执念了。 | **N2 认清对方无爱，决意放弃执念**<br>类型{情绪} · 情绪{心酸}{−5} |
 
-拆文报告不只给好话。同一份产出里，`写作手法.md` 直接点出原作的代价：
+同一份产出里，`写作手法.md` 直接点出原作的代价：
 
 > **POV 代价**：男主的转变缺乏过程展示，N47 的内心独白集中倒出「早就原谅、夜不能寐、深爱」，
 > 略显直白说明（tell 多于 show）——这是第一人称追妻文的通病。
@@ -184,9 +180,9 @@ F054、F056 转为「已回收｜回收第21章」，从热上下文退出；被
 下游 `/story-short-write` 直接读这些手法写同题材新篇。
 完整产出：[`demo/拆文库/曾将爱意私藏/`](demo/拆文库/曾将爱意私藏/)
 
-### 去 AI 味：不是猜，是逐条匹配
+### 去 AI 味：逐条匹配已知句式
 
-`/story-deslop` 的本地检查是写作 lint——不判断「像不像 AI 写的」，而是逐条匹配已知句式模板，
+`/story-deslop` 的本地检查是写作 lint：逐条匹配已知句式模板，
 给出行号、命中片段和改写方向。拿一段人工构造的 AI 腔样例扫描，9 处命中（7 blocking）：
 
 ```text
@@ -390,7 +386,7 @@ oh-story-claudecode 内置适配 Claude Code、Google Antigravity、OpenCode、Z
 
 ## 延伸阅读
 
-- [提示词、技能包、插件与 MCP 怎么分](https://zenstory.ai/zh/oh-story/agent-skills-for-writers) — 先选写作任务，再选宿主与流程
+- [提示词、技能包、插件与 MCP 怎么分](https://zenstory.ai/zh/oh-story/agent-skills-for-writers) — 先选写作任务，再选 Agent 与流程
 - [导入 10–20 章后接着写](https://zenstory.ai/zh/oh-story/import-and-continue) — 审阅反推结果，以书稿证据为准
 - [分开角色已知、承诺与线索](https://zenstory.ai/zh/oh-story/long-novel-continuity) — 别把未来计划当成已发生事实
 - [把剧情规格写成可见变化](https://zenstory.ai/zh/oh-story/outline-to-chapter) — 用行动、选择、代价和结果推进
