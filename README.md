@@ -30,7 +30,7 @@
   <a href="https://github.com/zenstory-ai/oh-story-claudecode/discussions"><img alt="GitHub Discussions" src="https://img.shields.io/badge/GitHub%20Discussions-181717?style=for-the-badge&logo=github&logoColor=white"></a>
 </p>
 
-<video src="https://github.com/user-attachments/assets/ff60e467-1923-4134-b873-b210d9a23d6b" controls muted playsinline width="100%"></video>
+<video src="https://github.com/user-attachments/assets/3ced907e-0055-4654-bc55-d30609dda53d" controls muted playsinline width="100%"></video>
 
 ## 这是什么
 
