@@ -2,7 +2,7 @@
 
 [中文](hosts.md)
 
-Oh Story supports 9 agent hosts. This page holds per-host deployment detail, known limits and install troubleshooting; day-to-day use only needs the [Installation](../README_EN.md#installation) section.
+Oh Story supports 8 agent hosts. This page holds per-host deployment detail, known limits and install troubleshooting; day-to-day use only needs the [Installation](../README_EN.md#installation) section.
 
 ## Install troubleshooting: Windows errors, environment check, marketplace path
 On Windows you may occasionally see an `ENOENT ... mkdir` error while the run still ends with `Done!`. That means a skill was only partially installed. If a whole subdirectory of story-setup's reference bundle is missing, `/story-setup` reports an incomplete reference bundle; other forms of partial install may go unreported. Either way, re-run the same install command to fix it.

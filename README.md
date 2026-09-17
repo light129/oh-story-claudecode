@@ -32,7 +32,7 @@
 
 <video src="https://github.com/user-attachments/assets/ff60e467-1923-4134-b873-b210d9a23d6b" controls muted playsinline width="100%"></video>
 
-<p align="center"><sub>真实录屏：在 Claude Code 里安装 → <code>/story-setup</code> → <code>/story-long-write 写第21章</code> → 字数不足时停下来问作者 → 提交追踪。61 分钟会话剪成 71 秒，跳过处有标注。</sub></p>
+<p align="center"><sub>真实录屏：在 Claude Code 里安装 → <code>/story-setup</code> → <code>/story-long-write 写第21章</code> → 字数不足时停下来问作者 → 提交追踪。61 分钟会话剪成 78 秒，跳过处有标注。</sub></p>
 
 ## 这是什么
 
@@ -41,7 +41,7 @@ Oh Story 覆盖长篇与短篇网络小说的全流程：**扫榜选材 → 拆�
 
 - **用文件系统当记忆** — 设定、大纲、正文、追踪各自独立维护。几百章的长篇不靠对话记忆硬撑，压缩上下文也不会丢伏笔。
 - **确定性检查与门禁** — 写正文前没有细纲会被拦下；写完自动扫截断、工程词和字数欠账。7 个专业 Agent、8 个自动化 hook、100+ 份写作方法论按需加载。
-- **装进 9 款编程 Agent** — Claude Code · Codex CLI · Google Antigravity · OpenCode · ZCode · OpenClaw · Reasonix，以及能读取项目文件的通用 Web AI / Agent 环境。
+- **装进 8 款编程 Agent** — Claude Code · Codex CLI · Google Antigravity · OpenCode · ZCode · OpenClaw · Reasonix，以及能读取项目文件的通用 Web AI / Agent 环境。
 - **面向的平台** — 起点、番茄、晋江、七猫、知乎盐言等长短篇平台。
 
 > **套路 = 确定性的情绪满足**

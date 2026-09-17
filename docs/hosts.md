@@ -2,7 +2,7 @@
 
 [English](hosts_EN.md)
 
-Oh Story 支持 9 款编程 Agent。本页是各 Agent 的部署细节、已知限制和安装排查；
+Oh Story 支持 8 款编程 Agent。本页是各 Agent 的部署细节、已知限制和安装排查；
 日常使用只需 README 的[安装](../README.md#安装)一节。
 
 ## 安装排查：Windows 报错、环境检查、marketplace 路径

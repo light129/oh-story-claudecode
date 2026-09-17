@@ -35,7 +35,7 @@
 
 <video src="https://github.com/user-attachments/assets/ff60e467-1923-4134-b873-b210d9a23d6b" controls muted playsinline width="100%"></video>
 
-<p align="center"><sub>Real screen recording: install inside Claude Code → <code>/story-setup</code> → <code>/story-long-write 写第21章</code> → the skill stops to ask the author when the chapter runs short → tracking commit. A 61-minute session cut to 71 seconds; skips are labelled.</sub></p>
+<p align="center"><sub>Real screen recording: install inside Claude Code → <code>/story-setup</code> → <code>/story-long-write 写第21章</code> → the skill stops to ask the author when the chapter runs short → tracking commit. A 61-minute session cut to 78 seconds; skips are labelled.</sub></p>
 
 ## What it is
 
@@ -44,7 +44,7 @@ It installs as 13 skills into the coding agent you already use; the writing mode
 
 - **The file system is the memory** — settings, outlines, prose and continuity tracking are maintained as separate files. A several-hundred-chapter novel does not lean on conversation memory, and context compaction does not lose your foreshadowing.
 - **Deterministic checks and gates** — writing prose without a chapter blueprint is blocked; after each write, truncation, engineering vocabulary and word-count debt are scanned automatically. 7 specialist agents, 8 hooks and 100+ methodology files load on demand.
-- **Runs in 9 coding agents** — Claude Code · Codex CLI · Google Antigravity · OpenCode · ZCode · OpenClaw · Reasonix, plus generic Web AI / agent environments that can read project files.
+- **Runs in 8 coding agents** — Claude Code · Codex CLI · Google Antigravity · OpenCode · ZCode · OpenClaw · Reasonix, plus generic Web AI / agent environments that can read project files.
 - **Target platforms** — Qidian, Fanqie, Jinjiang, Qimao, Zhihu Yanyan and other long/short-form Chinese platforms.
 
 > **Trope = a reliable delivery of emotion.**
