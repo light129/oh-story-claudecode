@@ -35,8 +35,6 @@
 
 <video src="https://github.com/user-attachments/assets/ff60e467-1923-4134-b873-b210d9a23d6b" controls muted playsinline width="100%"></video>
 
-<p align="center"><sub>Real screen recording: install inside Claude Code → <code>/story-setup</code> → <code>/story-long-write 写第21章</code> → the skill stops to ask the author when the chapter runs short → tracking commit. A 61-minute session cut to 78 seconds; skips are labelled.</sub></p>
-
 ## What it is
 
 Oh Story covers the whole web-fiction pipeline, long-form and short: **chart scanning → deconstructing bestsellers → outline and prose → de-AI editing → cover art**.
@@ -130,7 +128,8 @@ the skill provides a book-local `.deslop-whitelist`: one literal per line, exemp
 checks — facts, word count, truncation and engineering vocabulary are still reported (mechanism: `references/style-resolution.md`).
 
 After the commit, tracking state is re-rendered in full from `_tracking-state.json`; **hand-editing a
-derived view is rejected by `check`**. Against the card above, this is what the write-back changed:
+derived view is rejected by `check`**. Against the card above, this is what the write-back changed
+(excerpt — the recap and character-state rows that rolled in the same commit are omitted):
 
 ```diff
  ## Current position
@@ -443,5 +442,3 @@ Oh Story is part of [ZenStory AI](https://zenstory.ai) — open-source, agent-na
 | [video-recap-skills](https://github.com/zenstory-ai/video-recap-skills) | Create Chinese-narration recaps from supported video files, with optional editable JianYing/CapCut draft export |
 | [oh-story-dsh](https://github.com/zenstory-ai/oh-story-dsh) | Community DeepSeek Harness plugin with novel, short-drama, game and video-recap workbenches |
 | [zenstory](https://github.com/zenstory-ai/zenstory) | Chat-to-create AI novel-writing workbench ([app.zenstory.ai](https://app.zenstory.ai)) |
-
-Moved from worldwonderer/oh-story-claudecode; old links redirect.

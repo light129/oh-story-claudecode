@@ -32,8 +32,6 @@
 
 <video src="https://github.com/user-attachments/assets/ff60e467-1923-4134-b873-b210d9a23d6b" controls muted playsinline width="100%"></video>
 
-<p align="center"><sub>真实录屏：在 Claude Code 里安装 → <code>/story-setup</code> → <code>/story-long-write 写第21章</code> → 字数不足时停下来问作者 → 提交追踪。61 分钟会话剪成 78 秒，跳过处有标注。</sub></p>
-
 ## 这是什么
 
 Oh Story 覆盖长篇与短篇网络小说的全流程：**扫榜选材 → 拆解爆款 → 搭大纲写正文 → 去AI味 → 生成封面图**。
@@ -120,7 +118,7 @@ npx skills add zenstory-ai/oh-story-claudecode -y -g
 事实、字数、截断、工程词照报（机制见 `references/style-resolution.md`）。
 
 提交之后，追踪状态是工具从 `_tracking-state.json` 整份重新渲染的，**手改派生文件会被 `check` 拒绝**。
-对照上面的状态卡，回写实际改了什么：
+对照上面的状态卡，回写实际改了什么（节选，省略了同批滚动的近三章速记与角色状态）：
 
 ```diff
  ## 当前位置
@@ -427,5 +425,3 @@ Oh Story 是 [ZenStory AI](https://zenstory.ai/zh) 的一部分——一组开�
 | [video-recap-skills](https://github.com/zenstory-ai/video-recap-skills) | 将支持的视频文件制作成中文解说，可选导出可编辑的剪映/CapCut 草稿 |
 | [oh-story-dsh](https://github.com/zenstory-ai/oh-story-dsh) | DeepSeek Harness 社区插件，提供小说、短剧、游戏和视频解说工作台 |
 | [zenstory](https://github.com/zenstory-ai/zenstory) | 对话即创作的 AI 小说写作工作台（[app.zenstory.ai](https://app.zenstory.ai)） |
-
-本仓库从 worldwonderer/oh-story-claudecode 迁入，旧链接自动跳转。
