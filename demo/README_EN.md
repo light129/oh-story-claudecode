@@ -87,10 +87,11 @@ Per-chapter extraction (events / characters / settings / foreshadowing / timelin
 
 | Path | What it is |
 |---|---|
-| [`长篇/…/正文/第021章_离别开出花.md`](长篇/让你管账号，你高燃混剪炸全网/正文/第021章_离别开出花.md) | Chapter 21, continued by `/story-long-write` (2,204 chars, all four checks green) |
-| [`长篇/…/大纲/细纲_第021章.md`](长篇/让你管账号，你高燃混剪炸全网/大纲/细纲_第021章.md) | Its blueprint, 9/9 in `check-outline-contract.js` |
-| [`长篇/…/.deslop-whitelist`](长篇/让你管账号，你高燃混剪炸全网/.deslop-whitelist) · [`追踪/逐章记录/第021章.md`](长篇/让你管账号，你高燃混剪炸全网/追踪/逐章记录/第021章.md) | Book-local style whitelist; the chapter-21 tracking record (with its retirement log) |
+| [`长篇/…/正文/第021章_离别怎么会开花.md`](长篇/让你管账号，你高燃混剪炸全网/正文/第021章_离别怎么会开花.md) | Chapter 21, continued by `/story-long-write` in one real session (2,068 chars, chapter check green; the README video is this session) |
+| [`长篇/…/大纲/细纲_第021章.md`](长篇/让你管账号，你高燃混剪炸全网/大纲/细纲_第021章.md) · [`设定/角色/谭守义.md`](长篇/让你管账号，你高燃混剪炸全网/设定/角色/谭守义.md) | The blueprint the skill wrote first (0 blocking structural findings) and the new character card |
+| [`长篇/…/.deslop-whitelist`](长篇/让你管账号，你高燃混剪炸全网/.deslop-whitelist) · [`追踪/逐章记录/第021章.md`](长篇/让你管账号，你高燃混剪炸全网/追踪/逐章记录/第021章.md) | The book-local style whitelist the skill created itself; the chapter-21 tracking record (with its retirement log) |
 | [`去AI味对照/`](去AI味对照/README_EN.md) | Real scan output from the `/story-deslop` checker: 9 findings on an AI-flavored sample vs zero on the clean rewrite |
 
-> `追踪/` has been advanced to chapter 21 through `storyctl.py chapter commit` (`state_revision` 0 → 1); every derived
-> view is re-rendered from `_tracking-state.json`. `.deslop-whitelist` registers the book's own "……" and end-divider and exempts style checks only.
+> `追踪/` was advanced to chapter 21 by the skill itself, in the same real session, through `storyctl.py chapter commit`
+> (`state_revision` 0 → 1); every derived view is re-rendered from `_tracking-state.json`. `.deslop-whitelist` was also
+> registered by the skill after reading `设定/文风.md`.

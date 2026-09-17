@@ -106,53 +106,52 @@ Full file: [`demo/长篇/.../追踪/上下文.md`](demo/长篇/让你管账号�
 
 ### Continuing into chapter 21: gate to write-back, end to end
 
-Following the card above, here is what `/story-long-write 写第21章` produced and every check on the way:
+The video above is this exact session. What `/story-long-write 写第21章` produced, and every check on the way:
 
 ```text
-Outline gate    check-outline-contract.js   ok=true · 9/9 (first draft bounced with exit 1: 8 fields missing, no plot-point table)
-Chapter check   storyctl.py chapter check   2204 chars / target 2500 · internal band pass
+Blueprint       细纲_第021章.md              tracking said "no blueprint for ch.21", so the skill wrote one first: unit L1-03, target emotion, stakes, loop state, a 10-row five-column plot table
+Chapter check   storyctl.py chapter check   2068 chars / target 2300 · internal_pass
                   ├ check-ai-patterns.js     0 hits
                   ├ check-degeneration.js    0 hits
-                  └ normalize-punctuation    5 blocking → 0 after registering the book's own "……" and end-divider in .deslop-whitelist
+                  └ normalize-punctuation    0 hits (the skill read 设定/文风.md and registered this book's "……" in .deslop-whitelist by itself)
 Tracking commit storyctl.py chapter commit  tracking_committed=true · state_revision 0 → 1
 Derived views   tracking_commit.py check    上下文.md / 伏笔.md / 角色状态/ / 时间线/ / 逐章记录/ all re-rendered from state, byte-identical
 ```
 
-Before any prose, `guard-outline-before-prose.sh` blocks a chapter with no blueprint; the blueprint
-itself must pass 9 structural checks — "plot points are a five-column table", "every plot point
-states what the writer may and may not invent" — before writing is allowed.
+Before any prose, `guard-outline-before-prose.sh` blocks a chapter with no blueprint; once the blueprint passes
+structural checks, `narrative-writer` drafts the prose in two batches, `consistency-checker` audits facts and
+foreshadowing, a de-AI review edits for readability, and the deterministic closing scripts plus `chapter check` run last.
 
-The punctuation step deserves a note. The `……` pause and the end-of-chapter divider are this book's
-established style across its first 20 chapters (`设定/文风.md`). The checker cannot read intent, so
-the skill provides a book-local `.deslop-whitelist`: one literal per line, exempting only style
-checks — facts, word count, truncation and engineering vocabulary are still reported (mechanism: `references/style-resolution.md`).
-
-After the commit, tracking state is re-rendered in full from `_tracking-state.json`; **hand-editing a
-derived view is rejected by `check`**. Against the card above, this is what the write-back changed
-(excerpt — the recap and character-state rows that rolled in the same commit are omitted):
+After the commit, tracking state is re-rendered in full from `_tracking-state.json`; **hand-editing a derived view is
+rejected by `check`**. Against the card above, this is what the write-back changed (excerpt; the rolling recent-chapter
+digest and character snapshots are omitted):
 
 ```diff
  ## Current position
--- Chapter 20 · Story time: the day after "如愿" passed 100M views
-+- Chapter 21 · Story time: two days after "如愿" passed 100M views
+-- Chapter 20 · Scene: the propaganda troupe, after Zhong Jiajia delivers the veterans' calligraphy
++- Chapter 21 · Scene: the troupe office, after Jiang Chen receives Tan Shouyi's address
  ## Live foreshadowing
 -- F054｜A veteran invited Jiang Chen to hear his story｜planted ch.20｜payoff TBD｜high
-+- F055｜"离别开出花" premiered live at the veterans' home; the finished video is not yet released｜planted ch.20｜high
-+- F057｜The care worker filmed the whole performance; unreleased, and Jiang Chen saw and did not stop it｜planted ch.21｜high
++- F054｜Tan Shouyi has sent his address; Jiang Chen will visit tomorrow｜planted ch.20｜payoff ch.22｜high
++- F057｜Tan Shouyi has a story "fifty years long that no one has heard to the end"; contents unrevealed｜planted ch.21｜payoff ch.22｜high
++- F058｜Task three: a "farewell" piece, 10M+ heat on open day, 14-day limit｜planted ch.21｜payoff ch.27｜high
  ## Promises for the next chapter
 -- Write the ch.21 blueprint first, then pick up the veteran's invitation, the backing track and the piano skill.
-+- Follow where the care worker's footage goes; settle the video's numbers and the system task.
++- Jiang Chen asks for leave, travels to the neighbouring city to hear Tan Shouyi's full story and records it; F057 revealed.
  ## Continuity risks
 -- Chapter 21 has no blueprint yet; prose cannot be written directly.
-+- The footage is unreleased; its numbers and the system settlement belong to chapter 22 and must not be written early.
++- The truth behind Tan Shouyi's story is a candidate (E015); the author may change it before the ch.22 blueprint; not reader-known until revealed.
 ```
 
-F054 and F056 flipped to "paid off｜ch.21" and left the hot context; the retired risk line was written
-into `逐章记录/第021章.md` under "本章退役登记", so it can always be traced — **state never vanishes silently**.
+The new character Tan Shouyi gets his own setting card and character-state file; the candidate truth behind his story
+(E015) sits in `时间线/作者真相.md` marked unrevealed, while `读者已知.md` holds only the one line Jiang Chen has read.
+The retired risk line was written into `逐章记录/第021章.md` under "本章退役登记" — **state never vanishes silently**.
 
-Output: [`正文/第021章_离别开出花.md`](demo/长篇/让你管账号，你高燃混剪炸全网/正文/第021章_离别开出花.md)
+Output: [`正文/第021章_离别怎么会开花.md`](demo/长篇/让你管账号，你高燃混剪炸全网/正文/第021章_离别怎么会开花.md)
 · [`大纲/细纲_第021章.md`](demo/长篇/让你管账号，你高燃混剪炸全网/大纲/细纲_第021章.md)
+· [`设定/角色/谭守义.md`](demo/长篇/让你管账号，你高燃混剪炸全网/设定/角色/谭守义.md)
 · [`追踪/逐章记录/第021章.md`](demo/长篇/让你管账号，你高燃混剪炸全网/追踪/逐章记录/第021章.md)
+
 
 ### A deconstruction report: scores that come with reasons
 
@@ -195,18 +194,18 @@ Full output: [`demo/拆文库/曾将爱意私藏/`](demo/拆文库/曾将爱意�
 ### De-AI editing: rule-by-rule matching
 
 The local check in `/story-deslop` is a writing lint. It matches known sentence templates and returns the line, the span and a rewrite
-direction. Scanning a hand-constructed AI-flavored sample returns 9 findings (7 blocking):
+direction. Scanning a hand-constructed AI-flavored sample returns 8 findings (7 blocking):
 
 ```text
-改前.md:5:31:  [blocking] not-is-comparison  (不是遗憾，而是一种被时间掩埋的沉重)
-改前.md:9:3:   [blocking] voice-contrast     (声音不高，却)
-改前.md:11:1:  [blocking] negation-parade    (没有华丽的技巧，没有刻意的煽情，)
-改前.md:31:6:  [blocking] trailer-ending     (才刚刚开始)
-改前.md:33:1:  [blocking] trailer-ending     (没人知道)
-改前.md:17:1:  [advisory] stock-reaction-tic (喉结滚动了一下 | 指节攥紧了椅背 | 抿了下唇)
+改前.md:7:20     [blocking] em-dash             (么叫做命运的安排——不是巧合，而是一)
+改前.md:7:22     [blocking] not-is-comparison   (不是巧合，而是一种冥冥之中的注定)
+改前.md:11:1     [blocking] negation-parade     (没有犹豫，没有生涩，)
+改前.md:19:3     [blocking] voice-contrast      (声音不大，却)
+改前.md:21:2     [blocking] not-is-comparison   (不是一次简单的弹奏，而是一场蓄谋已久的惊艳亮相)
+改前.md:3:1      [advisory] cliche-density-tic  (仿佛 一丝 深吸一口气 缓缓 微微)
 ```
 
-The same scene written clean — the text shipped as chapter 21 — scans **zero findings, exit 0**.
+The same scene as it stands in chapter 21 scans **zero findings, exit 0**.
 Both passages are nearly the same length; the difference is that the first tells the reader what to
 feel, and the second hands the same beat to visible action and objects.
 
