@@ -683,9 +683,10 @@
         {
           "label": "本章技法·感情",
           "files": [
-            "skills/story-long-write/references/emotional-methods.md"
+            "skills/story-long-write/references/emotional-methods.md",
+            "skills/story-long-write/references/emotion-on-page.md"
           ],
-          "budget": 28750
+          "budget": 30400
         },
         {
           "label": "本章技法·日常",
@@ -710,7 +711,7 @@
           "budget": 30450
         }
       ],
-      "why": "v0.8.2：主会话自己写正文时与写手读同一套技法（writing-craft + long-format），去味走检测器、写后兜底读 deslop-gates；新书前几章按召回全量＋本章技法组合计。"
+      "why": "v0.8.2：主会话自己写正文时与写手读同一套技法（writing-craft + long-format），去味走检测器、写后兜底读 deslop-gates；新书前几章按召回全量＋本章技法组合计。 感情章主会话自己写时与写手同读情绪上页（emotion-on-page）。"
     },
     {
       "label": "长篇日更 direct/solo（主会话自己写正文）",
@@ -773,9 +774,10 @@
         {
           "label": "本章技法·感情",
           "files": [
-            "skills/story-long-write/references/emotional-methods.md"
+            "skills/story-long-write/references/emotional-methods.md",
+            "skills/story-long-write/references/emotion-on-page.md"
           ],
-          "budget": 32450
+          "budget": 34050
         },
         {
           "label": "本章技法·日常",
@@ -792,7 +794,7 @@
           "budget": 34150
         }
       ],
-      "why": "v0.8.2：同单章 direct/solo；日更项目已有正文，不计新书组合。"
+      "why": "v0.8.2：同单章 direct/solo；日更项目已有正文，不计新书组合。 感情章主会话自己写时与写手同读情绪上页（emotion-on-page）。"
     },
     {
       "label": "长篇大修 direct/solo（主会话自己写正文）",
@@ -833,9 +835,10 @@
         {
           "label": "本章技法·感情",
           "files": [
-            "skills/story-long-write/references/emotional-methods.md"
+            "skills/story-long-write/references/emotional-methods.md",
+            "skills/story-long-write/references/emotion-on-page.md"
           ],
-          "budget": 25050
+          "budget": 26700
         },
         {
           "label": "本章技法·悬疑",
@@ -852,7 +855,7 @@
           "budget": 24700
         }
       ],
-      "why": "v0.8.2：主会话自己改稿；不再读整份单章流程，追踪协议只在报错时读。"
+      "why": "v0.8.2：主会话自己改稿；不再读整份单章流程，追踪协议只在报错时读。 感情章主会话自己写时与写手同读情绪上页（emotion-on-page）。"
     },
     {
       "label": "短篇构思（Phase 1–2，主会话）",
