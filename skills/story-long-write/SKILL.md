@@ -14,7 +14,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 必须分块读到 EOF：
 
-1. 规划按时刻读：定方向、定设定读 `references/workflow-setup.md`，出卷纲读 `references/workflow-volume.md`，出细纲或补纲读 `references/workflow-outline.md`，只读当前时刻的；写指定章读取 `references/workflow-chapter.md`；日更/大修先读取 `references/workflow-daily.md` 或 `references/workflow-revision.md`，进入正文前再完整读取 `workflow-chapter.md`。
+1. 规划按时刻读：定方向、定设定读 `references/workflow-setup.md`，出卷纲读 `references/workflow-volume.md`，出细纲或补纲读 `references/workflow-outline.md`，只读当前时刻的；写指定章读取 `references/workflow-chapter.md`；日更先读取 `references/workflow-daily.md`，进入正文前再完整读取 `workflow-chapter.md`；大修只读 `references/workflow-revision.md`（改稿要用的单章规则它已写明）。
 2. 主会话直接写正文时，首次落笔前完整读取 `references/long-format.md` 与 `references/writing-craft.md`（和写手同一套技法）；`references/long-chapter-quality.md`、`references/long-chapter-hooks.md` 只在排查具体问题时读，去味走检测器，不预读。交给 narrative-writer 时，由该 agent 按自己的 reference 表完成写前读取，主会话不得用未读 reference 的临时 prompt 替代。
 3. 本章技法按下方「核心方法」表至多读一份（悬疑读 `references/long-suspense.md`，反转读 `references/long-reversal.md`，其余见表）。
 4. 正文写前，references 读完后立即重读当前用户请求、本章细纲和卷纲，先在上下文里**记下本轮约束**：原样记录用户明确字数范围、必发生、禁止发生、精确时间锚与本章停笔点、章尾新债。references 只提供技法，不得覆盖这些项目事实；作者给的字数范围写在细纲「字数范围」行（命令参数只作临时覆盖），不用默认 ±15%。交付前逐项复核：字数带外按 `workflow-chapter.md` 的收口流程交用户处置，不自动补字；其余项越界不算完成。
@@ -33,7 +33,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 先抓情绪，再用验证过的模式可靠交付，灵感只做素材：每个场景服务一个说得清的目标情绪；从对标里找验证过的剧情模式，把对标角色当功能位，用本书的角色和素材填；写每章只读「不知道就会写错」的状态、伏笔与设定。契约与推进决策先过 `references/reader-contract-and-progression.md`「契约四问」。作者记忆：写正文时组装脚本已代查注入；其他任务按 [references/author-memory.md](references/author-memory.md) 带 `--book-root` 查 ≤2KB active 项交执行者，当前请求与本书文风优先，长期声明用 `record` 写入、回传回执。
 
-**本章技法（每章至多读一份）**：按细纲主功能选——打脸/逆袭（爽感释放）`style-combat-face.md`；身份/认知/立场反转（震撼+痛快）`long-reversal.md`；感情拉扯（意难平）`emotional-methods.md`；悬疑/惊悚/异常线索（紧张+好奇）`long-suspense.md`；日常装逼（期待感）`long-chapter-hooks.md`。都不对应就不读，按 writing-craft 写。作者先说情绪没说题材时按括号反查，再从 `long-genre-catalog.md` 找细分方向。
+**本章技法（每章至多读一份）**：按细纲主功能选——打脸/逆袭（爽感释放）`style-combat-face.md`；身份/认知/立场反转（震撼+痛快）`long-reversal.md`；感情拉扯（意难平）`emotional-methods.md`；悬疑/惊悚/异常线索（紧张+好奇）`long-suspense.md`；日常装逼（期待感）`long-chapter-hooks.md`。都不对应就不读，按 writing-craft 写。交给写手时只在 prompt「本章技法」填类别，由写手读；主会话自己写正文时才读这份文件。作者先说情绪没说题材时按括号反查，再从 `long-genre-catalog.md` 找细分方向。
 
 ---
 

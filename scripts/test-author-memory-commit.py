@@ -1119,7 +1119,8 @@ def main() -> None:
 
     # 只锚 prompt 与运行时 CLI / 槽位的对接片段，不钉措辞
     injection_contracts = {
-        REPO / "skills/story-long-write/references/workflow-chapter.md": (
+        # 写一章的填槽说明随「只在交给写手时才用」迁到 agent-calls.md（v0.8.2）。
+        REPO / "skills/story-long-write/references/agent-calls.md": (
             "`author_preferences`",
         ),
         # 查到的偏好要进子代理 prompt 的槽位，否则 query 照跑、结果到不了写手。

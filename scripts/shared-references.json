@@ -58,6 +58,11 @@
       ]
     },
     {
+      "name": "emotion-on-page",
+      "source": "skills/story-long-write/references/emotion-on-page.md",
+      "targets": ["skills/story-setup/references/agent-references/emotion-on-page.md"]
+    },
+    {
       "name": "emotional-arc-design",
       "source": "skills/story-long-write/references/emotional-arc-design.md",
       "targets": ["skills/story-setup/references/agent-references/emotional-arc-design.md"]
