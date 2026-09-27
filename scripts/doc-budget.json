@@ -1275,10 +1275,10 @@
             "skills/story-deslop/references/anti-ai-writing.md",
             "skills/story-deslop/references/banned-words.md"
           ],
-          "budget": 34800
+          "budget": 34900
         }
       ],
-      "why": "v0.8.2：交给 narrative-writer 时主会话不读去味规则（写手自己的审查路径另有登记）；主会话自己改时读删除保护、改写方法与词表。"
+      "why": "v0.8.2：交给 narrative-writer 时主会话不读去味规则（写手自己的审查路径另有登记）；主会话自己改时读删除保护、改写方法与词表。 合并后 +45：降级提示改白话＋技术备注行、作者记忆维护文件指路。"
     },
     {
       "label": "部署写作环境（story-setup）",
