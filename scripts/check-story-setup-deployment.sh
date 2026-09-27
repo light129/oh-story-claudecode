@@ -10,6 +10,15 @@ SKILL_DIR="$REPO_ROOT/skills/story-setup"
 HOOKS_DIR="$SKILL_DIR/references/templates/hooks"
 AGENT_REFS_DIR="$SKILL_DIR/references/agent-references"
 SKILL_FILE="$SKILL_DIR/SKILL.md"
+# 入口只留通用流程；各宿主专属部署清单/算法/验证在 references/deploy-<target_cli>.md，入口按宿主只读一份。
+DEPLOY_HOSTS="claude-code opencode codex antigravity zcode openclaw reasonix generic"
+deploy_file() { printf '%s/references/deploy-%s.md' "$SKILL_DIR" "$1"; }
+DEPLOY_CLAUDE="$(deploy_file claude-code)"
+DEPLOY_OPENCODE="$(deploy_file opencode)"
+DEPLOY_ZCODE="$(deploy_file zcode)"
+DEPLOY_OPENCLAW="$(deploy_file openclaw)"
+DEPLOY_REASONIX="$(deploy_file reasonix)"
+DEPLOY_GENERIC="$(deploy_file generic)"
 SETTINGS_FILE="$SKILL_DIR/references/templates/settings-hooks.json"
 CLAUDE_MERGE="$SKILL_DIR/scripts/merge-claude-settings.py"
 COPY_PATH_SAFETY="$SKILL_DIR/scripts/copy-path-safety.py"
@@ -157,9 +166,9 @@ for hook in check-prose-after-write guard-outline-before-prose validate-story-co
   fi
   assert_grep 'story_hook_cli\.js' "$HOOKS_DIR/$hook.sh" "$hook.sh must delegate to story_hook_cli.js"
 done
-assert_grep '递归复制完整目录树|recursive' "$SKILL_FILE" "SKILL.md must require recursive hook deployment"
-assert_grep 'lib/common\.sh' "$SKILL_FILE" "SKILL.md must mention hooks/lib/common.sh"
-assert_grep 'lib/sentinel\.sh' "$SKILL_FILE" "SKILL.md must mention hooks/lib/sentinel.sh"
+assert_grep '递归复制完整目录树|recursive' "$DEPLOY_CLAUDE" "Claude deploy file must require recursive hook deployment"
+assert_grep 'lib/common\.sh' "$DEPLOY_CLAUDE" "Claude deploy file must mention hooks/lib/common.sh"
+assert_grep 'lib/sentinel\.sh' "$DEPLOY_CLAUDE" "Claude deploy file must mention hooks/lib/sentinel.sh"
 echo "  OK TS1 hook dependency completeness"
 
 # TS1b — SessionStart 部署自检名单必须覆盖所有 hook 脚本（防新增 hook 漏登记，#195 review）。
@@ -182,14 +191,35 @@ while IFS= read -r hookfile; do
 done < <(find "$HOOKS_DIR" -maxdepth 1 \( -name '*.sh' -o -name '*.js' \) -type f)
 echo "  OK TS1b session-start self-check lists all hook scripts and node cores"
 
+# TS2a — 按宿主拆分：入口路由到每个宿主的部署文件，每份文件都有完整的清单/验证/报告提示。
+# 缺一份或入口漏路由，那个宿主的作者就拿不到部署步骤；缺一节就是该宿主的行为被拆丢了。
+for host in $DEPLOY_HOSTS; do
+  host_file="$(deploy_file "$host")"
+  assert_file "$host_file"
+  assert_grep "references/deploy-$host\.md" "$SKILL_FILE" "story-setup entry must route target_cli $host to its deploy file"
+  assert_grep "^# " "$host_file" "deploy file must have a title: $host"
+  assert_grep "\`target_cli\` 含 \`$host\`" "$host_file" "deploy file must state which target_cli reads it: $host"
+  for section in '^## 部署清单' '^## 验证' '^## 安装报告必须提示'; do
+    assert_grep "$section" "$host_file" "deploy file $host missing section: $section"
+  done
+  # 下方自复制探测器靠这两个表头认出部署清单表；表头改名会让清单行检查静默空转。
+  for header in 'Source path' 'Target path'; do
+    assert_grep "$header" "$host_file" "deployment manifest header the self-copy detector keys on is missing in $host: $header"
+  done
+done
+extra_deploy_files="$(find "$SKILL_DIR/references" -maxdepth 1 -name 'deploy-*.md' | wc -l | tr -d ' ')"
+[ "$extra_deploy_files" = "8" ] || fail "story-setup must ship exactly 8 host deploy files, found $extra_deploy_files"
+# 能从运行环境判断宿主就不问作者；问也用白话，不再追问部署位置。
+assert_grep '能判断就不问作者' "$SKILL_FILE" "story-setup must detect the current host before asking the author"
+assert_no_grep '让用户选择目标环境' "$SKILL_FILE" "story-setup must not ask first-time authors to pick among all hosts when the host is detectable"
+assert_no_grep 'AskUserQuestion 确认部署位置' "$SKILL_FILE" "story-setup must not ask for the deploy location by default"
+echo "  OK TS2a host deploy files"
+
 # TS2 — Deployment checklist/manifest parseability
-# 下方自复制探测器靠这两个表头认出部署清单表；表头改名会让清单行检查静默空转。
-for header in 'Source path' 'Target path'; do
-  assert_grep "$header" "$SKILL_FILE" "deployment manifest header the self-copy detector keys on is missing: $header"
-done
 for group in 'templates/hooks/' 'templates/rules' 'templates/agents' 'agent-references' 'settings-hooks\.json' 'CLAUDE\.md' '\.story-deployed'; do
-  assert_grep "$group" "$SKILL_FILE" "deployment manifest missing asset group: $group"
+  assert_grep "$group" "$DEPLOY_CLAUDE" "deployment manifest missing asset group: $group"
 done
+assert_grep '\.agents-pending-restart' "$DEPLOY_CLAUDE" "Claude deploy must create the one-shot restart marker"
 assert_file "$SKILL_DIR/references/openclaw/AGENTS.md.tmpl"
 assert_file "$SKILL_DIR/references/generic/AGENTS.md.tmpl"
 assert_file "$SKILL_DIR/references/reasonix/AGENTS.md.tmpl"
@@ -209,17 +239,26 @@ assert_file "$SKILL_DIR/scripts/merge-antigravity-hooks.py"
 # it deploys alongside plugin.ts as .opencode/plugins/lib/story_hook_core.js (lib/ subdir so it
 # escapes OpenCode's single-level .opencode/plugins/*.js plugin auto-discovery).
 assert_file "$SKILL_DIR/references/opencode/story_hook_core.js"
-assert_grep 'opencode/story_hook_core\.js' "$SKILL_FILE" "deployment manifest missing OpenCode shared prose-guard core"
-assert_grep 'references/openclaw/AGENTS\.md\.tmpl' "$SKILL_FILE" "deployment manifest missing OpenClaw AGENTS template"
-assert_grep 'OpenClaw skills-only|target_cli 含 openclaw' "$SKILL_FILE" "story-setup must document OpenClaw skills-only deployment"
-assert_grep 'references/generic/AGENTS\.md\.tmpl' "$SKILL_FILE" "deployment manifest missing generic AGENTS template"
-assert_grep 'target_cli 含 generic|通用 Web AI / 其他 Agent' "$SKILL_FILE" "story-setup must document generic Web AI deployment"
-assert_grep 'references/reasonix/AGENTS\.md\.tmpl' "$SKILL_FILE" "deployment manifest missing Reasonix AGENTS template"
-assert_grep 'Reasonix skills-only|target_cli 含 reasonix' "$SKILL_FILE" "story-setup must document Reasonix skills-only deployment"
-assert_grep 'references/zcode/AGENTS\.md\.tmpl' "$SKILL_FILE" "deployment manifest missing ZCode AGENTS template"
-assert_grep 'target_cli 含 zcode|target_cli = zcode' "$SKILL_FILE" "story-setup must document ZCode deployment"
-assert_grep '\.zcode/config\.json' "$SKILL_FILE" "story-setup must document ZCode config merge"
-assert_grep '不部署.*\.zcode/agents|不创建.*\.zcode/agents' "$SKILL_FILE" "story-setup must document ZCode agent boundary"
+assert_grep 'opencode/story_hook_core\.js' "$DEPLOY_OPENCODE" "deployment manifest missing OpenCode shared prose-guard core"
+assert_grep 'references/openclaw/AGENTS\.md\.tmpl' "$DEPLOY_OPENCLAW" "deployment manifest missing OpenClaw AGENTS template"
+assert_grep 'OpenClaw skills-only' "$DEPLOY_OPENCLAW" "story-setup must document OpenClaw skills-only deployment"
+assert_grep 'references/generic/AGENTS\.md\.tmpl' "$DEPLOY_GENERIC" "deployment manifest missing generic AGENTS template"
+assert_grep '通用 Web AI / 其他 Agent' "$DEPLOY_GENERIC" "story-setup must document generic Web AI deployment"
+assert_grep 'references/reasonix/AGENTS\.md\.tmpl' "$DEPLOY_REASONIX" "deployment manifest missing Reasonix AGENTS template"
+assert_grep 'Reasonix skills-only' "$DEPLOY_REASONIX" "story-setup must document Reasonix skills-only deployment"
+assert_grep '\.agents/skills → \.\./skills' "$DEPLOY_REASONIX" "Reasonix deploy must link .agents/skills to skills/"
+assert_grep 'references/zcode/AGENTS\.md\.tmpl' "$DEPLOY_ZCODE" "deployment manifest missing ZCode AGENTS template"
+assert_grep 'target_cli = zcode' "$SKILL_FILE" "story-setup must detect ZCode projects"
+assert_grep '\.zcode/config\.json' "$DEPLOY_ZCODE" "story-setup must document ZCode config merge"
+assert_grep '不部署.*\.zcode/agents|不创建.*\.zcode/agents' "$DEPLOY_ZCODE" "story-setup must document ZCode agent boundary"
+# 三条 skills-only 路径的 AGENTS 模板分别写在各自部署文件里，不能互相串用。
+for pair in "openclaw:$DEPLOY_OPENCLAW" "reasonix:$DEPLOY_REASONIX" "generic:$DEPLOY_GENERIC"; do
+  host="${pair%%:*}"; file="${pair#*:}"
+  for other in openclaw reasonix generic zcode opencode codex; do
+    [ "$other" = "$host" ] && continue
+    assert_no_grep "references/$other/AGENTS\.md\.tmpl" "$file" "deploy-$host.md must not deploy the $other AGENTS template"
+  done
+done
 assert_grep 'references_dir' "$SKILL_FILE" "sentinel references_dir must be documented"
 assert_grep 'resolver_strategy' "$SKILL_FILE" "sentinel resolver_strategy must be documented"
 assert_grep 'target_cli' "$SKILL_FILE" "sentinel target_cli must be documented"
@@ -382,8 +421,10 @@ fixture_hits="$({ python3 "$TMP_DIR/detect-self-copy.py" "$TMP_DIR/self-copy-fix
 [ "$fixture_hits" = "2,3,5,18," ] \
   || fail "self-copy detector fixtures regressed: expected lines 2,3,5,18 got [$fixture_hits]"
 
-python3 "$TMP_DIR/detect-self-copy.py" "$SKILL_FILE" \
-  || fail "story-setup declares a copy whose source and target are the same path"
+for setup_doc in "$SKILL_FILE" "$SKILL_DIR"/references/deploy-*.md; do
+  python3 "$TMP_DIR/detect-self-copy.py" "$setup_doc" \
+    || fail "story-setup declares a copy whose source and target are the same path ($setup_doc)"
+done
 
 # Claude Code 的 Bash 正文写入必须进入同一 pre-guard；只注册 Write/Edit 会让 cat>/tee/cp 绕过。
 python3 - "$SKILL_DIR/references/templates/settings-hooks.json" <<'PY' || fail "Claude Bash prose pre-guard is not registered"
@@ -735,6 +776,10 @@ for ref_dir in "$SKILL_DIR"/references/*/; do
     *) fail "story-setup Phase 1 self-check list is missing reference dir: $ref_name" ;;
   esac
 done
+case "$selfcheck_text" in
+  *'`references/deploy-*.md`'*) ;;
+  *) fail "story-setup Phase 1 self-check must also require the host deploy files" ;;
+esac
 listed_ref_dirs="$(printf '%s\n' "$selfcheck_text" | grep -oE '`[a-z][a-z-]*`' | tr -d '`')"
 [ -n "$listed_ref_dirs" ] || fail "story-setup Phase 1 self-check list names no reference dirs"
 for ref_name in $listed_ref_dirs; do

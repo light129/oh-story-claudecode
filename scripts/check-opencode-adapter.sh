@@ -651,14 +651,30 @@ echo "  OK slash command templates (含 \$ARGUMENTS 占位符与 ZCode 对齐)"
 # This job has no opencode CLI (the real load is asserted by test-opencode-cli-e2e.sh), so this is a
 # structural proxy: the deploy manifest must place the core under .opencode/plugins/lib/, never flat
 # in .opencode/plugins/ (a flat *.js there is auto-loaded by OpenCode as a broken second plugin).
-assert_grep '\.opencode/plugins/lib/story_hook_core\.js' "$REPO_ROOT/skills/story-setup/SKILL.md" "SKILL.md deploy manifest must target .opencode/plugins/lib/story_hook_core.js, not a flat .opencode/plugins/story_hook_core.js"
+assert_grep '\.opencode/plugins/lib/story_hook_core\.js' "$REPO_ROOT/skills/story-setup/references/deploy-opencode.md" "OpenCode deploy manifest must target .opencode/plugins/lib/story_hook_core.js, not a flat .opencode/plugins/story_hook_core.js"
 # Version gate is fail-closed: on 1.x the plugin never loads and agents' `permissions:` rules are
 # ignored (read-only agents would get write/shell), so an unknown version must stop, not continue,
 # and a blocked OpenCode-only deploy must leave `.story-deployed` untouched.
-SETUP_MD="$REPO_ROOT/skills/story-setup/SKILL.md"
+# story-setup 入口按宿主只读一份部署文件：入口路由到 deploy-opencode.md，版本门与模型配置写在那份里。
+assert_grep 'references/deploy-opencode\.md' "$REPO_ROOT/skills/story-setup/SKILL.md" "story-setup entry must route opencode to its deploy file"
+SETUP_MD="$REPO_ROOT/skills/story-setup/references/deploy-opencode.md"
 assert_grep '命令不可用或解析不出版本 → 同样停止 OpenCode 部署' "$SETUP_MD" "OpenCode version gate must stop when the version cannot be determined"
 assert_grep 'target 只有 opencode 则不写、不更新 `\.story-deployed`' "$SETUP_MD" "blocked OpenCode-only deploy must not write or bump .story-deployed"
 if grep -q '解析不出版本 → 继续部署' "$SETUP_MD"; then fail "OpenCode version gate must not continue on an unknown version"; fi
+# 模型缓存必须先于 .opencode/agents/ 的 replace，否则用户已配的 model: 被覆盖后再缓存为空。
+assert_grep '先缓存已有模型配置' "$SETUP_MD" "OpenCode deploy must cache existing agent models before replacing .opencode/agents/"
+# 选模型问作者时用角色名（拆书助手／写手／总指挥），内部 agent 名只进技术备注列。
+assert_grep '拆书助手' "$SETUP_MD" "OpenCode model questions must name roles the author understands"
+# 用 python 按字符匹配：C 区域下 grep 的 [^」] 是字节集，会误排除含同一字节的汉字而漏报。
+python3 - "$SETUP_MD" <<'PY' || fail "OpenCode model questions must not show internal agent names to the author"
+import re, sys
+text = open(sys.argv[1], encoding="utf-8").read()
+internal = r"chapter-extractor|consistency-checker|story-explorer|story-researcher|character-designer|narrative-writer|story-architect"
+hits = [q for q in re.findall(r"「[^」]*」", text) if re.search(internal, q)]
+if hits:
+    print("internal agent names inside author-facing quotes: {}".format(hits), file=sys.stderr)
+    sys.exit(1)
+PY
 assert_grep 'permissions:` 规则列表' "$REPO_ROOT/skills/story-review/SKILL.md" "story-review must validate OpenCode 2.x agents by their permissions: list"
 # #242: runtime behavioral test — loads plugin.ts against the deployed core layout (lib/) and
 # exercises ctx.location, the execute.before/after and compaction hooks. The core's byte identity is
