@@ -7,6 +7,7 @@
 | [short-format.md](short-format.md) | 写正文前（短篇正文格式，两平台模板） |
 | [submission-craft.md](submission-craft.md) | 定平台、写导语、定付费点 |
 | [short-craft.md](short-craft.md) | 写作全程（情绪直写与场景支撑、在场叙述、超短章节制） |
+| [scene-craft.md](scene-craft.md) · [agent-calls.md](agent-calls.md) | 写正文的场景写法（三维度揉进、疏密）；派写手写正文或精修去味的 prompt |
 | [genre-styles/](genre-styles/) | 定方向后按题材读一个风格包（追妻火葬场 / 世情打脸 / 复仇打脸 / 总裁豪门 / 宅斗宫斗 / 民俗怪谈 / 悬疑 / 甜宠 / 双男主 / 沙雕脑洞） |
 | [genre-writing-formulas.md](genre-writing-formulas.md) | 冷门题材结构骨架（核心 10 题材用 genre-styles/） |
 | [genre-writing-techniques.md](genre-writing-techniques.md) | 跨题材通用技法（震惊场景 / 三翻四震 / 感情线四阶段 / 喜剧 flag / 女频读者心理） |

@@ -32,7 +32,9 @@ ROOT = Path(__file__).resolve().parent.parent
 REQUIRED = {
     # 导入的完成报告随汇报时刻移进 import-report.md（长篇、短篇各一块）。
     "skills/story-import/references/import-report.md": 2,
-    "skills/story-review/SKILL.md": 1,
+    # 审稿报告随时刻迁出入口（v0.8.2）：full/lean 模板随派子代理读 agent-prompts.md，一人审模板在 solo.md。
+    "skills/story-review/references/agent-prompts.md": 1,
+    "skills/story-review/references/solo.md": 1,
     "skills/story-deslop/SKILL.md": 1,
     "skills/story-short-analyze/SKILL.md": 1,
     "skills/story-long-scan/SKILL.md": 1,
