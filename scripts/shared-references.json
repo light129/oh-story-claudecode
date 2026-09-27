@@ -21,6 +21,16 @@
       ]
     },
     {
+      "name": "author-memory-maintenance-reference",
+      "source": "skills/story/references/author-memory-maintenance.md",
+      "targets": [
+        "skills/story-long-write/references/author-memory-maintenance.md",
+        "skills/story-short-write/references/author-memory-maintenance.md",
+        "skills/story-deslop/references/author-memory-maintenance.md",
+        "skills/story-review/references/author-memory-maintenance.md"
+      ]
+    },
+    {
       "name": "prose-banned-words",
       "source": "skills/story-long-write/references/banned-words.md",
       "targets": [
