@@ -1414,3 +1414,27 @@ for (const f of r.findings) {
 NODE
 
 echo "review classification (semantic/mechanical) contract tests passed."
+
+# --- 否定对偶（「没A，也没B」式叙述过密=英文式节奏）---
+FIXTURE_NEG="$TMP_DIR/fixture-negation-pair.md"
+printf '%s\n' \
+  '他没说让她住，也没说不让，自己进里间去了。' \
+  '她没碰那排蒜，也没叫他。' \
+  '外公没抬头，她也没吭声。' \
+  '"你不去，我也不去。"她笑着说。' > "$FIXTURE_NEG"
+set +e
+node "$SCRIPT" --json "$FIXTURE_NEG" > "$OUT"
+set -e
+node - "$OUT" <<'NODE'
+const fs = require('fs');
+const r = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+const np = r.findings.filter((f) => f.type === 'negation-pair-tic');
+if (np.length !== 1) throw new Error('叙述里 3 处「没A，也没B」应报 1 条 negation-pair-tic: ' + JSON.stringify(r.findings.map((f) => f.type)));
+if (np[0].severity !== 'advisory' || np[0].review !== 'semantic') throw new Error('negation-pair-tic 应为 advisory/semantic');
+NODE
+printf '%s\n' '他没说话，转身出门去了。' '"你不去，我也不去。"她说。' '"没钱，也没票。"他说。' > "$FIXTURE_NEG"
+set +e
+node "$SCRIPT" --json "$FIXTURE_NEG" > "$OUT"
+set -e
+node -e "const r=JSON.parse(require('fs').readFileSync(process.argv[1],'utf8'));if(r.findings.some(f=>f.type==='negation-pair-tic'))throw new Error('台词里的否定对偶与单处否定不应报')" "$OUT"
+echo "negation-pair-tic regression tests passed."
