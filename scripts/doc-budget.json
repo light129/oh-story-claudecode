@@ -27,8 +27,8 @@
     },
     {
       "path": "skills/story-long-write/references/workflow-setup.md",
-      "budget": 5800,
-      "why": "v0.8.2：只留开书时刻表、定方向与定设定（含设定模板）；卷纲、细纲拆到 workflow-volume / workflow-outline。"
+      "budget": 5900,
+      "why": "v0.8.2：只留开书时刻表、定方向与定设定（含设定模板）；卷纲、细纲拆到 workflow-volume / workflow-outline。 e2e 修正（+87）：定方向时书目录与 .active-book 怎么建、题材定位在定方向就建（原文三处说法相反）、作者已给方向时跳过扫榜追问。"
     },
     {
       "path": "skills/story-short-write/SKILL.md",
@@ -492,7 +492,7 @@
         {
           "label": "常规",
           "files": [],
-          "budget": 21100
+          "budget": 21200
         }
       ],
       "why": "v0.8.2：任务包 = workflow-setup 的 Phase 2 与模板（保守按整份计）+ 人物方法 + 读者契约 + 两个小节。"
