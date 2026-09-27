@@ -14,7 +14,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 必须分块读到 EOF：
 
-1. 规划/开书/补纲先完整读取 `references/workflow-setup.md`；写指定章读取 `references/workflow-chapter.md`；日更/大修先读取 `references/workflow-daily.md` 或 `references/workflow-revision.md`，进入正文前再完整读取 `workflow-chapter.md`。
+1. 规划按时刻读：定方向、定设定读 `references/workflow-setup.md`，出卷纲读 `references/workflow-volume.md`，出细纲或补纲读 `references/workflow-outline.md`，只读当前时刻的；写指定章读取 `references/workflow-chapter.md`；日更/大修先读取 `references/workflow-daily.md` 或 `references/workflow-revision.md`，进入正文前再完整读取 `workflow-chapter.md`。
 2. 主会话直接写正文时，首次落笔前完整读取 `references/long-format.md` 与 `references/writing-craft.md`（和写手同一套技法）；`references/long-chapter-quality.md`、`references/long-chapter-hooks.md` 只在排查具体问题时读，去味走检测器，不预读。交给 narrative-writer 时，由该 agent 按自己的 reference 表完成写前读取，主会话不得用未读 reference 的临时 prompt 替代。
 3. 本章技法按下方「核心方法」表至多读一份（悬疑读 `references/long-suspense.md`，反转读 `references/long-reversal.md`，其余见表）。
 4. 正文写前，references 读完后立即重读当前用户请求、本章细纲和卷纲，先在上下文里**记下本轮约束**：原样记录用户明确字数范围、必发生、禁止发生、精确时间锚与本章停笔点、章尾新债。references 只提供技法，不得覆盖这些项目事实；作者给的字数范围写在细纲「字数范围」行（命令参数只作临时覆盖），不用默认 ±15%。交付前逐项复核：字数带外按 `workflow-chapter.md` 的收口流程交用户处置，不自动补字；其余项越界不算完成。
@@ -87,21 +87,9 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 ---
 
-### Phase 1：确认选题方向
+### Phase 1–3：开书与规划
 
-消费 `选题决策.md`、确认题材方向、登记对标书。**执行前先读 [references/workflow-setup.md](references/workflow-setup.md) 的「Phase 1：确认选题方向」节**。
-
----
-
-### Phase 2：核心设定
-
-产出核心设定表与 `设定/` 下的关系、题材定位、题材正文提示卡。**执行前先读 [references/workflow-setup.md](references/workflow-setup.md) 的「Phase 2：核心设定」节**。
-
----
-
-### Phase 3：大纲搭建
-
-产出全书体量与阶段总览、卷纲、细纲。**执行前先读 [references/workflow-setup.md](references/workflow-setup.md) 的「Phase 3：大纲搭建」节**。
+按作者确认点分时刻读（见首屏写前必读第 1 条）；时刻表、交接与换上下文规则见 [references/workflow-setup.md](references/workflow-setup.md) 开头。
 
 ---
 
@@ -109,7 +97,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 #### 项目文件与产物
 
-创建目录、首次引用对标、定位产物或文件缺失时，先完整读取 [references/project-files.md](references/project-files.md) 照做；正常续写不重复加载。
+首次引用对标、定位已有产物或文件缺失时，先完整读取 [references/project-files.md](references/project-files.md) 照做；开书建文件按各时刻文件写明的路径直接落盘，不必先读它。
 
 #### 单章写作流程
 

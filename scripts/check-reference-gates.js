@@ -26,7 +26,7 @@ const longLines = long.split(/\r?\n/)
 const longGateLine = longLines.findIndex((line) => line.includes('## 写前必读')) + 1
 assert(longGateLine > 0 && longGateLine <= 20, `long 写前必读 gate must stay in first screen, got line ${longGateLine}`)
 for (const reference of [
-  'workflow-setup.md', 'workflow-chapter.md', 'workflow-daily.md', 'workflow-revision.md', 'long-format.md',
+  'workflow-setup.md', 'workflow-volume.md', 'workflow-outline.md', 'workflow-chapter.md', 'workflow-daily.md', 'workflow-revision.md', 'long-format.md',
   'writing-craft.md', 'long-chapter-quality.md', 'long-chapter-hooks.md', 'long-suspense.md',
   'long-reversal.md',
 ]) {

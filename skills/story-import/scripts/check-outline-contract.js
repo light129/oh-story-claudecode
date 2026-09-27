@@ -18,7 +18,7 @@
 const fs = require('fs')
 const path = require('path')
 
-// 权威模板：references/workflow-setup.md「排纲自查与细纲」里的细纲模板
+// 权威模板：references/workflow-outline.md 的细纲模板
 // 必填只留有证据或事故撑腰的核心字段；阶段位置、章节定位、结构公式、本章标价、闭环状态、
 // 写手自由区、契约风险、镜头准入、信息差触发点与「分辨率」列是可选的阅读体验字段——
 // 写了照样消费，没写不拦（#383 隔离实验：只补目标情绪与主角目标就复现了补满全部字段的收益）。
@@ -119,7 +119,7 @@ function makeCheck(id, ok, file, evidence, expected, repair, severity = 'blockin
     file,
     evidence,
     expected,
-    references: ['references/workflow-setup.md', 'references/artifact-protocols.md'],
+    references: ['references/workflow-outline.md'],
     repair,
   }
 }

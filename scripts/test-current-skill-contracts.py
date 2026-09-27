@@ -777,7 +777,7 @@ def test_style_profile_is_not_a_book_existence_probe() -> None:
             "**不得用 `文风.md` 兼作目录存在性探针**\n",
         ),
         "forbidden-outline-numeric-capacity": (
-            "skills/story-long-write/references/workflow-setup.md",
+            "skills/story-long-write/references/workflow-outline.md",
             "末尾写一行 `目标字数合计：下限X字（章目标Y，范围Y-Z）`。\n",
             "情节点只写语义义务，不填写逐点字数。\n",
         ),
@@ -820,7 +820,7 @@ def test_style_profile_is_not_a_book_existence_probe() -> None:
     budget_rule = rules["forbidden-outline-numeric-capacity"]
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
-        path = root / "skills/story-long-write/references/workflow-setup.md"
+        path = root / "skills/story-long-write/references/workflow-outline.md"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text("不得再写旧字段 `预算合计` 或 `目标字数合计`。\n", encoding="utf-8")
         require(

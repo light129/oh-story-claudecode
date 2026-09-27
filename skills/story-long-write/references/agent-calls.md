@@ -2,28 +2,19 @@
 
 只在要 spawn 对应 agent 时读；主会话自己写正文、自己排纲时不读。何时调用由各流程文件决定，这里只放 prompt 与必须附带的内容。Antigravity 用 `invoke_subagent` + 同名 `TypeName`。
 
-## story-architect：题材定位（开书 Phase 1）
+## story-architect：定设定、出卷纲、出一批细纲（换新上下文）
 
-轻量题材定位优先由主会话完成；只有涉及复杂世界观、多线结构、强反转工程或用户明确要求时，才调用 story-architect。确认选题方向后，已部署 story-architect 时可 spawn `Agent(subagent_type: "story-architect", prompt: "项目目录：{dir}\n任务类型：题材定位\n查询参数：{用户选择的方向+对标信息}")` 辅助题材分析和核心梗设计。
+先跑 `{PYTHON} {skill 根}/scripts/build_architect_brief.py --project {书目录} --task world`（卷纲 `--task volume --volume {N}`，细纲 `--task outline --chapters {A-B}`，一批最多 10 章），只取输出里的任务包路径，不读包的内容。交接前确认作者在对话里定下的方向、偏好和否掉的方案都已写进 `设定/`。
 
-> **story-architect 契约摘要（spawn 时必须原样附带）**：部署的 story-architect 读不到本 skill 的 references，只能靠 spawn prompt 里带的摘要和模板对齐 schema。摘要内容：
-> - **终局储备边界**：终局底牌（头号宿敌/终极真相/金手指上限/身份终点/核心情感终点）是一次性资源，逐卷解锁，不得提前打光；升级台阶（境界/等级/地图/势力层级）按剩余档数逐级解锁，不得越级。
-> - **剧情单元**：卷纲内写剧情单元卡，含单元ID、主推线（1条）+ 战果（若干，一战多得允许）、章级推进下限（快节奏保留可见事件/爽点下限）。卷纲每个标题下一行写 `> 作用域：卷级常任｜单元级 {单元ID}`；剧情单元卡字段照主会话随 prompt 附上的模板；供给自查、建纲追加写 `大纲/排纲底稿_{单元ID}.md`，不进卷纲；缺设定按新增物三级（直接写 / 写了要报 / 先问作者）。
-> - **细纲层字段**：每章细纲带九个必填字段（含 单元ID/位置、主角目标/关键选择）；「行动成本（可无）/收益归属」——行动成本可无，不硬造代价，收益归属必须可见。
-> - **契约四问**：①主角是不是靠自己的选择挣到结果（不要求事事亲自动手，但决定事情为什么发生、作出关键选择、拿到收益的是主角或本卷已承诺的所有者）？②核心收益或高光有没有被配角、机构或巧合无交换地拿走？③有没有动用本阶段不该解锁的终局底牌、或把升级线顶到天花板？④旧期待付了利息没，又留下什么期待？四问都过＝契约安全，能补＝需补强，补不上＝契约破坏；结论写进单元卡「契约风险」。
-> - 随摘要附上：[artifact-protocols.md](artifact-protocols.md)「大纲/卷纲_第X卷.md」一节（剧情单元卡字段、段位契约、全卷常任裁定、本卷故事线表）与文末排纲底稿模板、SKILL.md「新增物三级」一段；完整规则以主会话已加载的 `references/reader-contract-and-progression.md` 为准。
+Prompt：`项目目录：{dir}\n任务包：{任务包路径}\n先完整读取任务包，按包里的流程与模板完成；作者已定的方向、设定和要求都在 设定/，对话内容不会传给你\n交付后只回任务包开头要求的几项`
 
-## story-architect + character-designer：核心设定（Phase 2）
+收回后主会话：设定提案拿给作者逐项确认，按作者意见改文件；卷纲跑 `outline_view.py --check {卷纲路径}`，细纲每章跑 `check-outline-contract.js`；失败把报错原样交回同一 agent 修一次。按 workflow-volume.md / workflow-outline.md 的汇报模板用故事话告诉作者，不转述任务包。
 
-- `Agent(subagent_type: "story-architect", prompt: "项目目录：{dir}\n任务类型：核心设定\n查询参数：世界观构建+核心冲突设计")` — 辅助世界观和核心冲突设计；spawn prompt 必须原样附带上文「story-architect 契约摘要」（升级台阶检查约束力量体系设计）
+## story-architect、character-designer：题材定位与角色细化（可选）
+
+定方向以和作者来回讨论为主，默认主会话自己做；复杂世界观、多线结构、强反转工程或作者明确要求时才派：
+- `Agent(subagent_type: "story-architect", prompt: "项目目录：{dir}\n任务类型：题材定位\n查询参数：{作者选定的方向与对标信息}")`
 - `Agent(subagent_type: "character-designer", prompt: "项目目录：{dir}\n任务类型：角色设定\n查询参数：{主角设定信息}")` — 辅助角色设定和语言风格档案
-
-## story-architect：大纲与细纲（Phase 3）
-
-- 任务：传入本次交付层级、章/卷范围与停点；只做卷纲时不让 agent 附带细纲或正文。
-- 章节定位（可选）：需要时标高压/推进/修炼试错/关系回收/低压生活/信息整理；低压章可弱爽点，但仍要有往下看的理由。
-- 目标字数：只填写章级 `字数目标` 与 `visible_chars_v1` 口径；情节点不分配精确字数。
-- **契约摘要与模板必须附带**：卷纲要直接产出终局储备和剧情单元卡，spawn prompt 带上上文「story-architect 契约摘要」及其末条列出的模板与三级判据，让主会话与委托产出共用同一 schema。
 
 ## consistency-checker：写正文后的事实核对
 

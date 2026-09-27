@@ -240,7 +240,8 @@ LEGACY_RULES = (
         "outline beats never use numeric totals or sigma bands to predict prose capacity",
         r"预算合计|目标字数合计|Σ∈\[章目标",
         (
-            "skills/story-long-write/references/workflow-setup.md",
+            "skills/story-long-write/references/workflow-volume.md",
+            "skills/story-long-write/references/workflow-outline.md",
             "skills/story-long-write/references/artifact-protocols.md",
             "skills/story-setup/references/templates/rules/story-outline.md",
             "skills/story-setup/references/templates/agents/story-architect.md",
@@ -265,8 +266,7 @@ SPAWN_CAPABLE_SKILLS = (
 
 # 细纲结构容量的 canonical 副本与消费方：逐点只写语义义务，不填数字配额。
 OUTLINE_SEMANTIC_CAPACITY_CONSUMERS = (
-    "skills/story-long-write/references/workflow-setup.md",
-    "skills/story-long-write/references/artifact-protocols.md",
+    "skills/story-long-write/references/workflow-outline.md",
     "skills/story-setup/references/templates/rules/story-outline.md",
 )
 
@@ -1385,13 +1385,14 @@ def validate_repository(repo_root: Path, manifest: ContractManifest) -> List[Fin
             "long writing must bound public inspiration retrieval to Top 3-8 CBA cards without IA/NM",
         )
     )
-    setup_workflow = repo_root / "skills/story-long-write/references/workflow-setup.md"
-    for pattern, code, message in (
-        (r"适用阶段=设定", "inspiration-hook-setup", "book setup must offer optional inspiration recall"),
-        (r"适用阶段=卷纲", "inspiration-hook-volume", "volume outlining must offer optional inspiration recall"),
-        (r"适用阶段=细纲", "inspiration-hook-outline", "chapter outlining must offer optional inspiration recall"),
+    # 开书按时刻拆成三份文件（v0.8.2），三个灵感召回锚点各在自己的时刻文件里。
+    references_dir = repo_root / "skills/story-long-write/references"
+    for filename, pattern, code, message in (
+        ("workflow-setup.md", r"适用阶段=设定", "inspiration-hook-setup", "book setup must offer optional inspiration recall"),
+        ("workflow-volume.md", r"适用阶段=卷纲", "inspiration-hook-volume", "volume outlining must offer optional inspiration recall"),
+        ("workflow-outline.md", r"适用阶段=细纲", "inspiration-hook-outline", "chapter outlining must offer optional inspiration recall"),
     ):
-        findings.extend(require_pattern(setup_workflow, pattern, code, message))
+        findings.extend(require_pattern(references_dir / filename, pattern, code, message))
     findings.extend(
         require_pattern(
             repo_root / "skills/story-long-write/references/cross-book-recall.md",

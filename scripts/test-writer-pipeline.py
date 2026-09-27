@@ -289,6 +289,41 @@ class PipelineTests(unittest.TestCase):
                 self.assertEqual(style.read_text(encoding='utf-8'), content)
 
 
+    def test_architect_brief_carries_only_the_moment_files(self):
+        # 开书按作者确认点分时刻：卷纲任务包只带卷纲时刻的流程、模板与技法，细纲任务包只带细纲时刻的；
+        # 主会话不读包，story-architect 在新上下文里只读包和项目文件。
+        refs = SCRIPTS.parent / 'references'
+        vol = self.call('build_architect_brief.py', '--project', self.book, '--task', 'volume', '--volume', 1)
+        self.assertEqual(vol.returncode, 0, vol.stderr)
+        info = json.loads(vol.stdout)
+        text = Path(info['brief']).read_text(encoding='utf-8')
+        self.assertEqual(Path(info['brief']).parent, self.book / '.story' / 'work' / '排纲')
+        self.assertEqual(info['includes'], ['workflow-volume.md', 'artifact-protocols.md', 'emotional-methods.md',
+                                            'reader-contract-and-progression.md'])
+        self.assertIn((refs / 'workflow-volume.md').read_text(encoding='utf-8').strip()[:200], text)
+        self.assertNotIn('## 细纲（第 N 章）', text)
+        self.assertLess(info['chars'], 30000)
+        first = json.loads(self.call('build_architect_brief.py', '--project', self.book, '--task', 'outline',
+                                     '--chapters', '1-10').stdout)
+        later = json.loads(self.call('build_architect_brief.py', '--project', self.book, '--task', 'outline',
+                                     '--chapters', '11-20').stdout)
+        self.assertIn('opening-design.md', first['includes'])
+        self.assertNotIn('opening-design.md', later['includes'])
+        outline_text = Path(first['brief']).read_text(encoding='utf-8')
+        self.assertIn('## 细纲（第 N 章）', outline_text)
+        self.assertIn('第1节：主角卡', outline_text)
+        self.assertNotIn('第3节：反派设计', outline_text)
+        world = json.loads(self.call('build_architect_brief.py', '--project', self.book, '--task', 'world').stdout)
+        world_text = Path(world['brief']).read_text(encoding='utf-8')
+        self.assertIn('## 作者已定', world_text)  # 设定模板随包，定方向落盘的作者决定有处可读
+        self.assertIn('核心梗三层递进设计', world_text)
+        self.assertNotIn('## 微创新与差异化设计', world_text)
+        self.assertNotIn('## 感情流人设核心法', world_text)
+        self.assertNotIn('全书体量与阶段总览', world_text)
+        too_many = self.call('build_architect_brief.py', '--project', self.book, '--task', 'outline', '--chapters', '1-11')
+        self.assertEqual(too_many.returncode, 2)
+        self.assertIn('一批细纲最多 10 章', too_many.stderr)
+
 
 if __name__ == '__main__':
     unittest.main()
