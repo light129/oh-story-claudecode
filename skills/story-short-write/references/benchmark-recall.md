@@ -37,6 +37,6 @@
 5. 写入本篇 `设定.md` 的“对标摘要”区，写作时每个场景从中召回 1-2 个相关技法
 6. 如只找到原文、未找到拆文报告，提示用户先运行 `/story-short-analyze`；如用户要求继续，也可只按原文做弱参考
 
-> **拆文产出格式**：analyze 落盘的完整文件树、`_meta.json` schema、Stage→文件映射，以及「story-short-write 怎么读这些产出」的下游消费规范，见 [references/output-contract.md](output-contract.md)。
+> **拆文产出**：文件树、`_meta.json`、Stage→文件映射见 [output-contract.md](output-contract.md)；读法见 [analyze-output-usage.md](analyze-output-usage.md)。
 
 > **多对标书时**：参 `references/cross-book-recall.md`，副对标 anchor 入「对标摘要」区

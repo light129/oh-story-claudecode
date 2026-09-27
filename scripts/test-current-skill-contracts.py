@@ -887,6 +887,44 @@ def test_author_facing_templates_stay_plain() -> None:
     )
 
 
+def test_analyze_moments_route_and_default_dispatch() -> None:
+    """拆文按时刻读：入口路由表缺一份阶段文件就报；停下来问时不把派发方式丢给作者选。"""
+
+    require(not VALIDATOR.analyze_moment_routing_findings(REPO_ROOT), "real analyze skills must route every moment file")
+    real_facing = REPO_ROOT / "skills/story-long-analyze/references/author-facing.md"
+    require(not VALIDATOR.analyze_dispatch_default_findings(real_facing), "real stop-after-opening template must default dispatch")
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        for relative, heading, files in VALIDATOR.ANALYZE_MOMENT_ROUTES:
+            path = root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            rows = "".join("| x | [{0}](references/{0}) |\n".format(name) for name in files[1:])
+            path.write_text("{}\n\n{}\n## 下一节\n\n[{}](references/{})\n".format(heading, rows, files[0], files[0]), encoding="utf-8")
+        flagged = {finding.message for finding in VALIDATOR.analyze_moment_routing_findings(root)}
+        for _, _, files in VALIDATOR.ANALYZE_MOMENT_ROUTES:
+            require(
+                any(files[0] in message for message in flagged),
+                "a moment file linked only outside the routing table must be flagged: {}".format(files[0]),
+            )
+        facing = root / "author-facing.md"
+        facing.write_text(
+            "### 开头三章拆完、停下来问\n\n```text\n继续的话，想怎么拆？\n1. 一段接一段\n```\n\n### 拆的过程中报进度\n",
+            encoding="utf-8",
+        )
+        require(
+            finding_codes(VALIDATOR.analyze_dispatch_default_findings(facing)) == {"analyze-dispatch-default"},
+            "asking the author to pick a dispatch mode must be flagged",
+        )
+        facing.write_text(
+            "### 开头三章拆完、停下来问\n\n```text\n继续的话我每次同时拆三段。\n```\n\n### 作者问起怎么拆\n\n```text\n1. 一段接一段\n```\n",
+            encoding="utf-8",
+        )
+        require(
+            not VALIDATOR.analyze_dispatch_default_findings(facing),
+            "explaining the options only when the author asks must stay allowed",
+        )
+
+
 def main() -> int:
     test_manifest_contract()
     test_bad_fallbacks_fail()
@@ -909,6 +947,7 @@ def main() -> int:
     test_style_profile_is_not_a_book_existence_probe()
     test_outline_total_and_profile_gap_parity()
     test_author_facing_templates_stay_plain()
+    test_analyze_moments_route_and_default_dispatch()
     print("OK: current-contract manifest, structure, and fallback regressions passed")
     return 0
 
