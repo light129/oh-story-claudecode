@@ -124,7 +124,8 @@ LEGACY_RULES = (
         "duplicate-adapter-reference-fallback",
         "story-setup deploys one canonical reference path per adapter",
         r"同步复制到\s*`skills/[^`]+`\s*作为 fallback",
-        ("skills/story-setup/SKILL.md",),
+        # 入口只留通用流程，各宿主的复制步骤在 references/deploy-*.md，两处都要扫。
+        ("skills/story-setup/SKILL.md", "skills/story-setup/references"),
     ),
     AbsentRule(
         "opencode-old-reference-prefix",

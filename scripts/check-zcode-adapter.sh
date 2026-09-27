@@ -157,11 +157,12 @@ fi
 assert_grep '\$story-long-write|\$story-setup' "$ROOT/AGENTS.md.tmpl" 'ZCode AGENTS template must document $skill invocation'
 assert_grep 'project custom agents unavailable.*solo|不执行项目.*custom agents' "$ROOT/AGENTS.md.tmpl" "ZCode AGENTS template must document solo fallback"
 assert_grep 'target_cli = zcode|target_cli.*zcode' skills/story-setup/SKILL.md "story-setup must document zcode target_cli"
-assert_grep 'references/zcode/config\.json\.patch' skills/story-setup/SKILL.md "story-setup manifest missing ZCode config patch"
+assert_grep 'references/deploy-zcode\.md' skills/story-setup/SKILL.md "story-setup entry must route zcode to its deploy file"
+assert_grep 'references/zcode/config\.json\.patch' skills/story-setup/references/deploy-zcode.md "story-setup manifest missing ZCode config patch"
 # 组合安装验证代理（CI 无 ZCode 运行时）：插件 manifest 与 workspace config 注册同一批 hooks，
 # 部署算法必须记录二者互斥（装插件则跳过 config hooks 合并），否则 PreToolUse/PostToolUse 双触发。
-assert_grep 'hooks 互斥' skills/story-setup/SKILL.md "story-setup must document the plugin/workspace hooks mutex (skip config hooks merge when plugin installed, avoid double-firing)"
-assert_grep '\.zcode/skills/story-setup/references/agent-references' skills/story-setup/SKILL.md "story-setup missing ZCode reference path"
+assert_grep 'hooks 互斥' skills/story-setup/references/deploy-zcode.md "story-setup must document the plugin/workspace hooks mutex (skip config hooks merge when plugin installed, avoid double-firing)"
+assert_grep '\.zcode/skills/story-setup/references/agent-references' skills/story-setup/references/deploy-zcode.md "story-setup missing ZCode reference path"
 
 for skill in story-long-write story-short-write story-long-analyze story-import story-deslop story-review; do
   assert_grep 'ZCode 3\.3\.4|\.zcode/' "skills/$skill/SKILL.md" "$skill must document ZCode fallback"
