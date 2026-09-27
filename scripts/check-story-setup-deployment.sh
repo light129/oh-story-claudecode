@@ -830,7 +830,7 @@ assert_grep '导入续写入口顺序|推荐顺序.*story-setup' "$REPO_ROOT/ski
 assert_grep '推荐顺序.*story-setup' "$REPO_ROOT/skills/story-import/references/import-special-cases.md" "story-import special cases must keep the setup-vs-import answer"
 assert_grep '只需重建 `追踪/`' "$REPO_ROOT/skills/story-import/references/import-special-cases.md" "story-import must rebuild legacy tracking without re-analyzing the book"
 assert_grep '\.story/work/导入记录\.md' "$REPO_ROOT/skills/story-import/SKILL.md" "story-import must persist author decisions to the import record"
-assert_grep '每批 10–20 章' "$REPO_ROOT/skills/story-import/references/outline-reverse.md" "story-import must reverse outlines in bounded batches"
+assert_grep '超过约 25K 字时脚本自动少排几章' "$REPO_ROOT/skills/story-import/references/outline-reverse.md" "story-import must reverse outlines in bounded batches"
 echo "  OK TS10 version + behavior anchors"
 
 # TS11 — Outline-before-prose write guard (BLOCKING PreToolUse hook)

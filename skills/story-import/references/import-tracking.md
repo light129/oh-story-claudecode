@@ -16,8 +16,8 @@ Phase 4 只读本文件、[tracking-initialization.md](tracking-initialization.m
    > 项目 `追踪/` 里已有不属于当前协议的早期文件时不必手工清理：`init` 会先把它们按原样整体移入 `追踪/_旧追踪存档/`，再在原地建当前协议。旧内容保留供作者查阅，不参与解析，当前状态完全由本次导入输入决定；校验失败的 `init` 不移动任何文件。`init` 只在 `_tracking-state.json` 不存在时执行，绝不覆盖已初始化项目。
 
    ```text
-   {PYTHON} {story-import skill 根}/scripts/tracking_commit.py init --project {项目根} --input {项目根}/.story/work/init.json
-   {PYTHON} {story-import skill 根}/scripts/tracking_commit.py check --project {项目根}
+   {PYTHON} {story-import skill 根}/scripts/tracking_commit.py init --project {书目录} --input {书目录}/.story/work/init.json
+   {PYTHON} {story-import skill 根}/scripts/tracking_commit.py check --project {书目录}
    ```
 
 半成品最后一章为残稿时，`last_chapter`、角色快照和其他当前语义检查点一律截至最后完整章；残稿处理策略（导入记录里作者的决定）写入 `continuity_risks`，不把未完成动作登记成既成事实。

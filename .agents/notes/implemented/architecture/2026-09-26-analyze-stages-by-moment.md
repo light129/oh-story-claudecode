@@ -19,8 +19,9 @@ Related: [35K 加载上限](2026-09-26-per-call-load-ceiling-35k.md)、[开书�
 - **长篇入口瘦身**：章号对不上三选一与原文变化的细则移到 `index-rebuild.md`，脚本停下时才读；入口的 Stage 2 只留一段指向 pipeline-ops；维护者回归与语义验收样例移到 `final-checks.md`「维护者回归」。
 - **派发方式替作者定好**：Stage 2 默认有限并行（每轮 3 批），停下来问的模板不再列三种拆法；作者问起更快或更稳时，按 author-facing 新增的「作者问起怎么拆」解释并切换。三档本身与 story-import 自动续跑的有限并行不变。
 - **短篇分两个时刻**：Stage 2–3 读 output-contract、`analysis-method.md`（拆解思路，两个时刻共用）、`stage2-3-structure-emotion.md`、`quality-checklist.md`（逐阶段清单与质量标准，BLOCK 项扫描的依据）、analysis-report-style；Stage 4–6 把阶段文件换成 `stage4-6-reversal-summary.md`，Stage 6 评源文好坏时加 source-story-quality。同类对比、平台适配、详细节奏移到 `optional-modules.md`。
+- **短篇阈值统一**：反转铺垫线索按 output-contract（单一权威）写 ≥3 条、无反转/报应型不查，入口管道表、Stage→文件映射、stage4-6 方法与质量清单同口径（没有检查脚本，靠文字对齐）。数「有反差人物」（计入 `character_archetypes`）的最小判定写进 stage4-6：三层标签至少一层与另两层相反且原文有行为对照；Stage 5 只在细拆反差手法时才按标题查 analysis-character-design 一节。
 - **短篇去重**：SKILL.md 的验收只保留本 skill 的具体做法（表达自检跳过源文引用、无反转合法、BLOCK 扫 quality-checklist、补不出时用故事话告诉作者）和完成汇报，步骤本身以 output-contract「验收接入点」为准；输出目录树、Stage→文件映射、写盘协议改为指向 output-contract。
-- **output-contract 瘦身**：共享源（story-short-write）删去「下游消费规范」「写作流程建议」「维护者本地烟雾测试」，移到 story-short-write 独有的 `analyze-output-usage.md`，由 benchmark-recall 指向；两份副本经 shared-references 同步。
+- **output-contract 瘦身**：共享源（story-short-write）删去「下游消费规范」「写作流程建议」「维护者本地烟雾测试」与只对维护者有用的 sync-policy、版本约定细则；构思时用得上的读法（`_meta.json` 可选、按反转类型选骨架、情节节点排节奏、手法与原文只学写法）并成 benchmark-recall 的一段，不再另设文件；两份副本经 shared-references 同步。验收接入点三步与入口一致：表达自检命中时分析者自己修订报告本身，BLOCK 项扫本地质量清单，通过后按 SKILL 的完成汇报告诉作者。
 - **守卫**：check-current-skill-contracts 新增 `analyze-moment-routing`（两个入口的按时刻读表必须链接每份时刻文件）与 `analyze-dispatch-default`（停下来问的模板不得让作者选派发方式），test-current-skill-contracts 有正反例回归。原有锚点（pipeline-ops 派发清单与 schema_version、SKILL 的章号连续校验、选题决策 Phase、author-facing 模板工程词、短篇观察标尺路由）都留在原文件或随内容保留。
 
 | 时刻（主会话规则部分，去空白字数） | 改前 | 改后 |
@@ -31,7 +32,7 @@ Related: [35K 加载上限](2026-09-26-per-call-load-ceiling-35k.md)、[开书�
 | 长篇 Stage 4 / 5 | 48.4K | 18.3K / 15.0K |
 | 长篇 Stage 6 | 32.2K | 16.6K |
 | 短篇 Stage 2–3 | 42.5K | 20.1K |
-| 短篇 Stage 4–6 | 42.5K | 27.0K（评源文 31.2K；最重的对照标尺分支 35.0K） |
+| 短篇 Stage 4–6 | 42.5K | 26.9K（评源文 31.1K；人物标尺各一份 32.7–33.2K；最重的写作技法表分支 34.9K） |
 
 改前按入口实际点名的文件计，Stage 3–5 与短篇为同一套全量加载。
 
@@ -45,5 +46,5 @@ Related: [35K 加载上限](2026-09-26-per-call-load-ceiling-35k.md)、[开书�
 ## Consequences
 
 - 收益：长篇每个时刻 ≤25.4K（含条件分支 ≤29.5K），短篇两个时刻 ≤27K（分支 ≤35K）；Stage 1 有了入口小节，罕见分支与维护者内容不再常驻；作者不再面对工程选择。时刻之间只靠落盘交接，续跑与换新对话走同一条路。
-- 代价：长篇参考文件从 9 份变 14 份，短篇核心文件从 5 份变 6 份，维护时要按阶段找文件；「按时刻读」表成为新的路由契约，加阶段文件必须同步入口（由新守卫拦）。短篇 Stage 4–6 读 analysis-writing-techniques 整份时正好 35.0K，入口要求只按标题查其中一张表；再往 Stage 4–6 文件加内容需先删等量文字。本次未登记 doc-budget 路径，预算由主会话统一登记。
+- 代价：长篇参考文件从 9 份变 14 份，短篇核心文件从 5 份变 6 份，维护时要按阶段找文件；「按时刻读」表成为新的路由契约，加阶段文件必须同步入口（由新守卫拦）。短篇 Stage 4–6 读 analysis-writing-techniques 整份时正好 35.0K，入口要求只按标题查其中一张表；再往 Stage 4–6 文件加内容需先删等量文字。各时刻与人物标尺分支已登记 doc-budget 路径，Stage 5 的人物标尺一次只查一份。
 - 行为：阶段编号、脚本命令、验收与交接不变；唯一的可观察变化是 Stage 1 停下来问时不再列出三种拆法、直接按每次三段继续。本次没有做真实模型对照评测。

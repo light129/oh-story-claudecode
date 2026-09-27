@@ -3,10 +3,6 @@ name: output-contract
 description: |
   story-short-analyze 输出契约。定义 Stage → 文件映射、_meta.json schema、
   写入顺序、Resume 与验收接入点。story-short-write 怎么读这些产出由写作侧自己维护。
-sync-policy: |
-  本文件在 story-short-analyze 与 story-short-write 之间需保持字节一致（byte-equal）。
-  修改任一副本后，必须同步另一副本，并通过 bash scripts/check-shared-files.sh 验证。
-  禁止把本文件加入 IGNORE_NAMES 列表——它必须保持同步，不属于 intentional differences。
 ---
 
 # 输出契约：story-short-analyze ↔ story-short-write
@@ -39,7 +35,7 @@ sync-policy: |
 |-------|------|----------|---------|
 | 2 | 结构+情节节点 | `拆文报告.md`（故事核/结构/梗概段） + `情节节点.md` | 故事核 / 4-6 段结构 / 故事梗概 / 情节节点清单 |
 | 3 | 情感线+爆点 | `拆文报告.md`（情感曲线段+爆点段） | 情感曲线 ≥5 节点 / 爆点 6 维度 / 期待感 |
-| 4 | 反转+写作手法 | `拆文报告.md`（反转段） + `写作手法.md` | 前置反转检查 / 反转分析（铺垫 ≥2） / 写作手法 ≥5 项 |
+| 4 | 反转+写作手法 | `拆文报告.md`（反转段） + `写作手法.md` | 前置反转检查 / 反转分析（铺垫 ≥3） / 写作手法 ≥5 项 |
 | 5 | 人物+开头结尾 | `拆文报告.md`（人物段+首尾段） | 人物分类+功能评估 / 开头分析 / 结尾分析 / 首尾呼应 |
 | 6 | 综合评估 | `拆文报告.md`（综合段） + `_meta.json`（写 structure_counts） | 五维评分 / 爆点性 / 话题性 / 共鸣 ≥3 层 / 可复用结构 ≥3 条 / 节奏速报 |
 
@@ -97,7 +93,7 @@ Stage 6 内容写完后、`stages_completed[6]` append 前，跑三道检查：
 
 扫描 `拆文报告.md` 全文 against 拆文流程本地加载的禁用词表与报告 AI 腔规则。
 这是拆文报告质量门；成稿去 AI 规则由写作流程在自己的 Skill 内维护，不跨 Skill 读取参考文件，也不要把两套规则混用。
-命中 → 不写 `stages_completed[6]`，列出位置请用户修订**拆文报告本身**的 AI 腔
+命中 → 不写 `stages_completed[6]`，逐处修订**拆文报告本身**的 AI 腔后重扫
 （源文里有 AI 腔不算——这里扫的是分析师写的报告）。
 
 ### Step 2：`_meta.json.structure_counts` 数值校验
@@ -116,19 +112,16 @@ Stage 6 内容写完后、`stages_completed[6]` append 前，跑三道检查：
 
 ### Step 3：`story-short-analyze` BLOCK 项扫描
 
-扫拆文流程本地加载的输出模板，确认所有 `[BLOCK]` 标注项对应的产出段均在 `拆文报告.md` 出现。
+扫拆文流程本地质量检查清单的全部 `[BLOCK]` 项，确认对应产出均已写出。
 任一缺失 → 阻断。`[WARN]` 项 → 写入拆文报告末尾「待补」清单，不阻断。
 
 ### Step 4：通过
 
-清空 `_meta.json.last_stage_in_progress`，append `6` 到 `stages_completed[]`，提示
-用户「拆解完成，可调用 `/story-short-write` 写下一篇」。
+清空 `_meta.json.last_stage_in_progress`，append `6` 到 `stages_completed[]`，按拆文
+流程 SKILL 的完成汇报告诉作者。
 
 ---
 
 ## 版本约定
 
-- `_meta.json.version` 与本文件 `sync-policy` 联动。
-- breaking change（字段重命名 / 类型变更 / 必填变更）必须 bump major version 并同步两侧
-  副本，CI 通过 `scripts/check-shared-files.sh` 拦截单边修改。
-- additive change（新增可选字段）可 bump minor；producer、consumer 与两侧副本必须在同一变更中升级到当前 schema。
+`_meta.json.version` 跟本契约走：字段改名、类型或必填变更升 major，新增可选字段升 minor。

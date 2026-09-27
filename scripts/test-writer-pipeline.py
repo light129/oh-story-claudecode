@@ -342,9 +342,17 @@ class PipelineTests(unittest.TestCase):
 
 
 class ImportOutlineBriefTests(unittest.TestCase):
-    """导入逐批反推细纲：任务包只带本批规则、证据路径、测好的长度与重叠的剧情单元行。"""
+    """导入逐批反推细纲：任务包只带本批规则、抽好的摘要要点、测好的长度与重叠的剧情单元行。"""
 
     SCRIPT = ROOT / 'skills/story-import/scripts/build_outline_brief.py'
+    SUMMARY = ('## 第{n}章\n\n**概要**：概要不进包{n}\n\n**关键事件**：\n1. 江晨推门{n}\n2. 看见雨\n\n'
+               '**因果**：雨夜来信\n\n**局面结果**：信被收下\n\n**涉及**：江晨，老周\n\n**信息变化**：读者知道信是假的\n\n'
+               '**状态变化**：江晨 犹疑→决定\n\n**三维节奏**：三维节奏不进包\n\n**章尾钩子**：悬念：信里写了谁\n\n'
+               '**证据**：证据不进包\n\n**情节点**：\n\n'
+               'P1 **雨夜推门**：类型行动 | 白描不进包 | 涉及江晨 | 地点无 | 物品无 | 时间无\n\n'
+               '主题标签悬念 | 基调：紧张\n\n---\n\n'
+               'P2 **收下来信**：类型转折点 | 白描不进包 | 涉及江晨 | 地点无 | 物品信 | 时间无\n\n'
+               '主题标签悬念 | 基调：压抑\n')
 
     def setUp(self):
         tmp = tempfile.TemporaryDirectory(prefix='import-brief-')
@@ -354,41 +362,108 @@ class ImportOutlineBriefTests(unittest.TestCase):
         for chapter in range(1, 26):
             self.put(f'正文/第{chapter:03d}章_雨夜.md', f'# 第{chapter}章 雨夜\n\n他推开门，看见雨。' + '字' * chapter + '\n')
             if chapter != 7:
-                summary = self.root / '拆文库' / '旧书' / '章节' / f'第{chapter}章_摘要.md'
-                summary.parent.mkdir(parents=True, exist_ok=True)
-                summary.write_text('- 关键事件：推门\n', encoding='utf-8')
-        self.put('大纲/卷纲_第1卷.md', '# 第一卷 卷纲\n\n## 剧情单元（反推）\n'
-                 '| 单元ID | 章节范围 | 单元节拍 | 主推线/战果 | 下一单元因果钩子 |\n|---|---|---|---|---|\n'
-                 '| L1-1 | 第1-12章 | 接信 | 主线 | 追查 |\n| L1-2 | 第13-25章 | 反击 | 主线 | 新敌 |\n\n'
-                 '（导入反推只填有证据的字段）\n\n## 人物弧线\n| 角色 | 本卷起点 |\n|---|---|\n| 甲 | 第1-99章 |\n')
+                self.summary(chapter, self.SUMMARY.format(n=chapter))
+        self.volume('| L1-1 | 第1-12章 | 接信 | 主线 | 追查 |\n| L1-2 | 第13-25章 | 反击 | 主线 | 新敌 |\n')
 
     def put(self, name, body):
         file = self.book / name
         file.parent.mkdir(parents=True, exist_ok=True)
         file.write_text(body, encoding='utf-8')
 
+    def summary(self, chapter, body):
+        file = self.root / '拆文库' / '旧书' / '章节' / f'第{chapter}章_摘要.md'
+        file.parent.mkdir(parents=True, exist_ok=True)
+        file.write_text(body, encoding='utf-8')
+
+    def volume(self, rows, header='| 单元ID | 章节范围 | 单元节拍 | 主推线/战果 | 下一单元因果钩子 |'):
+        self.put('大纲/卷纲_第1卷.md', f'# 第一卷 卷纲\n\n## 剧情单元（反推）\n{header}\n|---|---|---|---|---|\n{rows}\n'
+                 '（导入反推只填有证据的字段）\n\n## 人物弧线\n| 角色 | 本卷起点 |\n|---|---|\n| 甲 | 第1-99章 |\n')
+
     def call(self, chapters):
         return subprocess.run([sys.executable, str(self.SCRIPT), '--project', str(self.book), '--chapters', chapters],
                               cwd=self.root, capture_output=True, encoding='utf-8',
                               env={**os.environ, 'PYTHONIOENCODING': 'ascii'})
 
-    def test_brief_carries_batch_evidence_and_rules(self):
-        result = self.call('1-12')
+    def brief(self, chapters):
+        result = self.call(chapters)
         self.assertEqual(result.returncode, 0, result.stderr)
         info = json.loads(result.stdout)
-        brief = Path(info['brief'])
-        self.assertEqual(brief.parent, (self.book / '.story' / 'work' / '排纲').resolve())
-        text = brief.read_text(encoding='utf-8')
+        return info, Path(info['brief']).read_text(encoding='utf-8')
+
+    def test_brief_carries_batch_evidence_and_rules(self):
+        info, text = self.brief('1-12')
+        self.assertEqual(Path(info['brief']).parent, (self.book / '.story' / 'work' / '排纲').resolve())
         # 长度按 visible_chars_v1 由脚本测好：story-architect 不能执行命令。
         self.assertEqual(info['metric'], 'visible_chars_v1')
         self.assertEqual(info['lengths']['3'], len('他推开门，看见雨。') + 3)
         self.assertEqual(info['missing_summaries'], [7])
+        self.assertEqual((info['chapters'], info['next']), ('1-12', 13))
         self.assertIn('| L1-1 | 第1-12章 |', text)
         self.assertNotIn('L1-2', text)
         self.assertNotIn('| 甲 |', text)  # 别的表不串进来
         self.assertIn('## 细纲（第 N 章）', text)
         self.assertIn('你不执行命令', text)
         self.assertIn('导入记录.md', text)
+
+    def test_brief_extracts_summary_fields_instead_of_paths_only(self):
+        info, text = self.brief('1-12')
+        # 写细纲要用的字段抽进包里，执行者不再整读摘要。
+        for want in ('关键事件：江晨推门3 看见雨', '因果：雨夜来信', '局面结果：信被收下', '涉及：江晨，老周',
+                     '信息变化：读者知道信是假的', '状态变化：江晨 犹疑→决定', '章尾钩子：悬念：信里写了谁',
+                     'P1 雨夜推门｜行动｜紧张；P2 收下来信｜转折点｜压抑'):
+            self.assertIn(want, text)
+        for skip in ('概要不进包', '三维节奏不进包', '证据不进包', '白描不进包'):
+            self.assertNotIn(skip, text)
+        # 缺摘要的章要读正文：chars 计入执行者真正要读的总量。
+        body7 = (self.book / '正文' / '第007章_雨夜.md').read_text(encoding='utf-8')
+        self.assertIn('摘要：未找到', text)
+        self.assertEqual(info['chars'], len(''.join(text.split())) + len(''.join(body7.split())))
+
+    def test_legacy_summary_labels_still_extracted(self):
+        self.summary(2, '- 关键事件：推门\n\n**出场人物**：\n\n| 角色 | 本章重要性 |\n|---|---|\n| 林雷 | major |\n| 希尔曼 | minor |\n\n'
+                        '- **卡点与伏笔**：结尾卡点：信没拆\n')
+        _, text = self.brief('1-12')
+        self.assertIn('关键事件：推门', text)
+        self.assertIn('涉及：林雷、希尔曼', text)
+        self.assertIn('章尾钩子：结尾卡点：信没拆', text)
+        self.assertIn('局面结果：（摘要未写）', text)
+
+    def test_simplified_summary_fallback_for_long_books(self):
+        self.put('.story/work/简化摘要/第007章.md', '江晨把信交给老周，老周当场烧掉。')
+        info, text = self.brief('1-12')
+        self.assertEqual(info['missing_summaries'], [])
+        self.assertIn('江晨把信交给老周，老周当场烧掉。', text)
+
+    def test_batch_shrinks_when_brief_too_big(self):
+        for chapter in range(1, 26):
+            if chapter != 7:
+                self.summary(chapter, self.SUMMARY.format(n=chapter).replace('看见雨', '雨' * 3000))
+        info, text = self.brief('1-12')
+        first, last = map(int, info['chapters'].split('-'))
+        self.assertEqual(first, 1)
+        self.assertLess(last, 10)  # 包按总量切，可以少于 10 章
+        self.assertEqual(info['next'], last + 1)
+        self.assertLessEqual(info['chars'], info['limit'])
+        self.assertTrue(Path(info['brief']).name.endswith(f'第001-{last:03d}章.md'))
+        self.assertNotIn(f'### 第{last + 1}章', text)
+
+    def test_unit_rows_read_only_the_chapter_range_column(self):
+        self.volume('| L1-1 | 第1章—第5章 | 接信 | 主线 | 追查 |\n'
+                    '| L1-2 | 第6-9章 | 反击 | 主线 | 新敌 |\n'
+                    '| L1-3 | 第10章 | 余波 | 主线 | 新敌 |\n'
+                    '| L1-4 | 第15章 | 单元编号不当章号 | 第1-2章的回响 | 无 |\n'
+                    '| L1-5 | 第13-25章 | 远处 | 主线 | 无 |\n')
+        _, text = self.brief('1-12')
+        for row in ('| L1-1 | 第1章—第5章 |', '| L1-2 | 第6-9章 |', '| L1-3 | 第10章 |'):
+            self.assertIn(row, text)
+        self.assertNotIn('L1-4', text)  # 旧实现回退扫整行，会把「L1-4」「第1-2章」当成章号
+        self.assertNotIn('L1-5', text)
+
+    def test_unit_table_without_range_column_stops(self):
+        self.volume('| L1-1 | 第1-12章 | 接信 | 主线 | 追查 |\n', header='| 单元ID | 范围 | 单元节拍 | 主推线/战果 | 钩子 |')
+        result = self.call('1-12')
+        self.assertEqual(result.returncode, 2)
+        self.assertIn('章节范围', result.stderr)
 
     def test_batch_bounds(self):
         too_many = self.call('1-21')
@@ -397,9 +472,9 @@ class ImportOutlineBriefTests(unittest.TestCase):
         too_few = self.call('1-5')
         self.assertEqual(too_few.returncode, 2)
         self.assertIn('至少 10 章', too_few.stderr)
-        tail = self.call('21-25')  # 全书最后一批可以不足 10 章
-        self.assertEqual(tail.returncode, 0, tail.stderr)
-        self.assertIn('L1-2', Path(json.loads(tail.stdout)['brief']).read_text(encoding='utf-8'))
+        info, text = self.brief('21-25')  # 全书最后一批可以不足 10 章
+        self.assertIn('L1-2', text)
+        self.assertIsNone(info['next'])
         beyond = self.call('20-30')
         self.assertEqual(beyond.returncode, 2)
         self.assertIn('正文只迁到第25章', beyond.stderr)
