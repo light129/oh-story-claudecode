@@ -12,6 +12,12 @@ compare 链接；小节名使用 Keep a Changelog 的六个英文类别（`Added
 
 ## [Unreleased]
 
+## [0.8.3] - 2026-09-27
+
+> 本版 `agents_version` 仍是 34，`setup_skill_version` 仍是 1.3.2，助手模板没有改：更新技能包后新开对话即可，不用重跑 `/story-setup`。
+
+v0.8.3 把 0.8.2 省下来却还没验证的两处做了对比试写：主会话自己写长篇少读去 AI 味规则，会多出三类像 AI 的写法，现在写完专门查这三类；短篇构思完换新对话写正文，实测不比接着写差。另外给读取上限留出了改规则的余量，去 AI 味的轻中重只按一套标准定。
+
 ### Changed
 
 - **给以后改规则留出余量**：长篇写正文、去 AI 味这几步读进去的说明原来贴着 3.5 万字的上限，改一句话就得先去别处删字。现在把只在少数时候才用的内容挪了出去，用到时才读：长篇写章时缺文件、追踪对不上的修法，单独放一份「停下修」说明；去 AI 味交给写作助手时用的那段长说明也单独放一份，主会话自己改时不读。日更说明里和写章流程重复的「常见问题」表删了，其中「写到卷末问要不要开新卷」并进了批末汇报。审稿一人审和短篇拆文原来按整份文件算字数，其实只读其中一两节，改成按实际读的算。除短篇写正文外，最紧的几步现在都留出 500 字以上的余量。
@@ -25,7 +31,7 @@ compare 链接；小节名使用 Keep a Changelog 的六个英文类别（`Added
 
 ## [0.8.2] - 2026-09-27
 
-> 本版 `agents_version: 34`（v0.8.1 为 33），`setup_skill_version: 1.3.2`。写手、架构师、查资料、角色设计、资料研究几个助手模板都已更新：更新技能包后，在每个写作项目根重新运行 `/story-setup`（Codex 用 `$story-setup`），再新开会话；不重跑的话，写手认不出主会话填的「本章技法」类别。项目里旧的 `.claude/agent-memory/` 可以删掉。升级细节见 [UPGRADING](skills/story-setup/UPGRADING.md)。
+> 本版 `agents_version: 34`（v0.8.1 为 33），`setup_skill_version: 1.3.2`。写手、架构师、查资料、角色设计、资料研究几个助手模板都已更新：更新技能包后，在每个写作项目根重新运行 `/story-setup`（Codex 用 `$story-setup`），再新开会话；不重跑的话，写手用的还是旧说明，新写法用不上。项目里旧的 `.claude/agent-memory/` 可以删掉。升级细节见 [UPGRADING](skills/story-setup/UPGRADING.md)。
 
 v0.8.2 主要改的是：写书的每一步，助手只看这一步用得上的规矩，不再一上来把所有说明都读一遍。开书、写章、审稿、去 AI 味、导入旧稿、拆书、扫榜、安装都照作者实际停下来确认的地方分成几段；你在对话里定下的事会先写进书里的设定文件，换个新对话接着做也不会丢。每一次读进去的说明都控制在 3.5 万字以内。另外修了正文读着像电报的问题（见下）。这些改动都用改前改后的试写对比过，没有发现写得更差。
 
@@ -1195,7 +1201,8 @@ npx skills add zenstory-ai/oh-story-claudecode -y -g
 - 初始版本：长篇/短篇写作、拆文、扫榜、去 AI 味、浏览器操控
 - 用 52000+ 本真实数据增强知识库
 
-[Unreleased]: https://github.com/zenstory-ai/oh-story-claudecode/compare/v0.8.2...HEAD
+[Unreleased]: https://github.com/zenstory-ai/oh-story-claudecode/compare/v0.8.3...HEAD
+[0.8.3]: https://github.com/zenstory-ai/oh-story-claudecode/compare/v0.8.2...v0.8.3
 [0.8.2]: https://github.com/zenstory-ai/oh-story-claudecode/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/zenstory-ai/oh-story-claudecode/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/zenstory-ai/oh-story-claudecode/compare/v0.7.11...v0.8.0

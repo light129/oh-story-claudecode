@@ -2,7 +2,7 @@
 
 ## 当前版本
 
-发布版本 `v0.8.2`。`agents_version` 从上一发布 tag v0.8.1 的 33 增加到 34；已部署项目需更新技能包、重新运行 `/story-setup` 并新开会话，以加载本次完整部署内容。
+发布版本 `v0.8.3`。`agents_version` 仍是 34（与 v0.8.2 相同）：从 v0.8.2 升级只需更新技能包并新开会话，不用重跑 `/story-setup`；从 v0.8.1 或更早升级，按下方「v0.8.2 必须重跑 story-setup」重跑一次。
 
 - `setup_skill_version: 1.3.2`
 - `agents_version: 34`
