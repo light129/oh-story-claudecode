@@ -1,6 +1,6 @@
 # workflow-chapter.md：单章正文工作流（Phase 4-5）
 
-每章正文走本文件（日更批次见 `workflow-daily.md`）；首次定位或文件缺失才读 [project-files.md](project-files.md)。
+每章正文走本文件（日更批次见 `workflow-daily.md`）。**缺文件就停下修，本轮不写**：追踪类按 `tracking_commit.py check` 的提示修，对标主产物（情绪模块／节奏）缺失请作者用 `/story-long-analyze` 补拆，要找某类文件放哪才读 [project-files.md](project-files.md)；修好再从步骤 1 开始。
 
 **工作目录**：本章临时文件（前组.md、后组.md、writer_prompt.md、tracking.json）只放书目录下 `.story/work/第NNN章/`，不写系统 `/tmp`、`正文/`、`大纲/` 或书根；提交成功后脚本自动删除。
 
@@ -17,19 +17,16 @@
    - **状态筛选**：从续写状态卡取本章在场角色、要碰/要避的伏笔、必须履行的下一章承诺与相关长期约束，写成本节速记。
    - **召回**：核对报告写「召回降档：成立」时直接用脚本给的情绪/节奏；不成立时才完整读取 [benchmark-recall.md](benchmark-recall.md) 执行全量召回。
    - **意图确认**：一句话写清本章意图（例：「快节奏打脸——账单暴露→逼问→反证→公开代价」）。对照：细纲是唯一剧情蓝图，新增物按「新增物三级」；底牌不因章尾钩子提前泄露；细纲重复的同一要求只兑现一次；爽点前有可指认的铺垫，打脸/揭露章写在场配角的差异反应。
-   - **契约风险**：细纲或单元卡标了需补强／契约破坏时，读 `references/reader-contract-and-progression.md` 对应小节，需补强就补进本章意图，契约破坏先修纲再写；标契约安全的写前不重问，写后在步骤 9 核。
+   - **契约风险**：细纲或单元卡标了需补强，把单元卡写的补强办法（交换、铺垫或成本）写进本章意图；标了契约破坏，先按 workflow-outline 补纲流程修纲再写；标契约安全的写前不重问，写后在步骤 9 核。
 4. **资料研究**（按需）：需查证外部事实时 spawn story-researcher 输出到 `参考资料/`，不可用则主会话查。
 5. **标题预检**：看核对报告的重名结论；重名或明显重复才按核心事件改名，并同步细纲标题与正文文件名。
-6. **写作准备**：全章细纲先交给写手统筹编排，默认同一 session 按前后两组交付。
-   - 按实际叙述顺序在自然转场或因果停顿处分组，不在一句对话或同一动作中间截断；可交错情节点，但不增删批准内容，不拆逐点字数配额。
-   - 写手先把前组写到工作目录 `前组.md`；主会话只调用一次 `storyctl.py wordcount checkpoint --file {segment} --project {项目根} --chapter {N}`，把 `actual / remaining_user_range` 连同后组交回同一写手。两组按原文拼接，不回改前组追字数。
-   - 用户明确要求一次成文时执行安排填「全章」，直接落盘，不跑 checkpoint。批准内容写完即停，不为字数加剧情；实际长度由步骤 8 收口。
+6. **写作准备**：交给写手时按 [agent-calls.md](agent-calls.md)「写一章」分前后两组交付；主会话自己写时一次写完整章直接落盘。批准内容写完即停，不为字数加剧情；实际长度由步骤 8 收口。
 7. **正文执行**：已部署 narrative-writer 时按 [agent-calls.md](agent-calls.md)「写一章」填槽交给它，交付后核对它只消费了批准情节点。未部署则主会话自己写：不填槽，按脚本输出与本节速记直接写，新增物自列申报表。
 8. **核情节点落点，再一次检测收口**：
    - 细纲每个情节点**至少出现一次**，漏即退回补写批准内容。不以字数为由。
    - 运行 `{PYTHON} {skill 根}/scripts/storyctl.py chapter check --project {项目根} --chapter {N} --fix-punctuation`：一次整理标点并跑 AI 句式、`check-degeneration.js` 退化、细纲照搬与字数检测（去味管线：检测器 → 选 Gate → 一次定点改写 → 复扫）；文件改动后重跑，不再分别调各检测脚本。
    - 按返回的 `status` 走：`ready` → 完成步骤 9-12 再提交。`blocked` / `invalid`（退出码 1）→ 就地修净再重跑。`needs_decision`（字数出带）→ 看 `available_actions`：欠字不补不重试，按字数问法请作者选；超字把删除区间随 `compress-once` 交 narrative-writer 一次净删、零新语义，复检仍带外也请作者选。`tool_unavailable`（退出码 3，见 `quality.tool_errors`）→ 不能提交、无绕过，用停下问法告诉作者要装 Node.js 18+ 才能做写后检查。退出码 2（`status: error`）按 `error_code` 修命令。
-9. **检查钩子、爽点与契约**：章尾有往下看的理由（低压/过场章留阶段目标即可）；高压/推进章爽点到位；对着成稿过契约四问——主角是否靠自己的选择挣到本章结果？收益是否被配角、机构或巧合无交换地拿走？有没有提前动用后面的底牌？旧期待付利息、留新期待了吗？任一问不过读 `references/reader-contract-and-progression.md` 对应小节。不达标只修批准内容，修后重跑步骤 8；需补强、契约破坏都在本章汇报里告诉作者。
+9. **检查钩子、爽点与契约**：章尾有往下看的理由（低压/过场章留阶段目标即可）；高压/推进章爽点到位；对着成稿过契约四问——主角是否靠自己的选择挣到本章结果？收益是否被配角、机构或巧合无交换地拿走？有没有提前动用后面的底牌？旧期待付利息、留新期待了吗？任一问不过就按问改：没挣到→让结果落在他的选择或判断上；收益被拿走→补交换或让他拿回控制点；提前用了底牌→换成本卷已解锁的手段；没付利息→给旧期待一个小兑现再留新钩。不达标只修批准内容，修后重跑步骤 8；需补强、契约破坏都在本章汇报里告诉作者。
 10. **元信息扫描**：标题行以外清掉第X章、上一章、本章、前文、后文、伏笔、细纲、读者这类工程词，改成角色能感知的事件锚点（「比第一章那三秒开火更疼」→「比那三秒开火更疼」）；角色真实读到「第X章」或本身是作者/读者的除外。
 11. **检测结果处理**（选 Gate 与定点改写）：严重度读作必须修 / 建议看 / 仅提示——检测器 blocking 与 checker 的 S1/S2 必须修，advisory 与 S3 建议看，S4 仅提示。`quality.blocking_findings` 就地改到净；`advisories` 逐条读原文判断，确属问题才改，不为归零机械改写。`formulaic-parallelism` 连同台词一起复核；细纲照搬里判定保留的补进细纲「复沓锚句」。禁用词表不整读，拿不准的二级词才查 `references/banned-words.md` 对应条目。改完只重跑步骤 8 复扫，不另安排全篇去味。
 12. **更新追踪**：运行 `{PYTHON} {skill 根}/scripts/tracking_commit.py draft --project {项目根} --chapter {N}`，预填工作目录 `tracking.json`，并给出在场核心角色的当前快照和每类条目的样板（`shapes`）。只填 `delta` 与留空的本章结尾时间、场景：变化的核心角色把快照整份改好放进 `character_snapshots`；撤下的长期约束或风险从 `context` 删掉并把原文列进 `delta.retired_context_items`。不读脚本源码或 state 找格式；出错或 `mode=revision` 时才读 [tracking-transaction.md](tracking-transaction.md)。带内执行 `{PYTHON} {skill 根}/scripts/storyctl.py chapter commit --project {项目根} --chapter {N} --input {工作目录}/tracking.json`，作者接受当前长度把 `commit` 换成 `accept-current-length`。报错按提示改完重跑同一命令。判为「登记」的申报项在这次事务里一并登记；有「先问作者」项时暂停提交与下一章。「本章没写成的」：细纲没给的追加进本单元排纲底稿「建纲追加」，先问作者的走下方处置表。
@@ -102,6 +99,6 @@
 
 ### Agent 调用：narrative-writer（去AI味审查）
 
-**按需调用**：步骤 8 的 `quality.semantic_advisories`（语义类 advisory 条数）≥3，或 blocking 一次就地修改后仍未清零，才 spawn 一次；否则主会话按步骤 11 处理。Prompt 见 [agent-calls.md](agent-calls.md)。不可用则主会话按 [deslop-gates.md](deslop-gates.md) 的删除保护、所选 Gate 与「写法抽查」执行，拿不准的模式再查 `references/anti-ai-writing.md` 对应条目。
+**按需调用**：步骤 8 的 `quality.semantic_advisories`（语义类 advisory 条数）≥3，或 blocking 一次就地修改后仍未清零，才 spawn 一次；否则主会话按步骤 11 处理。Prompt 见 [agent-calls.md](agent-calls.md)。不可用（主会话自己写）时不读去味细则：逐条按检测器那条提示改，先判能否直接删（删后不丢伏笔、钩子、角色、情节和必要信息就删），会丢才改写；blocking 改到净，advisory 确属问题才改。语义提示仍多时照常收口，在汇报里建议作者之后另开对话用 `/story-deslop` 精修。
 
 审查在本章提交前改的连续性事实直接进步骤 12 的事务；提交后再改，按 workflow-revision：`draft --chapter {N}` 预填 → 改 → `chapter commit`。

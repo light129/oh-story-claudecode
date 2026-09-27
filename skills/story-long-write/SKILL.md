@@ -1,7 +1,7 @@
 ---
 name: story-long-write
 version: 1.0.0
-description: "长篇网文规划与写作。支持只讨论结构、只写大纲或指定细纲，明确要求正文后再写章节。触发方式：/story-long-write、/写长篇、「帮我开书」「规划剧情」「写大纲」「补细纲」「日更」「续写」「继续写」「修改第X章」「回炉」「重写第X章」。"
+description: "长篇网文规划与写作。支持只讨论结构、只写大纲或指定细纲，明确要求正文后再写章节。触发方式：/story-long-write、/写长篇、「帮我开书」「定设定」「出卷纲」「规划剧情」「写大纲」「补细纲」「日更」「续写」「继续写」「修改第X章」「回炉」「重写第X章」。"
 metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudecode"}}
 ---
 # story-long-write：长篇网文写作
@@ -16,7 +16,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 1. 规划按时刻读：定方向、定设定读 `references/workflow-setup.md`，出卷纲读 `references/workflow-volume.md`，出细纲或补纲读 `references/workflow-outline.md`，只读当前时刻的；写指定章读取 `references/workflow-chapter.md`；日更先读取 `references/workflow-daily.md`，进入正文前再完整读取 `workflow-chapter.md`；大修只读 `references/workflow-revision.md`（改稿要用的单章规则它已写明）。
 2. 主会话直接写正文时，首次落笔前完整读取 `references/long-format.md` 与 `references/writing-craft.md`（和写手同一套技法）；`references/long-chapter-quality.md`、`references/long-chapter-hooks.md` 只在排查具体问题时读，去味走检测器，不预读。交给 narrative-writer 时，由该 agent 按自己的 reference 表完成写前读取，主会话不得用未读 reference 的临时 prompt 替代。
-3. 本章技法按下方「核心方法」表至多读一份（悬疑读 `references/long-suspense.md`，反转读 `references/long-reversal.md`，其余见表）。
+3. 本章技法按下方「本章技法」一段选，至多一份；主会话自己写时按那段只读指定小节，这是本条唯一允许的按节读。
 4. 正文写前，references 读完后立即重读当前用户请求、本章细纲和卷纲，先在上下文里**记下本轮约束**：原样记录用户明确字数范围、必发生、禁止发生、精确时间锚与本章停笔点、章尾新债。references 只提供技法，不得覆盖这些项目事实；作者给的字数范围写在细纲「字数范围」行（命令参数只作临时覆盖），不用默认 ±15%。交付前逐项复核：字数带外按 `workflow-chapter.md` 的收口流程交用户处置，不自动补字；其余项越界不算完成。
 
 任一必需路径不存在、不可读或未读完时立即停止，报告准确路径，**不得先写正文再补读**。写前必读按当前任务、当前会话重新执行；旧会话的“读过”不能沿用。
@@ -25,15 +25,15 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 > 内置适配 Claude Code / OpenCode / Codex / Antigravity / ZCode / OpenClaw。专业 agent 只查当前端 canonical 目录（`.claude/agents`、`.opencode/agents`、`.codex/agents` TOML、`.agents/agents`）；Antigravity 用 `invoke_subagent` + 同名 `TypeName`。文件或运行时能力缺失、返回 unknown agent，或当前为不执行 custom agents 的 ZCode 3.3.4 时，报告 fallback 并 solo/direct 执行。
 >
-> Spawn 版本提示（不阻断 spawn）：先读取项目根 `.story-deployed` 的 `agents_version`。与本版 `agents_version: 33` 不一致时（标记缺失、字段缺失/非整数、小于或大于 33）**照常按文件存在性检查并 spawn**，但只检查当前运行时的 canonical 目录；同时报告 `Notice: agents bundle 版本不匹配（项目 {N}，本版 33）` 并提示重新运行 `/story-setup` 后新开会话；大于 33 时额外提示先更新 oh-story-claudecode，不要用本地旧版 setup 降级覆盖。只有 agent 文件缺失、或运行时不暴露 custom agent 时才降级 solo/direct，报告 `Fallback: ... -> solo`。
+> Spawn 版本提示（不阻断 spawn）：先读取项目根 `.story-deployed` 的 `agents_version`。与本版 `agents_version: 33` 不一致时（标记缺失、字段缺失/非整数、小于或大于 33）**照常按文件存在性检查并 spawn**，但只检查当前运行时的 canonical 目录；同时用一句白话提示作者「写作助手是旧版，运行 /story-setup 后新开对话」，`Notice: agents bundle 版本不匹配（项目 {N}，本版 33）` 原文写进技术备注行；大于 33 时额外提示先更新 oh-story-claudecode，不要用本地旧版 setup 降级覆盖。只有 agent 文件缺失、或运行时不暴露 custom agent 时才降级 solo/direct，`Fallback: ... -> solo` 同样只进技术备注行。
 
 **文风裁决**：正文写作、改写或审稿前先读 [references/style-resolution.md](references/style-resolution.md)，加载本书文风并形成 `style_resolution`；无作者记忆也执行。当前请求、本书文风和 active 偏好按维度覆盖通用 references；同一裁决交给后续执行者。
 
 ## 核心方法
 
-先抓情绪，再用验证过的模式可靠交付，灵感只做素材：每个场景服务一个说得清的目标情绪；从对标里找验证过的剧情模式，把对标角色当功能位，用本书的角色和素材填；写每章只读「不知道就会写错」的状态、伏笔与设定。契约与推进决策先过 `references/reader-contract-and-progression.md`「契约四问」。作者记忆：写正文时组装脚本已代查注入；其他任务按 [references/author-memory.md](references/author-memory.md) 带 `--book-root` 查 ≤2KB active 项交执行者，当前请求与本书文风优先，长期声明用 `record` 写入、回传回执。
+先抓情绪，再用验证过的模式可靠交付，灵感只做素材：每个场景服务一个说得清的目标情绪；从对标里找验证过的剧情模式，把对标角色当功能位，用本书的角色和素材填；写每章只读「不知道就会写错」的状态、伏笔与设定。契约与推进决策先过 `references/reader-contract-and-progression.md`「契约四问」。作者记忆：写正文时组装脚本已代查注入；其他任务直接跑 `{PYTHON} {skill 根}/scripts/author_memory_commit.py query --workspace {放 .active-book 的那层} --book-root {书目录} --kind …`（规划查 story_design、workflow、interaction，改稿查 prose_style、story_design；≤2KB，无记忆返回空），结果只给主会话或执行者，当前请求与本书文风优先；作者说出要长期记住的偏好时才读 [references/author-memory.md](references/author-memory.md) 按它 `record` 写入、回传回执。
 
-**本章技法（每章至多读一份）**：按细纲主功能选——打脸/逆袭（爽感释放）`style-combat-face.md`；身份/认知/立场反转（震撼+痛快）`long-reversal.md`；感情拉扯（意难平）`emotional-methods.md`，自己写时加 `emotion-on-page.md`；悬疑/惊悚/异常线索（紧张+好奇）`long-suspense.md`；日常装逼（期待感）`long-chapter-hooks.md`。都不对应就不读，按 writing-craft 写。交给写手时只在 prompt「本章技法」填类别，由写手读；主会话自己写正文时才读这份文件。作者先说情绪没说题材时按括号反查，再从 `long-genre-catalog.md` 找细分方向。
+**本章技法（每章至多读一份）**：按细纲主功能选——打脸/逆袭（爽感释放）`style-combat-face.md`；身份/认知/立场反转（震撼+痛快）`long-reversal.md`；感情拉扯（意难平）`emotional-methods.md`，自己写时加 `emotion-on-page.md`；悬疑/惊悚/异常线索（紧张+好奇）`long-suspense.md`；日常装逼（期待感）`long-chapter-hooks.md`。都不对应就不读，按 writing-craft 写。交给写手时只在 prompt「本章技法」填类别，由写手整份读；主会话自己写正文时只读该文件的「决策路由」和它指向的那一节（先看标题定位，不整读），日更一批只读一份，按本批最需要的那章选，其余章按 writing-craft 写。作者先说情绪没说题材时按括号反查，再从 `long-genre-catalog.md` 找细分方向。
 
 ---
 
@@ -47,6 +47,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 | **大纲规划** | "写大纲/规划剧情/规划全书/规划第X卷/开新卷" | 按需取 Phase 1→3，交付所请求大纲/卷纲及必要设定；不自动展开细纲或初始化追踪 |
 | **细纲规划** | "出细纲/补纲/扩纲/补细纲/写或修改第N章细纲" | Phase 3：既有单元内只补/改点名章；需要新单元才走「中途补纲/扩纲小流程」。指定范围不扩到整单元；未指定时按剧情批建纲 |
 | **开书** | "帮我开书"，未限定规划层级 | 按确认点逐个走：定方向→定设定→卷纲→首批 10 章细纲，每个确认点作者说继续才往下；**最远停在细纲交付，不自动写正文** |
+| **定设定** | "定设定"，或已有题材定位、还没有角色与关系 | 定设定时刻：`references/workflow-setup.md` Phase 2，交付设定后停 |
 | **写指定章** | "写第 N 章" / "写第1章" / "开书并写首章"，对象是正文 | Phase 4→5，只写点名章后停止；缺前置时先补必要设定、卷纲和点名章细纲，不套用完整开书的 10 章默认 |
 | **日更续写** | 关键词（"日更"/"续写"/"继续写"）**且**项目已有正文+追踪 | 加载 `references/workflow-daily.md` |
 | **大修** | "修改第X章" / "回炉" / "重写第X章"，对象是已写正文 | 加载 `references/workflow-revision.md`；只改细纲不进此流程 |
@@ -71,11 +72,11 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 ### 面向作者的汇报
 
-所有给作者看的汇报、提问和停下说明只讲三件事：写了/改了什么（章名、发生了什么）；要作者定的事（一句白话问题＋白话选项＋推荐默认）；下一步。不写脚本、字段、参数名、状态码和内部清单名（如 排纲自查、供给自查、S1-S4、字数带）；编号必带故事标签，如「伏笔 F057（那封信的去处）」。检查结果一句白话带过，如「自查过设定和前文，没发现冲突」。回执、Notice、Fallback 等机器行放末尾一行。汇报照各 workflow 的模板写，不带代码块围栏；子 agent 返回的术语由主会话翻译后再说。
+所有给作者看的汇报、提问和停下说明只讲三件事：写了/改了什么（章名、发生了什么）；要作者定的事（一句白话问题＋白话选项＋推荐默认）；下一步。不写脚本、字段、参数名、状态码和内部清单名（如 排纲自查、供给自查、S1-S4、字数带）；编号必带故事标签，如「伏笔 F057（那封信的去处）」。检查结果一句白话带过，如「自查过设定和前文，没发现冲突」。回执、Notice、Fallback 等机器行只放最末一行「技术备注：」，其前可有一句下一步建议（如新开对话）。汇报照各 workflow 的模板写，不带代码块围栏；子 agent 返回的术语由主会话翻译后再说。
 
 ### 路径与术语约定
 
-> **对标书路径查找**：优先 `{项目}/对标/{书名}/`，不存在则回退 `拆文库/{书名}/`（`拆文库/` 是拆文原始产出，`对标/` 是本项目引用视图，首次引用的复制规则见 artifact-protocols.md）。
+> **对标书路径查找**：优先 `{项目}/对标/{书名}/`，不存在则回退 `拆文库/{书名}/`（`拆文库/` 是拆文原始产出，`对标/` 是本项目引用视图，首次引用的复制规则见 workflow-setup.md「对标发现」第 3 条）。
 >
 > **卷纲不整读**：一律走 `{PYTHON} {skill 根}/scripts/outline_view.py --unit {单元ID} {卷纲路径}`（只要契约用 `--contract`，看目录用 `--toc`）；找不到单元就核对单元ID或先补卷纲，不改用整读。排纲底稿放 `大纲/排纲底稿_{单元ID}.md`，只在排纲/补纲时读；取段器的作用域、历史与校验选项见 artifact-protocols.md 卷纲模板。
 >
@@ -97,7 +98,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 #### 项目文件与产物
 
-首次引用对标、定位已有产物或文件缺失时，先完整读取 [references/project-files.md](references/project-files.md) 照做；开书建文件按各时刻文件写明的路径直接落盘，不必先读它。
+要找某类产物放哪、或修复缺失文件时，完整读取 [references/project-files.md](references/project-files.md) 照做；开书建文件按各时刻文件写明的路径直接落盘，写正文时缺文件按 workflow-chapter 开头停下修，都不必先读它。
 
 #### 单章写作流程
 

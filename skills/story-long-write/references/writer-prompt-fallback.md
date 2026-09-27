@@ -12,6 +12,7 @@
      - `selected_emotion_module`、`rhythm_reference` 及来源路径。
      - `genre_prose_card`（题材正文提示卡摘要，只含本章相关条目）。
      - 文风全文路径、按 `style-resolution.md` 形成的 `style_resolution`、原文锚点；同一裁决原样交后续去味与审稿。
+     - `设定/题材定位.md`「作者已定」原样摘入（约 600 字内，超了注明去原文读完）。
      - `author_preferences`：作者记忆 `query` 结果中匹配本章的 `prose_style` / `story_design` 项；无则不传，禁止把完整画像或待确认项塞进 prompt；作为低优先级倾向自然吸收，不逐条展示或最大化命中，不牺牲连贯、节奏和字数。
      - 本章禁止提前释放信息与各点「放」；细纲写了阶段位置、结构公式时一并传。
      - 字数目标、`visible_chars_v1` 口径、格式硬约束；默认两组交付并由主会话测一次 checkpoint；用户明确要求一次成文时才写全章。字数目标按整章分量刻度使用，疏密自行分配，不填写逐情节点配额。

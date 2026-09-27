@@ -539,6 +539,39 @@ class TrackingCommitTests(unittest.TestCase):
         self.assertEqual(state["characters"]["江晨"]["identity"], "火箭军文工团宣传兵；军宣爆款创作者")
         self.assertEqual(state["characters"]["江晨"]["relationships"], ["与钟嘉嘉协作"])
 
+    def test_status_verbs_fill_a_missing_status_and_reject_a_contradicting_one(self) -> None:
+        # resolve/回收 映射成 upsert 时，动作词本身就是「已回收」的意图：缺 status 按它补，矛盾就退回并说清怎么写。
+        self.init()
+        document = transaction(1, foreshadow=True)
+        row = document["delta"]["foreshadow_changes"][0]
+        row["action"] = "回收"
+        row.pop("status")
+        self.run_tool("commit", document)
+        self.assertEqual(self.read_state()["foreshadow"]["F027"]["status"], "已回收")
+
+        for verb, status, hint in (("resolve", "已埋", "status=已回收"), ("回收", "已埋", "status=已回收"),
+                                   ("advance", "已回收", "status=已埋"), ("推进", "放弃", "status=已埋")):
+            document = transaction(2, foreshadow=True)
+            document["delta"]["foreshadow_changes"][0].update({"action": verb, "status": status})
+            stderr = self.run_tool("commit", document, expect=2).stderr
+            self.assertIn(f"action={verb} 与 status={status} 矛盾", stderr)
+            self.assertIn(hint, stderr)
+        self.assertEqual(self.read_state()["last_committed_chapter"], 1)
+
+        document = transaction(2, foreshadow=True)
+        document["delta"]["foreshadow_changes"][0].update({"action": "推进", "status": "已埋",
+                                                           "planted_chapter": "１"})
+        self.run_tool("commit", document)
+        self.assertEqual(self.read_state()["foreshadow"]["F027"]["status"], "已埋")
+
+    def test_superscript_chapter_is_a_clean_rejection_not_a_traceback(self) -> None:
+        self.init()
+        document = transaction(1, foreshadow=True)
+        document["delta"]["foreshadow_changes"][0]["planted_chapter"] = "²"
+        completed = self.run_tool("commit", document, expect=2)
+        self.assertIn("planted_chapter must be an integer", completed.stderr)
+        self.assertNotIn("Traceback", completed.stderr)
+
     def test_rejections_name_the_fix(self) -> None:
         self.init()
         document = transaction(1, foreshadow=True)

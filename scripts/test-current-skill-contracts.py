@@ -607,6 +607,23 @@ def test_author_note_preflight_keeps_engine_words_in_tech_note() -> None:
         ),
         "a Skill without a 技术备注 route must be flagged",
     )
+    # 换个动词、换个冒号就能绕开「报告 `Fallback:`」固定句式；只要同一句没写进技术备注都要拦。
+    for evasion in (
+        "降级时报 `Fallback: project custom agents unavailable -> solo`。汇报末行写技术备注：…\n",
+        "报告：`Notice: agents bundle 版本不匹配`。技术备注：…\n",
+        "直接说出 `Fallback: spawn failed -> solo`；其余见技术备注行。\n",
+    ):
+        require(
+            "author-note-preflight" in finding_codes(
+                VALIDATOR.author_note_preflight_findings(evasion, Path("evasion-fixture.md"))
+            ),
+            "a Fallback/Notice sentence without 技术备注 must be flagged: {}".format(evasion.strip()),
+        )
+    routed = "降级时一句白话告诉作者，`Fallback: x -> solo` 原文只写进汇报最后一行「技术备注：」。\n"
+    require(
+        not VALIDATOR.author_note_preflight_findings(routed, Path("routed-fixture.md")),
+        "a Fallback routed into 技术备注 in the same sentence must pass",
+    )
     for relative in VALIDATOR.AUTHOR_NOTE_PREFLIGHT_SKILLS:
         path = REPO_ROOT / relative
         require(

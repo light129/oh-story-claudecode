@@ -65,6 +65,13 @@ ACTION_ALIASES = {
     "新增": "upsert", "埋设": "upsert", "更新": "upsert", "推进": "upsert", "回收": "upsert",
     "remove": "delete", "删除": "delete",
 }
+# 带状态含义的伏笔动作词：它们也映射成 upsert，但动作词本身说了伏笔走到哪一步。
+# status 缺省时按动作词补上（意图只有这一个来源，不会猜错）；status 与动作词矛盾时退回，
+# 因为无法判断是动作词用错还是状态写错——静默改任何一边都可能把没回收的伏笔记成已回收。
+FORESHADOW_ACTION_STATUS = {
+    "resolve": "已回收", "回收": "已回收",
+    "advance": "已埋", "推进": "已埋",
+}
 FORESHADOW_KEY_ALIASES = {
     "planned_chapter": "planned_resolution_chapter", "planned_payoff_chapter": "planned_resolution_chapter",
     "payoff_chapter": "planned_resolution_chapter", "resolution_chapter": "planned_resolution_chapter",
@@ -130,7 +137,7 @@ def as_int(value: object, label: str, *, minimum: int = 0) -> int:
 
 def as_chapter(value: object, label: str, *, minimum: int = 1) -> int:
     """章号：模型常写成 "22"。纯数字字符串按整数收，语义不变；其余照旧报错。"""
-    if isinstance(value, str) and value.strip().isdigit():
+    if isinstance(value, str) and value.strip().isdecimal():
         value = int(value.strip())
     return as_int(value, label, minimum=minimum)
 
@@ -440,11 +447,22 @@ def normalize_foreshadow_change(
         {"action", "id", "summary", "planted_chapter", "planned_resolution_chapter", "status", "importance"},
         label,
     )
-    action = normalize_action(row.get("action", "upsert"), f"{label}.action", allow_delete=allow_delete)
+    raw_action = row.get("action", "upsert")
+    action = normalize_action(raw_action, f"{label}.action", allow_delete=allow_delete)
     identifier = clean_text(row.get("id"), f"{label}.id", max_bytes=24)
     require(FORESHADOW_ID.fullmatch(identifier) is not None, f"{label}.id must look like F001")
     if action == "delete":
         return {"action": action, "id": identifier}
+    implied = FORESHADOW_ACTION_STATUS.get(" ".join(str(raw_action).split()).lower())
+    if implied is not None:
+        if row.get("status") in (None, ""):
+            row["status"] = implied
+        right = "回收了就写 status=已回收" if implied == "已回收" else "只是推进、还没回收就写 status=已埋"
+        require(
+            row["status"] == implied,
+            f"{label}.action={raw_action} 与 status={row['status']} 矛盾：{right}；"
+            "不是这个意思就把 action 改成 upsert 并写实际状态",
+        )
     planted_chapter = as_chapter(row.get("planted_chapter"), f"{label}.planted_chapter")
     require(planted_chapter <= through_chapter, f"{label}.planted_chapter cannot be in the future")
     planned_raw = row.get("planned_resolution_chapter")

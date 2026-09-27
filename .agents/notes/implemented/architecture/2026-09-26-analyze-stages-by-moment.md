@@ -2,7 +2,7 @@
 
 Status: implemented
 Date: 2026-09-26
-Related: [35K 加载上限](2026-09-26-per-call-load-ceiling-35k.md)、[开书按作者确认点分时刻](../../proposed/architecture/2026-09-26-opening-by-author-moments.md)、[主会话不中转内容](../simplification/2026-09-24-long-analyze-no-relay-and-digest.md)
+Related: [35K 加载上限](2026-09-26-per-call-load-ceiling-35k.md)、[开书按作者确认点分时刻](2026-09-26-opening-by-author-moments.md)、[主会话不中转内容](../simplification/2026-09-24-long-analyze-no-relay-and-digest.md)
 
 ## Problem
 

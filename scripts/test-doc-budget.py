@@ -140,6 +140,110 @@ class DocBudgetCliTests(unittest.TestCase):
         self.assertRegex(result.stdout, re.compile(r"\b7\s*/\s*7\s+0\s+branched route（left）\s+\[ok\]"))
         self.assertRegex(result.stdout, re.compile(r"\b5\s*/\s*5\s+0\s+branched route（right）\s+\[ok\]"))
 
+    def stacking_manifest(self, slots: list[list[str]], budget: int = 12) -> dict:
+        return {
+            "files": [],
+            "path_ceiling": {"limit": 12, "exempt": [], "why": "fixture"},
+            "paths": [{
+                "label": "solo",
+                "files": ["base.md"],
+                "branches": [
+                    {"label": "技法甲", "budget": 12, "files": ["tech-a.md"]},
+                    {"label": "技法乙", "budget": 12, "files": ["tech-b.md"]},
+                    {"label": "兜底", "budget": 12, "files": ["fallback.md"]},
+                ],
+                "stacking": {"budget": budget, "slots": slots},
+            }],
+        }
+
+    STACK_FILES = {"base.md": "基" * 5, "tech-a.md": "甲" * 4, "tech-b.md": "乙" * 3, "fallback.md": "兜" * 4}
+
+    def test_stacking_checks_the_worst_combination_of_co_occurring_branches(self) -> None:
+        # 每条分支单独看都在 12 以内（9/8/9），但技法和兜底会在同一次调用里叠加：5+4+4=13。
+        over = self.run_checker(self.STACK_FILES, self.stacking_manifest([["技法甲", "技法乙"], ["兜底"]]))
+        self.assertEqual(over.returncode, 1, over.stdout)
+        self.assertIn("路径「solo（最坏叠加：技法甲＋兜底）」超过硬上限 12 字（实际 13，预算 12）", over.stdout)
+        # 变异：同样的分支当成互斥（不登记叠加）就放过去了——这正是叠加语义要堵的洞。
+        exclusive = self.stacking_manifest([])
+        del exclusive["paths"][0]["stacking"]
+        self.assertEqual(self.run_checker(self.STACK_FILES, exclusive).returncode, 0)
+        # 变异：两个技法放进同一个槽是互斥的，不会三份一起算；拆成两个槽才会。
+        same_slot = self.run_checker(self.STACK_FILES, self.stacking_manifest([["技法甲", "技法乙"]]))
+        self.assertEqual(same_slot.returncode, 0, same_slot.stdout)
+        self.assertRegex(same_slot.stdout, re.compile(r"\b9\s*/\s*12\s+3\s+solo（最坏叠加：技法甲）"))
+        split = self.run_checker(self.STACK_FILES, self.stacking_manifest([["技法甲"], ["技法乙"]], budget=11))
+        self.assertEqual(split.returncode, 1, split.stdout)
+        self.assertIn("路径「solo（最坏叠加：技法甲＋技法乙）」超预算 1 字（12 > 11）", split.stdout)
+
+    def test_stacking_counts_a_shared_file_once(self) -> None:
+        files = {**self.STACK_FILES, "fallback.md": "甲" * 1}
+        manifest = self.stacking_manifest([["技法甲"], ["兜底"]])
+        manifest["paths"][0]["branches"][2]["files"] = ["tech-a.md", "fallback.md"]
+        result = self.run_checker(files, manifest)
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertRegex(result.stdout, re.compile(r"\b10\s*/\s*12\s+2\s+solo（最坏叠加：技法甲＋兜底）"))
+
+    def test_stacking_rejects_unknown_or_repeated_branch(self) -> None:
+        unknown = self.run_checker(self.STACK_FILES, self.stacking_manifest([["技法丙"]]))
+        self.assertEqual(unknown.returncode, 1, unknown.stdout)
+        self.assertIn("stacking 列了不存在的分支：技法丙", unknown.stdout)
+        repeated = self.run_checker(self.STACK_FILES, self.stacking_manifest([["技法甲"], ["技法甲"]]))
+        self.assertEqual(repeated.returncode, 1, repeated.stdout)
+        self.assertIn("出现在两个槽里", repeated.stdout)
+
+    def test_section_anchor_counts_only_that_section(self) -> None:
+        doc = "# 手册\n前言\n## 决策路由\n路由\n### 细分\n细\n```\n## 围栏里不算标题\n```\n## 第二节\n很长很长很长\n"
+        result = self.run_checker(
+            {"m.md": doc},
+            {"files": [], "paths": [{"label": "按节读", "budget": 100,
+                                     "files": ["m.md#决策路由", "m.md#第二节"]}]},
+        )
+        self.assertEqual(result.returncode, 0, result.stdout)
+        routed = len(re.sub(r"\s", "", "## 决策路由\n路由\n### 细分\n细\n```\n## 围栏里不算标题\n```"))
+        second = len(re.sub(r"\s", "", "## 第二节\n很长很长很长"))
+        self.assertRegex(result.stdout, re.compile(rf"\b{routed + second}\s*/\s*100\b.*按节读"))
+        # 整份与它的小节同在一次调用里时，小节不重复计。
+        whole = self.run_checker(
+            {"m.md": doc},
+            {"files": [], "paths": [{"label": "整读", "budget": 100, "files": ["m.md", "m.md#第二节"]}]},
+        )
+        whole_weight = len(re.sub(r"\s", "", doc))
+        self.assertRegex(whole.stdout, re.compile(rf"\b{whole_weight}\s*/\s*100\b.*整读"))
+        missing = self.run_checker(
+            {"m.md": doc},
+            {"files": [], "paths": [{"label": "拼错", "budget": 100, "files": ["m.md#不存在的节"]}]},
+        )
+        self.assertEqual(missing.returncode, 1, missing.stdout)
+        self.assertIn("路径「拼错」登记的小节找不到：m.md#不存在的节", missing.stdout)
+
+    def test_generated_brief_is_measured_by_running_its_script(self) -> None:
+        script = "import json, sys\nassert sys.argv[1] == '--project'\nprint(json.dumps({'chars': int(sys.argv[3])}))\n"
+        ok = self.run_checker(
+            {"gen.py": script, "a.md": "甲乙"},
+            {"files": [], "paths": [{"label": "任务包", "budget": 50, "files": ["a.md"],
+                                     "generated": [{"script": "gen.py", "args": ["40"]}]}]},
+        )
+        self.assertEqual(ok.returncode, 0, ok.stdout)
+        self.assertRegex(ok.stdout, re.compile(r"\b42\s*/\s*50\s+8\s+任务包"))
+        broken = self.run_checker(
+            {"gen.py": "import sys\nsys.exit(2)\n"},
+            {"files": [], "paths": [{"label": "任务包", "budget": 50, "files": [],
+                                     "generated": [{"script": "gen.py", "args": []}]}]},
+        )
+        self.assertEqual(broken.returncode, 1, broken.stdout)
+        self.assertIn("没给出 chars（退出码 2）", broken.stdout)
+
+    def test_path_ceiling_limit_must_be_a_positive_number(self) -> None:
+        for limit in (None, 0, -5, "35000"):
+            ceiling = {"exempt": [], "why": "fixture"}
+            if limit is not None:
+                ceiling["limit"] = limit
+            result = self.run_checker({"a.md": "甲"}, {"files": [], "path_ceiling": ceiling,
+                                                       "paths": [{"label": "w", "budget": 5, "files": ["a.md"]}]})
+            self.assertEqual(result.returncode, 1, f"{limit}: {result.stdout}")
+            self.assertIn("path_ceiling.limit 缺失或不是正数", result.stdout)
+        self.assertIn("硬上限", result.stdout)
+
     def test_fails_when_registered_file_is_missing(self) -> None:
         result = self.run_checker(
             {},

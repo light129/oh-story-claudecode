@@ -2,7 +2,7 @@
 
 Status: implemented
 Date: 2026-09-26
-Related: [35K 加载上限](2026-09-26-per-call-load-ceiling-35k.md)、[开书按作者确认点分时刻](../../proposed/architecture/2026-09-26-opening-by-author-moments.md)、[短篇写前验收回归](../bug-fix/2026-09-24-short-write-precheck-regression.md)
+Related: [35K 加载上限](2026-09-26-per-call-load-ceiling-35k.md)、[开书按作者确认点分时刻](2026-09-26-opening-by-author-moments.md)、[短篇写前验收回归](../bug-fix/2026-09-24-short-write-precheck-regression.md)
 
 ## Problem
 

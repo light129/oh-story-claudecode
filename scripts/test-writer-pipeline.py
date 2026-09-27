@@ -181,6 +181,38 @@ class PipelineTests(unittest.TestCase):
         self.assertNotIn('言情线慢热', result.stdout)  # 「无言情线」不是言情题材
         self.assertIn('另有限定范围的作者记忆未代查（题材：仙侠、言情；流程：交稿）', result.stdout)
 
+    def test_builder_injects_author_decided_with_a_cap(self):
+        # 定方向落盘的书级决定（偏好、红线）写章时要能看到：脚本注入「作者已定」，超长截断并指回原文。
+        self.put('设定/题材定位.md', '# 题材定位\n## 基本信息\n- 题材类型：都市\n## 作者已定\n'
+                 '- {作者在对话里定下的方向}\n- 不写感情线，主角全程单身\n- 否掉：重生开局（作者嫌老套）\n'
+                 '## 读者契约\n- 核心读者承诺：不注入这一节\n')
+        result = self.build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('——— 作者已定（本书的决定', result.stdout)
+        self.assertIn('- 不写感情线，主角全程单身', result.stdout)
+        self.assertNotIn('{作者在对话里定下的方向}', result.stdout)
+        self.assertNotIn('不注入这一节', result.stdout)
+        self.assertIn('作者已定：已注入', result.stdout)
+        self.put('设定/题材定位.md', '## 作者已定\n' + ''.join(f'- 第{i}条红线：' + '禁' * 40 + '\n' for i in range(30)))
+        long = self.build()
+        self.assertIn('超过 600 字已截断', long.stdout)
+        self.assertIn('第0条红线', long.stdout)
+        self.assertNotIn('第29条红线', long.stdout)
+        self.put('设定/题材定位.md', '# 题材定位\n- 题材类型：都市\n')
+        self.assertIn('作者已定：题材定位里没有或为空，未注入', self.build().stdout)
+
+    def test_builder_matches_genre_cards_when_the_book_has_none(self):
+        # 新书第 1 章还没有题材正文提示卡：脚本按「题材类型」匹配卡，主会话不必整读 3K 的索引。
+        (self.book / '设定/题材正文提示卡.md').unlink()
+        self.put('设定/题材定位.md', '# 题材定位\n- 题材类型：都市日常 · 豪门总裁\n')
+        result = self.build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        cards = SCRIPTS.parent / 'references' / 'genre-prose-cards'
+        self.assertIn(f"主题材 {cards / '都市日常.md'}（置信度 high）；辅题材 {cards / '豪门总裁.md'}", result.stdout)
+        self.assertIn('召回降档：不成立（题材正文提示卡缺有效内容）', result.stdout)
+        self.put('设定/题材定位.md', '# 题材定位\n- 题材类型：蒸汽朋克考古\n')
+        self.assertIn('题材卡无匹配', self.build().stdout)
+
     def test_bare_out_archives_into_book_work_dir(self):
         result = self.call('build_writer_prompt.py', '--project', self.book, '--chapter', 1, '--out')
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -298,8 +330,14 @@ class PipelineTests(unittest.TestCase):
         info = json.loads(vol.stdout)
         text = Path(info['brief']).read_text(encoding='utf-8')
         self.assertEqual(Path(info['brief']).parent, self.book / '.story' / 'work' / '排纲')
-        self.assertEqual(info['includes'], ['workflow-volume.md', 'artifact-protocols.md', 'emotional-methods.md',
-                                            'reader-contract-and-progression.md'])
+        self.assertEqual(info['includes'], ['workflow-volume.md', 'artifact-protocols.md',
+                                            'emotional-methods.md（长篇单元情绪引擎）',
+                                            'reader-contract-and-progression.md', 'SKILL.md（新增物三级）',
+                                            '按条件可读（包外）'])
+        # 包外读不到 SKILL.md：新增物三级判据随包；流程点名的条件参考给出绝对路径与小节。
+        self.assertIn('**先问作者**：新主线事件或反转', text)
+        self.assertIn(f"{refs / 'long-reversal.md'}` 「反转类型」一节", text)
+        self.assertNotIn('## 情感虐心三板斧', text)
         self.assertIn((refs / 'workflow-volume.md').read_text(encoding='utf-8').strip()[:200], text)
         self.assertNotIn('## 细纲（第 N 章）', text)
         self.assertLess(info['chars'], 30000)
@@ -326,6 +364,13 @@ class PipelineTests(unittest.TestCase):
         uncovered = self.call('build_architect_brief.py', '--project', self.book, '--task', 'outline', '--chapters', '30-31')
         self.assertEqual(uncovered.returncode, 2)
         self.assertIn('找不到覆盖第30-31章的剧情单元', uncovered.stderr)
+        # 单元只覆盖请求的一部分：不能静默只给一半，点名缺的章。
+        partial = self.call('build_architect_brief.py', '--project', self.book, '--task', 'outline', '--chapters', '10-14')
+        self.assertEqual(partial.returncode, 2, partial.stdout)
+        self.assertIn('剧情单元只覆盖了一部分，缺覆盖第13-14章', partial.stderr)
+        rules = json.loads(self.call('build_architect_brief.py', '--project', self.book, '--task', 'outline',
+                                     '--chapters', '30-31', '--rules-only').stdout)
+        self.assertFalse(any('卷纲取段' in name for name in rules['includes']))
         self.assertIn('## 细纲（第 N 章）', outline_text)
         self.assertIn('第1节：主角卡', outline_text)
         self.assertNotIn('第3节：反派设计', outline_text)
@@ -336,9 +381,20 @@ class PipelineTests(unittest.TestCase):
         self.assertNotIn('## 微创新与差异化设计', world_text)
         self.assertNotIn('## 感情流人设核心法', world_text)
         self.assertNotIn('全书体量与阶段总览', world_text)
+        self.assertIn(f"{refs / 'female-audience-writing.md'}` 整份", world_text)
+        self.assertIn('按下附「新增物三级」属先问作者', world_text)
         too_many = self.call('build_architect_brief.py', '--project', self.book, '--task', 'outline', '--chapters', '1-11')
         self.assertEqual(too_many.returncode, 2)
         self.assertIn('一批细纲最多 10 章', too_many.stderr)
+
+
+    def test_architect_brief_names_unit_cards_missing_scope_lines(self):
+        # 单元卡少了「> 作用域：」行时取段器认不出它，报错要点名这张卡，而不是笼统说「要写章节范围」。
+        self.volume.write_text('# 第一卷\n### 剧情单元 L1-01\n- 章节范围：第1-3章\n', encoding='utf-8')
+        result = self.call('build_architect_brief.py', '--project', self.book, '--task', 'outline', '--chapters', '1-3')
+        self.assertEqual(result.returncode, 2, result.stdout)
+        self.assertIn('缺「> 作用域：单元级 {单元ID}」声明行：卷纲_第一卷.md「剧情单元 L1-01」', result.stderr)
+        self.assertIn('--check --strict', result.stderr)
 
 
 class ImportOutlineBriefTests(unittest.TestCase):

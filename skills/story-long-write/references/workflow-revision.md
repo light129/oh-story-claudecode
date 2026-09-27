@@ -34,7 +34,15 @@
 
 1. **备份**：原文复制为 `正文/第{X}章_章名_原稿_{YYYYMMDD}.md`；用 `{PYTHON} {skill 根}/scripts/storyctl.py wordcount measure --file {正文文件}` 记下原字数。
 2. **改写**：已部署 narrative-writer 时按 [agent-calls.md](agent-calls.md)「改写一章」交给它；否则主会话自己改，读 `references/writing-craft.md` 与 `references/long-format.md`。局部修改只动点到的段落，其余一字不改；不借改稿新增细纲外的剧情。
-3. **检测**：`{PYTHON} {skill 根}/scripts/storyctl.py chapter check --project {项目根} --chapter {X} --fix-punctuation`，blocking 改到净再重跑（工程词泄漏也在报告里）。
+3. **检测**：`{PYTHON} {skill 根}/scripts/storyctl.py chapter check --project {项目根} --chapter {X} --fix-punctuation`，按返回的 `status` 走：
+
+| 状态 | 处理 |
+|---|---|
+| `ready` | 往下走 |
+| `blocked` / `invalid` | 改到净再重跑（工程词泄漏也在报告里） |
+| `needs_decision`（字数出带） | 欠字不补；超字把删除区间交写手按 agent-calls「超字一次净删」删一次（自己改就同样只删不加），复检仍带外用下面的字数问法请作者选 |
+| `tool_unavailable`（退出码 3） | 停下，不提交，告诉作者「要装 Node.js 18 或更新版本，才能做改后检查」 |
+| 退出码 2 | 按 `error_code` 修命令重跑 |
 4. **人物与节奏**：改后的角色行为与设定、前后章一致；改动没把这章的节奏打散。
 5. **篇幅**：与原文差异超过 30% 或 800 字（取较大）时告诉作者「改后约 X 字，比原来多/少 Y 字，比目标多/少 Z 字」；字数本身不触发再改一遍。
 6. 需要查证外部事实时 spawn `story-researcher`。
@@ -50,7 +58,18 @@
 3. **时间与读者认知**：为受影响事件提交客观事实、读者截至 M 章的当前认知、实际揭示状态/章节；删掉的事件用 `action=delete`。未来揭示计划仍留大纲。工具重建作者/读者视图，禁止手改。
 4. **角色当前快照**：对受影响核心角色从 X 检查到 M，按身份、位置、目标、能力资源、关系对象、已知信息、未结事项分别重算，提交一份截至 M 的完整快照；不得用最后一条单维度变化覆盖其它维度。
 5. **导入截止范围**：若 X ≤ `_tracking-state.json.imported_through_chapter`，事务为第 X 章新增覆盖记录；导入截止章不变，当前结构化状态按修订结果更新。
-6. **提交与重试**：跑 `{PYTHON} {skill 根}/scripts/storyctl.py chapter commit --project {项目根} --chapter {X} --input {项目根}/.story/work/第{XXX}章/tracking.json`，它重新计数并清理本章工作目录。带外时作者决定保留当前长度就改用 `chapter accept-current-length`；不到目标一半、或超字还没压缩过一次会被拒，作者明确坚持才加 `--force`。失败时保留草稿，修正后重跑同一命令；通过 `check` 前不修下一章、不写新章。
+6. **提交与重试**：跑 `{PYTHON} {skill 根}/scripts/storyctl.py chapter commit --project {项目根} --chapter {X} --input {项目根}/.story/work/第{XXX}章/tracking.json`，它重新计数并清理本章工作目录。带外时先问作者：
+
+<!-- author-report -->
+```md
+第{X}章改完约 {实际} 字，比目标{少/多}了约 {差额} 字（目标约 {目标} 字）。{一句原因，如「按你说的删掉了那场追逐」}
+你想怎么处理？
+1. 就按现在的长度收下（推荐）
+2. 我再调整这章，往目标靠
+3. 退回原稿
+```
+
+不到目标一半时选项 1 不标推荐。选 1 → 改用 `chapter accept-current-length`，不到目标一半、或超字还没压缩过一次会被拒，把差多少字告诉作者，作者明确坚持才加 `--force`；选 2 → 回 Step 3；选 3 → 用备份原稿覆盖回去，不提交。失败时保留草稿，修正后重跑同一命令；通过 `check` 前不修下一章、不写新章。
 7. **收口**：`{PYTHON} {skill 根}/scripts/tracking_commit.py check --project {项目根}` 验证 state 与派生视图一致。改变了角色状态、关系或世界观设定的，扫一遍后续章正文，把受影响的列进汇报。
 
 ---

@@ -840,18 +840,33 @@ def spawn_preflight_findings(
 # 作者可见文本只说白话：这些 Skill 的降级与版本提示原文只进汇报最后一行「技术备注：」，
 # 不再写成「报告 `Fallback: …`」「同时报告 `Notice: …`」让模型原样念给作者（v0.8.2）。
 AUTHOR_NOTE_PREFLIGHT_SKILLS = (
+    "skills/story-long-write/SKILL.md",
     "skills/story-short-write/SKILL.md",
     "skills/story-deslop/SKILL.md",
 )
 BARE_ENGINE_REPORT_RE = re.compile(r"报告\s*`(?:Fallback|Notice):")
+ENGINE_LINE_RE = re.compile(r"(?:Fallback|Notice):")
+SENTENCE_SPLIT_RE = re.compile(r"[。；！？\n]")
 
 
 def author_note_preflight_findings(text: str, path: Path) -> List[Finding]:
-    """Fallback / Notice 原文必须改走技术备注行，给作者的是一句白话。"""
+    """Fallback / Notice 原文必须改走技术备注行，给作者的是一句白话。
+
+    只认「同一句话里写明进技术备注」：换个动词（报、说出、报告：）绕开固定句式都拦得住。"""
 
     problems = []
     if BARE_ENGINE_REPORT_RE.search(text):
         problems.append("Fallback/Notice must not be reported to the author verbatim")
+    stray = [
+        sentence.strip()
+        for sentence in SENTENCE_SPLIT_RE.split(text)
+        if ENGINE_LINE_RE.search(sentence) and "技术备注" not in sentence
+    ]
+    if stray:
+        problems.append(
+            "every Fallback:/Notice: mention must say in the same sentence that it goes into the 技术备注 line: "
+            + " | ".join(item[:60] for item in stray)
+        )
     if "技术备注" not in text:
         problems.append("route Fallback/Notice into the trailing 技术备注 line")
     if not problems:
@@ -1435,10 +1450,10 @@ def validate_repository(repo_root: Path, manifest: ContractManifest) -> List[Fin
     )
     findings.extend(
         require_pattern(
-            repo_root / "skills/story-long-write/references/benchmark-recall.md",
+            repo_root / "skills/story-long-write/references/agent-calls.md",
             r"profile_missing[^\n]{0,60}custom_style[^\n]{0,40}继续",
             "daily-profile-missing-custom-style",
-            "benchmark-recall must keep the profile_missing + custom_style continuation branch",
+            "the story-explorer recall gaps (agent-calls.md) must keep the profile_missing + custom_style continuation branch",
         )
     )
 

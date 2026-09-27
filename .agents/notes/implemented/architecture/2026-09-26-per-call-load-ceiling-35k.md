@@ -2,7 +2,7 @@
 
 Status: implemented
 Date: 2026-09-26
-Related: [v0.8 瘦身](2026-09-24-v0-8-lean-writing-loop.md)
+Related: [v0.8 瘦身](2026-09-24-v0-8-lean-writing-loop.md)、[叠加语义与 solo 按时刻少读](2026-09-26-budget-stacking-and-solo-reads.md)
 
 ## Problem
 
@@ -10,15 +10,15 @@ v0.8.1 的热路径预算里，写手与主会话已在 32K 左右，但三类�
 
 ## Decision
 
-- **预算口径**：`doc-budget.json` 的路径只登记无条件读取；召回全量、契约不过、文件缺失、本章技法（五选一）、写后去味兜底各为一条分支，每条连同基础部分计。新增 `path_ceiling`：任何非豁免路径与分支的实际加载和预算值都不得超过 35,000 字，`check-doc-budget.sh` 强制，`test-doc-budget.py` 有变异验证过的回归。
+- **预算口径**：`doc-budget.json` 的路径只登记无条件读取；召回全量、契约不过、文件缺失、本章技法（五选一）、写后去味兜底各为一条分支，每条连同基础部分计（已由[叠加语义](2026-09-26-budget-stacking-and-solo-reads.md)修订：会在同一次调用里同时发生的分支登记进 `stacking`，守卫取最坏组合；契约不过与去味兜底不再读 reference）。新增 `path_ceiling`：任何非豁免路径与分支的实际加载和预算值都不得超过 35,000 字，`check-doc-budget.sh` 强制，`test-doc-budget.py` 有变异验证过的回归。
 - **去味审查**：「写法抽查」表并入 deslop-gates，审查只读 deslop-gates、anti-ai-writing、banned-words、style-resolution；评分文件只在打分时读。45.6K → 31.4K。
-- **主会话自己写正文**：与写手读同一套技法（writing-craft + long-format），long-chapter-quality、long-chapter-hooks 只在排查具体问题时读；去味走检测器，写后兜底读 deslop-gates（同步到长篇）而非整读 anti-ai-writing；无一致性检查代理时由主会话按一行清单自查。本章技法按 SKILL.md「核心方法」表每章至多读一份（打脸 / 反转 / 感情 / 悬疑 / 日常）。单章、日更、大修三条 direct/solo 路径全部 ≤35K。
-- **去重与迁移**：派子代理的 prompt 移入 `agent-calls.md`；workflow-daily 的初始化、长期约束、批量续接改为指针；SKILL.md 路由与路径约定压缩，对标复制规则移入 artifact-protocols；artifact-protocols 的追踪体系改为指向 tracking-transaction；style-combat-face 的后宫女主与男频爱情线两节移入 character-relations；writing-craft 两份副本改为普通共享副本。短篇：Phase 4 精修清单移入 workflow-revision，Phase 3 写前加载清单移入 workflow-draft，参考索引与对标召回精简并改为条件读取。
+- **主会话自己写正文**：与写手读同一套技法（writing-craft + long-format），long-chapter-quality、long-chapter-hooks 只在排查具体问题时读；去味走检测器，写后兜底读 deslop-gates（同步到长篇）而非整读 anti-ai-writing（已修订为按检测器逐条提示改，不读 deslop-gates）；无一致性检查代理时由主会话按一行清单自查。本章技法按 SKILL.md「核心方法」表每章至多读一份（打脸 / 反转 / 感情 / 悬疑 / 日常；已修订为只读决策路由指向的那一节、日更一批一份）。单章、日更、大修三条 direct/solo 路径全部 ≤35K。
+- **去重与迁移**：派子代理的 prompt 移入 `agent-calls.md`；workflow-daily 的初始化、长期约束、批量续接改为指针；SKILL.md 路由与路径约定压缩，对标复制规则移入 workflow-setup「对标发现」第 3 条（原写移入 artifact-protocols，实际未落，审查后补回）；artifact-protocols 的追踪体系改为指向 tracking-transaction；style-combat-face 的后宫女主与男频爱情线两节移入 character-relations；writing-craft 两份副本改为普通共享副本。短篇：Phase 4 精修清单移入 workflow-revision，Phase 3 写前加载清单移入 workflow-draft，参考索引与对标召回精简并改为条件读取。
 - **审稿按时刻**：一人审（solo）读 `banned-words.md` 逐个核一级词（预检脚本对高频套话只做密度统计、另查固定句式，不逐个报一级词），AI 味判断读 anti-ai-writing 的「AI写作指纹」「10 种 AI 写作模式检测」两节。为放下它，审稿入口把只在派子代理时用的综合裁决、full/lean 报告模板与 story-explorer 预查询迁到 `agent-prompts.md`，把只在多章分批时用的跨批落盘契约、跨批连续性与乱序提醒迁到新的 `batch-review.md`，入口各留一句指路；作者报告模板守卫的锚点随之改到 agent-prompts.md 与 solo.md。审稿派出的 reviewer 一律只读：prompt 写明不改任何文件，narrative-writer 模板的审查任务段写明被审稿派出时只报告；deslop-gates「写法抽查」改为「判为可删并报告」，由去味执行者落改。solo 单章 33.4–33.9K、分批 34.8K；full/lean 20.3–21.2K、分批 22.6K。
 - **顺带修复**：workflow-chapter 步骤 12 的提交命令补上必填 `--input`；日更同单元的卷纲取段本批复用，与单章流程一致。
 - **豁免**：「长篇开书」「长篇开书并写首章」是多阶段规划会话，累计读取（含排纲技法参考）约 34–56K，本次如实补计并列入豁免，另行拆阶段（已由[开书按时刻](2026-09-26-opening-by-author-moments.md)取消豁免）。
 
-## 质量验证
+## Validation
 
 协议在数据产生前冻结（`~/.oh-story-bench/prereg/v0.8.2-load35/PROTOCOL.md`）。两臂：v0.8.1 与本改动，都删去 `.claude/agents` 强制 solo，写手为同一 prompt 的 Opus 子代理；demo 书第 22 章 ×3、玄幻与女频第 1 章，每臂 5 章。
 
@@ -45,5 +45,5 @@ v0.8.1 的热路径预算里，写手与主会话已在 32K 左右，但三类�
 ## Consequences
 
 - **收益**：写作回路所有调用 ≤35K；去味审查少 14K；skills-only 宿主（OpenClaw、Reasonix 等）主会话写正文少读一半；预算有硬上限，之后加文字要么删等量要么显式调豁免。
-- **代价**：solo 写正文时不再预读质量清单与章级钩子，只靠写后检测与步骤 9 检查兜底；Q4 贴线、样本小、评委同家族，只能排除大的退化。多份文件预算余量很小（日更 solo 打脸分支余 38 字、短篇冷门题材分支余 17 字），后续改动需同步删字。
-- **待办**：~~开书拆阶段~~（已完成）；追踪提交首次报错（本次 10 章在两臂都在第一次提交时因字段格式被退回）另行修；评委恢复后用异家族评委复核本次 5 对。
+- **代价**：solo 写正文时不再预读质量清单与章级钩子，只靠写后检测与步骤 9 检查兜底；Q4 贴线、样本小、评委同家族，只能排除大的退化。多份路径预算收紧到实际用量附近（按叠加语义重算后，日更 solo 最坏叠加 34,218、余 32 字；单章 solo 最坏叠加余 1 字），后续改动需同步删字或显式调预算。
+- **待办**：~~开书拆阶段~~（已完成）；~~追踪提交首次报错~~（已由[追踪提交接受常见写法](../bug-fix/2026-09-26-tracking-commit-model-spellings.md)修）；~~条件分支会叠加~~（已由[叠加语义](2026-09-26-budget-stacking-and-solo-reads.md)修）；评委恢复后用异家族评委复核本次 5 对。
