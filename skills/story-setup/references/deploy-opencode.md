@@ -74,8 +74,8 @@ OpenCode agents 部署是 `replace`，会覆盖上次写入的 `model:`。所以
 | 等级 | 问作者的话 | 技术备注：对应 agent |
 |------|-----------|---------------------|
 | 低端 | 「拆书助手、资料检索员和校对员做的是翻找和核对，给它们选哪个模型？便宜的就够用。」 | chapter-extractor（拆书助手）、story-explorer（资料检索员）、consistency-checker（校对员） |
-| 中端 | 「写正文的写手、人物设计师和资料研究员直接影响正文质量，给它们选哪个模型？」 | narrative-writer（写手）、character-designer（人物设计师）、story-researcher（资料研究员） |
-| 高端 | 「排大纲、统筹全书的总指挥用哪个模型？」 | story-architect（总指挥） |
+| 中端 | 「人物设计师和资料研究员整理设定与资料，给它们选哪个模型？」 | character-designer（人物设计师）、story-researcher（资料研究员） |
+| 高端 | 「写正文的写手和排大纲、统筹全书的总指挥直接决定正文质量，给它们选哪个模型？」 | narrative-writer（写手）、story-architect（总指挥） |
 
 每级选项结构：
 
@@ -95,8 +95,8 @@ OpenCode agents 部署是 `replace`，会覆盖上次写入的 `model:`。所以
 - `跳过，用主模型`：显式清除——不写该 agent 的 `model:`，agent 继承主模型。想保留上次配置请选 `保留现有模型`。
 - 各级候选为 0 时在问题说明里给出提示：
   - 低端："没找到便宜的模型，拆书助手、资料检索员和校对员会用主模型，花费可能较高"
-  - 中端："没找到合适的中档模型，写手、人物设计师和资料研究员会用主模型。主模型质量够的话这样没问题；想省钱可以自定义输入一个不比主模型差的中档模型，或从下面未分级的模型里选。"
-  - 高端："没找到高端模型，总指挥会用主模型"
+  - 中端："没找到合适的中档模型，人物设计师和资料研究员会用主模型。主模型质量够的话这样没问题；想省钱可以自定义输入一个不比主模型差的中档模型，或从下面未分级的模型里选。"
+  - 高端："没找到高端模型，写手和总指挥会用主模型"
 
 ### 写入 model 字段
 
@@ -142,7 +142,7 @@ model: provider/model-id
   ```
   Agent 模型配置：
     总指挥（story-architect）         → <高端模型>（provider/model-id）
-    写手（narrative-writer）          → <中端模型>（provider/model-id）
+    写手（narrative-writer）          → <高端模型>（provider/model-id）
     人物设计师（character-designer）  → <中端模型>（provider/model-id）
     资料研究员（story-researcher）    → <中端模型>（provider/model-id）
     拆书助手（chapter-extractor）     → <低端模型>（provider/model-id）
