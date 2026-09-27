@@ -707,6 +707,67 @@ AUTHOR_FACING_FORBIDDEN = (
 FENCE_RE = re.compile(r"^(`{3,})[^\n]*\n(.*?)^\1\s*$", re.MULTILINE | re.DOTALL)
 
 
+# 拆文按时刻加载：入口的「按时刻读」表是每个时刻读哪几份文件的唯一路由。某个阶段文件从表里
+# 掉出去，那个时刻就只能靠模型猜着整读旧的大文件，35K 的时刻上限随之失效。
+ANALYZE_MOMENT_ROUTES = (
+    (
+        "skills/story-long-analyze/SKILL.md",
+        "## 按时刻读",
+        (
+            "stage1-golden-chapters.md", "index-rebuild.md", "pipeline-ops.md", "stage2-extraction.md",
+            "synthesis-inputs.md", "stage3-plot-rhythm.md", "stage4-characters-settings.md",
+            "stage5-report.md", "style-profile-generator.md", "final-checks.md",
+        ),
+    ),
+    (
+        "skills/story-short-analyze/SKILL.md",
+        "### 按时刻读",
+        (
+            "output-contract.md", "analysis-method.md", "stage2-3-structure-emotion.md",
+            "stage4-6-reversal-summary.md", "quality-checklist.md", "analysis-report-style.md",
+        ),
+    ),
+)
+
+
+def analyze_moment_routing_findings(repo_root: Path) -> List[Finding]:
+    findings: List[Finding] = []
+    for relative, heading, files in ANALYZE_MOMENT_ROUTES:
+        path = repo_root / relative
+        text = read_text(path)
+        if text is None or heading not in text:
+            findings.append(Finding("analyze-moment-routing", "missing moment routing table {!r}".format(heading), path))
+            continue
+        level = heading.split(" ", 1)[0]
+        section = text.split(heading, 1)[1]
+        section = re.split(r"^#{{1,{}}} ".format(len(level)), section, maxsplit=1, flags=re.MULTILINE)[0]
+        for name in files:
+            if "(references/{})".format(name) not in section:
+                findings.append(Finding(
+                    "analyze-moment-routing",
+                    "moment routing table must link references/{}".format(name),
+                    path,
+                ))
+    return findings
+
+
+def analyze_dispatch_default_findings(path: Path) -> List[Finding]:
+    """开头三章拆完停下来问时，派发方式替作者定好，不把工程选择丢给作者。"""
+    text = read_text(path)
+    if text is None:
+        return [Finding("analyze-dispatch-default", "cannot read author-facing templates", path)]
+    match = re.search(r"^### 开头三章拆完、停下来问\n(.*?)(?=^### )", text, re.MULTILINE | re.DOTALL)
+    if match is None:
+        return [Finding("analyze-dispatch-default", "missing the stop-after-opening template", path)]
+    if re.search(r"想怎么拆|^\d+\.\s", match.group(1), re.MULTILINE):
+        return [Finding(
+            "analyze-dispatch-default",
+            "stop-after-opening must default the dispatch mode instead of asking the author to pick one",
+            path,
+        )]
+    return []
+
+
 def author_facing_findings(path: Path) -> List[Finding]:
     """Every fenced block in the author-facing reference is text the author reads verbatim."""
     text = read_text(path)
@@ -1250,6 +1311,8 @@ def validate_repository(repo_root: Path, manifest: ContractManifest) -> List[Fin
     findings.extend(rubric_parity_findings(repo_root))
 
     findings.extend(author_facing_findings(repo_root / "skills/story-long-analyze/references/author-facing.md"))
+    findings.extend(analyze_dispatch_default_findings(repo_root / "skills/story-long-analyze/references/author-facing.md"))
+    findings.extend(analyze_moment_routing_findings(repo_root))
     long_analyze = repo_root / "skills/story-long-analyze/SKILL.md"
     findings.extend(require_pattern(long_analyze, r"references/author-facing\.md", "author-facing-routed",
                                     "story-long-analyze must route every author-visible message through author-facing.md"))
