@@ -836,6 +836,28 @@ def spawn_preflight_findings(
     ]
 
 
+# 作者可见文本只说白话：这些 Skill 的降级与版本提示原文只进汇报最后一行「技术备注：」，
+# 不再写成「报告 `Fallback: …`」「同时报告 `Notice: …`」让模型原样念给作者（v0.8.2）。
+AUTHOR_NOTE_PREFLIGHT_SKILLS = (
+    "skills/story-short-write/SKILL.md",
+    "skills/story-deslop/SKILL.md",
+)
+BARE_ENGINE_REPORT_RE = re.compile(r"报告\s*`(?:Fallback|Notice):")
+
+
+def author_note_preflight_findings(text: str, path: Path) -> List[Finding]:
+    """Fallback / Notice 原文必须改走技术备注行，给作者的是一句白话。"""
+
+    problems = []
+    if BARE_ENGINE_REPORT_RE.search(text):
+        problems.append("Fallback/Notice must not be reported to the author verbatim")
+    if "技术备注" not in text:
+        problems.append("route Fallback/Notice into the trailing 技术备注 line")
+    if not problems:
+        return []
+    return [Finding("author-note-preflight", "; ".join(problems), path)]
+
+
 def rubric_dimension_names(repo_root: Path) -> Tuple[List[str], List[str]]:
     """取 quality-rubric.md「核心维度」表与 SKILL.md 内置 fallback 的维度名。"""
 
@@ -1254,6 +1276,10 @@ def validate_repository(repo_root: Path, manifest: ContractManifest) -> List[Fin
                 read_text(spawn_skill) or "", manifest, spawn_skill
             )
         )
+
+    for relative in AUTHOR_NOTE_PREFLIGHT_SKILLS:
+        note_skill = repo_root / relative
+        findings.extend(author_note_preflight_findings(read_text(note_skill) or "", note_skill))
 
     upgrading = repo_root / "skills/story-setup/UPGRADING.md"
     upgrading_text = read_text(upgrading) or ""
