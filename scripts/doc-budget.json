@@ -22,8 +22,8 @@
     },
     {
       "path": "skills/story-long-write/references/workflow-chapter.md",
-      "budget": 6450,
-      "why": "每章组装与质量流程；原 (a)-(g) 迁入 benchmark-recall，合计路径继续计入。 调高：新增「向作者汇报」四个白话模板（写完一章／字数不在范围／新增内容要拍板／停下）与书内工作目录 .story/work/ 约定；原先字数问法直接把 storyctl 动作名交给作者，临时文件无落点导致 /tmp 撞车和正文目录污染。 v0.8 收紧：单章/日更工作流改为短手册（组装脚本代查作者记忆、追踪事务 draft 预填、收尾检测一次调用），锁住精简。 v0.8.2：写手分组交付细节迁到 agent-calls；契约不过就地改法、缺文件停下修、主会话自己写时去味按检测器逐条提示改写进本文件，不再借读 reader-contract / project-files / deslop-gates。 恢复（+90）：主会话自己写正文也分两组、前组测一次 checkpoint、后组按剩余区间收——Wave 1 改成一次写完整章后，solo A/B 首检 3 例 demo 第 22 章有 2 例超带。 e2e（写第1章）：作者定了不对标时写前召回怎么走（原来三处都要求缺对标就停）；设定档案由主会话直接改、追踪事务不写设定。"
+      "budget": 6550,
+      "why": "每章组装与质量流程；原 (a)-(g) 迁入 benchmark-recall，合计路径继续计入。 调高：新增「向作者汇报」四个白话模板（写完一章／字数不在范围／新增内容要拍板／停下）与书内工作目录 .story/work/ 约定；原先字数问法直接把 storyctl 动作名交给作者，临时文件无落点导致 /tmp 撞车和正文目录污染。 v0.8 收紧：单章/日更工作流改为短手册（组装脚本代查作者记忆、追踪事务 draft 预填、收尾检测一次调用），锁住精简。 v0.8.2：写手分组交付细节迁到 agent-calls；契约不过就地改法、缺文件停下修、主会话自己写时去味按检测器逐条提示改写进本文件，不再借读 reader-contract / project-files / deslop-gates。 恢复（+90）：主会话自己写正文也分两组、前组测一次 checkpoint、后组按剩余区间收——Wave 1 改成一次写完整章后，solo A/B 首检 3 例 demo 第 22 章有 2 例超带。 e2e（写第1章）：作者定了不对标时写前召回怎么走（原来三处都要求缺对标就停）；设定档案由主会话直接改、追踪事务不写设定。 e2e（继续写）：无对标看脚本降档行即可、补复沓锚句不算改大纲、新进场核心角色建快照、追踪体积超目标只提醒。"
     },
     {
       "path": "skills/story-long-write/references/workflow-setup.md",
@@ -285,14 +285,14 @@
         {
           "label": "常规",
           "files": [],
-          "budget": 21850
+          "budget": 21950
         },
         {
           "label": "召回全量",
           "files": [
             "skills/story-long-write/references/benchmark-recall.md"
           ],
-          "budget": 24300
+          "budget": 24400
         },
         {
           "label": "新书首章：生成题材正文提示卡（两张最大的卡）",
@@ -300,18 +300,18 @@
             "skills/story-long-write/references/genre-prose-cards/都市日常.md",
             "skills/story-long-write/references/genre-prose-cards/都市脑洞.md"
           ],
-          "budget": 24400
+          "budget": 24500
         },
         {
           "label": "缺文件停下修（本轮不写，不与写作叠加）",
           "files": [
             "skills/story-long-write/references/project-files.md"
           ],
-          "budget": 26750
+          "budget": 26850
         }
       ],
       "stacking": {
-        "budget": 26850,
+        "budget": 26950,
         "slots": [
           [
             "召回全量"
@@ -916,7 +916,7 @@
             "skills/story-long-write/references/emotional-methods.md#情感虐心三板斧",
             "skills/story-long-write/references/emotion-on-page.md"
           ],
-          "budget": 28500
+          "budget": 28600
         },
         {
           "label": "本章技法·悬疑",
@@ -924,7 +924,7 @@
             "skills/story-long-write/references/long-suspense.md#决策路由表",
             "skills/story-long-write/references/long-suspense.md#拉期待手法速查"
           ],
-          "budget": 26950
+          "budget": 27050
         },
         {
           "label": "本章技法·日常",
@@ -932,11 +932,11 @@
             "skills/story-long-write/references/long-chapter-hooks.md#决策路由",
             "skills/story-long-write/references/long-chapter-hooks.md#章尾实战模板"
           ],
-          "budget": 27000
+          "budget": 27100
         }
       ],
       "stacking": {
-        "budget": 33500,
+        "budget": 33600,
         "slots": [
           [
             "召回全量"
@@ -969,21 +969,21 @@
         {
           "label": "常规",
           "files": [],
-          "budget": 29250
+          "budget": 29350
         },
         {
           "label": "召回全量",
           "files": [
             "skills/story-long-write/references/benchmark-recall.md"
           ],
-          "budget": 31700
+          "budget": 31800
         },
         {
           "label": "缺文件停下修（本轮不写，不与写作叠加）",
           "files": [
             "skills/story-long-write/references/project-files.md"
           ],
-          "budget": 34150
+          "budget": 34250
         },
         {
           "label": "本章技法·打脸",
@@ -991,7 +991,7 @@
             "skills/story-long-write/references/style-combat-face.md#决策路由",
             "skills/story-long-write/references/style-combat-face.md#打斗/智斗写作"
           ],
-          "budget": 30950
+          "budget": 31050
         },
         {
           "label": "本章技法·反转",
@@ -999,7 +999,7 @@
             "skills/story-long-write/references/long-reversal.md#决策路由",
             "skills/story-long-write/references/long-reversal.md#6. 认知反转"
           ],
-          "budget": 30150
+          "budget": 30250
         },
         {
           "label": "本章技法·感情",
