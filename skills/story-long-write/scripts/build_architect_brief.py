@@ -103,7 +103,9 @@ def build(task: str, volume: int | None, chapters: tuple[int, int] | None) -> tu
                  ("character-basics.md（主角卡、配角卡）", section(basics, "第1节：主角卡", "第3节"))]
         if first <= 3:
             parts.append(("opening-design.md", read_reference("opening-design.md")))
-    body = [head]
+    skill_root = REFERENCES.parent
+    body = [head + (f"\n\n包里命令的 `scripts/…` 与 `{{skill 根}}/scripts/…` 都指 `{skill_root / 'scripts'}`；"
+                    "`{PYTHON}` 用本机可用的 python3（没有就 python）；`{书目录}` 是本书目录。")]
     for name, text in parts:
         body.append(f"\n---\n\n<!-- 资料：{name} -->\n\n{text.strip()}\n")
     return "\n".join(body), [name for name, _ in parts]
