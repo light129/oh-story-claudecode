@@ -336,5 +336,75 @@ class PipelineTests(unittest.TestCase):
         self.assertIn('一批细纲最多 10 章', too_many.stderr)
 
 
+class ImportOutlineBriefTests(unittest.TestCase):
+    """导入逐批反推细纲：任务包只带本批规则、证据路径、测好的长度与重叠的剧情单元行。"""
+
+    SCRIPT = ROOT / 'skills/story-import/scripts/build_outline_brief.py'
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory(prefix='import-brief-')
+        self.addCleanup(tmp.cleanup)
+        self.root = Path(tmp.name)
+        self.book = self.root / '旧书'
+        for chapter in range(1, 26):
+            self.put(f'正文/第{chapter:03d}章_雨夜.md', f'# 第{chapter}章 雨夜\n\n他推开门，看见雨。' + '字' * chapter + '\n')
+            if chapter != 7:
+                summary = self.root / '拆文库' / '旧书' / '章节' / f'第{chapter}章_摘要.md'
+                summary.parent.mkdir(parents=True, exist_ok=True)
+                summary.write_text('- 关键事件：推门\n', encoding='utf-8')
+        self.put('大纲/卷纲_第1卷.md', '# 第一卷 卷纲\n\n## 剧情单元（反推）\n'
+                 '| 单元ID | 章节范围 | 单元节拍 | 主推线/战果 | 下一单元因果钩子 |\n|---|---|---|---|---|\n'
+                 '| L1-1 | 第1-12章 | 接信 | 主线 | 追查 |\n| L1-2 | 第13-25章 | 反击 | 主线 | 新敌 |\n\n'
+                 '（导入反推只填有证据的字段）\n\n## 人物弧线\n| 角色 | 本卷起点 |\n|---|---|\n| 甲 | 第1-99章 |\n')
+
+    def put(self, name, body):
+        file = self.book / name
+        file.parent.mkdir(parents=True, exist_ok=True)
+        file.write_text(body, encoding='utf-8')
+
+    def call(self, chapters):
+        return subprocess.run([sys.executable, str(self.SCRIPT), '--project', str(self.book), '--chapters', chapters],
+                              cwd=self.root, capture_output=True, encoding='utf-8',
+                              env={**os.environ, 'PYTHONIOENCODING': 'ascii'})
+
+    def test_brief_carries_batch_evidence_and_rules(self):
+        result = self.call('1-12')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        info = json.loads(result.stdout)
+        brief = Path(info['brief'])
+        self.assertEqual(brief.parent, (self.book / '.story' / 'work' / '排纲').resolve())
+        text = brief.read_text(encoding='utf-8')
+        # 长度按 visible_chars_v1 由脚本测好：story-architect 不能执行命令。
+        self.assertEqual(info['metric'], 'visible_chars_v1')
+        self.assertEqual(info['lengths']['3'], len('他推开门，看见雨。') + 3)
+        self.assertEqual(info['missing_summaries'], [7])
+        self.assertIn('| L1-1 | 第1-12章 |', text)
+        self.assertNotIn('L1-2', text)
+        self.assertNotIn('| 甲 |', text)  # 别的表不串进来
+        self.assertIn('## 细纲（第 N 章）', text)
+        self.assertIn('你不执行命令', text)
+        self.assertIn('导入记录.md', text)
+
+    def test_batch_bounds(self):
+        too_many = self.call('1-21')
+        self.assertEqual(too_many.returncode, 2)
+        self.assertIn('最多 20 章', too_many.stderr)
+        too_few = self.call('1-5')
+        self.assertEqual(too_few.returncode, 2)
+        self.assertIn('至少 10 章', too_few.stderr)
+        tail = self.call('21-25')  # 全书最后一批可以不足 10 章
+        self.assertEqual(tail.returncode, 0, tail.stderr)
+        self.assertIn('L1-2', Path(json.loads(tail.stdout)['brief']).read_text(encoding='utf-8'))
+        beyond = self.call('20-30')
+        self.assertEqual(beyond.returncode, 2)
+        self.assertIn('正文只迁到第25章', beyond.stderr)
+
+    def test_missing_volume_outline_stops(self):
+        (self.book / '大纲' / '卷纲_第1卷.md').unlink()
+        result = self.call('1-12')
+        self.assertEqual(result.returncode, 2)
+        self.assertIn('没有卷纲', result.stderr)
+
+
 if __name__ == '__main__':
     unittest.main()

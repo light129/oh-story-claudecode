@@ -288,7 +288,7 @@ def test_progress_schema_pins_are_repo_wide() -> None:
     for relative in (
         "skills/story-long-analyze/references/pipeline-ops.md",
         "skills/story-long-analyze/SKILL.md",
-        "skills/story-import/SKILL.md",
+        "skills/story-import/references/deep-analysis.md",
         "skills/story-setup/UPGRADING.md",
         "demo/拆文库/盘龙/_progress.md",
     ):
