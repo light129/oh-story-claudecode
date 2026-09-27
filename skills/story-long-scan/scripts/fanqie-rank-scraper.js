@@ -13,6 +13,8 @@
  *   node fanqie-rank-scraper.js --channel 1 --type 2 --outdir ./  # 指定输出目录
  *   node fanqie-rank-scraper.js --channel all                     # 全部采集
  *   node fanqie-rank-scraper.js --channel 1 --top 15              # 每题材只取前 15 本
+ *   node fanqie-rank-scraper.js --source library --channel all     # 书库「最热」：连载中、30 万字以下
+ *   node fanqie-rank-scraper.js --source library --channel mix --pages 5  # 不分男女，取 5 页
  *
  * 前置：
  *   node {SKILL_DIR}/browser-cdp/scripts/setup-cdp-chrome.js 9222
@@ -149,7 +151,11 @@ function buildDetailJS(ids) {
         var tags='';
         var bm=(abs||desc||'').match(/[【\\[]([^】\\]]{2,40})[】\\]]/);
         if(bm){tags=bm[1].split(/[+、,\\/\\s]+/).filter(Boolean).slice(0,6).join('、');}
-        map[id]={title:title,author:author,desc:desc,category:category,tags:tags};
+        // 书库列表的在读数、字数也被字体反爬，详情页的 SSR 数字是明文。
+        var num=function(k){return pick(h,[new RegExp('"'+k+'"[ ]*:[ ]*"?([0-9]+)')]);};
+        map[id]={title:title,author:author,desc:desc,category:category,tags:tags,
+          readCount:num('readCount'),wordNumber:num('wordNumber'),creationStatus:num('creationStatus'),
+          lastChapterTitle:pick(h,[/"lastChapterTitle"[ ]*:[ ]*"([^"]+)"/])};
       }catch(e){
         map[id]={title:'',author:'',desc:'',category:'',tags:'',err:String(e&&e.message||e)};
       }
@@ -229,6 +235,10 @@ const OUTDIR = getArg(args, "--outdir") || ".";
 const CHANNEL = getArg(args, "--channel") || "1";
 const TYPE = getArg(args, "--type") || "2";
 const TOP = parseInt(getArg(args, "--top") || "20", 10);
+const SOURCE = getArg(args, "--source") || "rank";
+const PAGES = parseInt(getArg(args, "--pages") || "3", 10);
+const STAT = getArg(args, "--stat") || "1";
+const COUNT = getArg(args, "--count") || "0";
 
 function channelLabel(ch) {
   return ch === "1" ? "男频" : "女频";
@@ -385,7 +395,136 @@ function scrapeChannel(ch, type) {
   return lines.concat(bodyLines).join("\n");
 }
 
+
+// ---------------------------------------------------------------------------
+// 书库「最热」：/library/{筛选}/page_{n}?sort=hottes，每页 18 本，按热度排序
+// ---------------------------------------------------------------------------
+
+const LIB_STAT = { "1": "连载中", "0": "已完结", any: "" };
+const LIB_COUNT = { "0": "30万字以下", "1": "30-50万字", "2": "50-100万字", "3": "100-200万字", "4": "200万字以上", any: "" };
+
+/** 书库筛选段：audience1=男生、audience0=女生，stat1=连载中，count0=30万字以下；全不选时站点用 all。 */
+function libraryPath(ch) {
+  const segs = [];
+  if (ch !== "mix") segs.push(`audience${ch}`);
+  if (STAT !== "any") segs.push(`stat${STAT}`);
+  if (COUNT !== "any") segs.push(`count${COUNT}`);
+  return segs.length ? segs.join("-") : "all";
+}
+
+function libraryLabel(ch) {
+  const who = ch === "mix" ? "全站" : channelLabel(ch);
+  const filters = [LIB_STAT[STAT], LIB_COUNT[COUNT]].filter(Boolean).join("·");
+  return { who, filters };
+}
+
+/** 列表页书名、在读数都被字体反爬；只按页面顺序取 bookId，其余字段由详情页解码。 */
+function buildLibraryIdsJS() {
+  return `JSON.stringify((function(){
+    var seen={},out=[];
+    Array.from(document.querySelectorAll('a[href*="/page/"]')).forEach(function(a){
+      var m=(a.getAttribute('href')||'').match(/\\/page\\/(\\d+)/);
+      if(m&&!seen[m[1]]){seen[m[1]]=1;out.push(m[1]);}
+    });
+    return out;
+  })())`;
+}
+
+function scrapeLibrary(ch) {
+  const { who, filters } = libraryLabel(ch);
+  const seg = libraryPath(ch);
+  console.log(`\n→ 采集 番茄书库最热 · ${who}${filters ? "（" + filters + "）" : ""}...`);
+  const ids = [];
+  for (let page = 1; page <= PAGES; page++) {
+    const url = `https://fanqienovel.com/library/${seg}/page_${page}?sort=hottes`;
+    ab(PORT, "open", url);
+    sleep(3000);
+    if (page === 1) {
+      const probe = probePage(PORT);
+      if (!probe) {
+        console.error(`  ✗ CDP 无响应。请确认已用 browser-cdp 启动 Chrome（端口 ${PORT}），且 agent-browser 可用。`);
+        return null;
+      }
+      if (probe.host && probe.host.indexOf("fanqie") === -1) {
+        console.error(`  ✗ 当前页面非番茄（host=${probe.host}），可能被重定向到登录/验证页，已跳过。`);
+        return null;
+      }
+    }
+    let pageIds = evalJSONBase64(PORT, buildLibraryIdsJS()) || [];
+    if (!pageIds.length) {
+      sleep(2000);
+      pageIds = evalJSONBase64(PORT, buildLibraryIdsJS()) || [];
+    }
+    const fresh = pageIds.filter((id) => !ids.includes(id));
+    console.log(`  第 ${page} 页：${fresh.length} 本`);
+    if (!fresh.length) break;
+    ids.push(...fresh);
+  }
+
+  const details = fetchDetails(PORT, ids);
+  const now = new Date().toISOString();
+  let resolved = 0;
+  const body = [`## 全部（书库最热） — ${ids.length} 本`, ""];
+  ids.forEach((id, i) => {
+    const info = details[id] || {};
+    if (info.title) resolved++;
+    const catSeg = info.category ? ` · ${info.category}` : "";
+    body.push(`### #${i + 1} ${info.title || "（标题待解析）"}`);
+    body.push(`*${info.author || "未知"}${catSeg} · ${fmtStatus(info.creationStatus)} · ${fmtReads(info.readCount)} 在读 · ${fmtWords(info.wordNumber)}字*`);
+    if (info.tags) body.push(`**标签：** ${info.tags}`);
+    body.push(`**最新更新：** ${info.lastChapterTitle || "未知"}`);
+    body.push(`**bookId：** ${id}`);
+    body.push(`[作品页](https://fanqienovel.com/page/${id})`);
+    const desc = cleanDesc(info.desc);
+    if (desc) body.push("", "**简介**", "", desc);
+    body.push("");
+  });
+  const quality = !ids.length ? "[无数据]" : resolved / ids.length < 0.5 ? "[标题解析异常]" : "[OK]";
+  if (ids.length && resolved / ids.length < 0.5) {
+    console.error(`  ⚠ 标题解析率偏低（${resolved}/${ids.length}），请在 Chrome 内手动打开任一作品页确认不是验证页。`);
+  }
+  // 列表名带「新书」：连载中、30 万字以下按热度排，本质是新书热度，聚合时进「新书榜」列。
+  const listName = `${who}书库最热${COUNT === "0" && STAT === "1" ? "新书" : ""}`;
+  const head = [
+    `# 番茄 · ${listName}`,
+    "",
+    `- 来源：https://fanqienovel.com/library/${seg}/page_1?sort=hottes`,
+    `- 筛选：${filters || "不限"}；按「最热」排序，取前 ${PAGES} 页`,
+    `- 抓取时间：${now}`,
+    `- 标题解析：成功 ${resolved} / 共 ${ids.length}`,
+    `- 数据质量：${quality}`,
+    "",
+    "---",
+    "",
+  ];
+  return { content: head.concat(body).join("\n"), name: `番茄${who}${listName.replace(who, "")}_${libraryPath(ch)}_${localDateStamp()}.md` };
+}
+
+function mainLibrary() {
+  if (!["0", "1", "all", "mix"].includes(CHANNEL)) throw new Error(`未知 --channel: ${CHANNEL}（书库用 1 / 0 / all / mix）`);
+  if (!(STAT in LIB_STAT)) throw new Error(`未知 --stat: ${STAT}（1 连载中 / 0 已完结 / any）`);
+  if (!(COUNT in LIB_COUNT)) throw new Error(`未知 --count: ${COUNT}（0-4 或 any）`);
+  const channels = CHANNEL === "all" ? ["1", "0"] : [CHANNEL];
+  let written = 0;
+  for (const ch of channels) {
+    try {
+      const out = scrapeLibrary(ch);
+      if (!out) continue;
+      fs.mkdirSync(OUTDIR, { recursive: true });
+      const filepath = path.join(OUTDIR, out.name);
+      fs.writeFileSync(filepath, out.content, "utf-8");
+      written++;
+      console.log(`  ✓ 已保存: ${filepath}`);
+    } catch (err) {
+      console.error(`[fanqie] 书库 ${ch} 采集失败，跳过: ${err && err.message ? err.message : err}`);
+    }
+  }
+  return written;
+}
+
 function main() {
+  if (SOURCE === "library") return mainLibrary();
+  if (SOURCE !== "rank") throw new Error(`未知 --source: ${SOURCE}（rank / library）`);
   if (!["0", "1", "all"].includes(CHANNEL)) {
     throw new Error(`未知 --channel: ${CHANNEL}`);
   }

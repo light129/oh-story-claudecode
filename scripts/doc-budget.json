@@ -1095,7 +1095,7 @@
             "skills/story-review/references/quality-rubric.md",
             "skills/story-review/references/rubrics/zhihu.md"
           ],
-          "budget": 21350
+          "budget": 21450
         },
         {
           "label": "长篇收尾维护追踪",
@@ -1106,7 +1106,7 @@
           "budget": 21800
         }
       ],
-      "why": "v0.8.2：审稿按时刻加载——派子代理的 prompt、solo 流程、追踪维护各自成文件，子代理的去味判据由它自己的读取表读，主会话不摘抄。"
+      "why": "v0.8.2：审稿按时刻加载——派子代理的 prompt、solo 流程、追踪维护各自成文件，子代理的去味判据由它自己的读取表读，主会话不摘抄。 作者记忆拆分后参考表多一行维护文件指路。"
     },
     {
       "label": "审稿 solo（主会话一人审）",
@@ -1121,7 +1121,7 @@
         {
           "label": "通用 rubric",
           "files": [],
-          "budget": 31750
+          "budget": 31850
         },
         {
           "label": "平台 rubric",
@@ -1131,7 +1131,7 @@
           "budget": 32250
         }
       ],
-      "why": "v0.8.2：一人审时 AI 味判断读 anti-ai-writing 的检测部分；一级词表由预检脚本承担，不再另读 banned-words。"
+      "why": "v0.8.2：一人审时 AI 味判断读 anti-ai-writing 的检测部分；一级词表由预检脚本承担，不再另读 banned-words。 作者记忆拆分后参考表多一行维护文件指路。"
     },
     {
       "label": "去AI味主会话",
@@ -1245,7 +1245,7 @@
           "files": [
             "skills/story-long-scan/references/platform-fanqie.md"
           ],
-          "budget": 14250
+          "budget": 14800
         },
         {
           "label": "晋江",
@@ -1255,7 +1255,7 @@
           "budget": 13600
         }
       ],
-      "why": "v0.8.2：先聚合再读，结论落盘交给选题与写作；按平台只读一份平台说明（上界：全部通用参考一起读）。"
+      "why": "v0.8.2：先聚合再读，结论落盘交给选题与写作；按平台只读一份平台说明（上界：全部通用参考一起读）。 番茄参考加书库「最热」一节（+500）：阅读榜被老书占住时，连载中 30 万字以下的热度才看得出新书里什么题材在冒头。"
     },
     {
       "label": "短篇扫榜",

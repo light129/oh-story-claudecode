@@ -17,6 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 LONG = ROOT / "skills" / "story-long-scan" / "scripts" / "aggregate-rank.js"
+FANQIE = ROOT / "skills" / "story-long-scan" / "scripts" / "fanqie-rank-scraper.js"
 SHORT = ROOT / "skills" / "story-short-scan" / "scripts" / "aggregate-rank.js"
 NODE = shutil.which("node")
 
@@ -359,6 +360,60 @@ def test_compression(tmp: Path) -> None:
     check(len(proc.stdout) * 5 < len(raw), f"aggregate must be far smaller than raw: {len(proc.stdout)} vs {len(raw)}")
 
 
+# 番茄书库「最热」：列表页书名与数字都被字体反爬，脚本只按页面顺序取 bookId，其余字段靠详情页解码。
+# 这里打桩 cdp-utils，按真实页面的形状喂 bookId 与详情，跑完整书库流程再交给聚合。
+CDP_STUB = r"""
+const u = require(process.env.CDP_UTILS);
+let url = "";
+const pages = {1: ["101", "102", "103"], 2: ["103", "104"], 3: []};
+const detail = {
+  "101": {title: "神通者", author: "甲", category: "传统玄幻", tags: "系统、升级", desc: "【系统+升级】简介", readCount: "1824959", wordNumber: "308072", creationStatus: "1", lastChapterTitle: "第110章"},
+  "102": {title: "诡舍2", author: "乙", category: "悬疑灵异", tags: "", desc: "永夜", readCount: "488046", wordNumber: "217097", creationStatus: "1", lastChapterTitle: "第100章"},
+  "103": {title: "", author: "", category: "", tags: "", desc: "", readCount: "", wordNumber: "", creationStatus: ""},
+  "104": {title: "合院亿富翁", author: "丙", category: "都市种田", tags: "", desc: "", readCount: "90000", wordNumber: "120000", creationStatus: "1", lastChapterTitle: "第30章"},
+};
+u.ab = (port, cmd, target) => { url = target || url; process.stderr.write("OPEN " + url + "\n"); };
+u.sleep = () => {};
+u.scrollLoad = () => {};
+u.evalJSONBase64 = (port, js) => {
+  if (js.includes("hasState")) return {host: "fanqienovel.com", hasState: true};
+  if (js.includes("XMLHttpRequest")) {
+    const ids = JSON.parse(js.match(/var ids=(\[[^\]]*\])/)[1]);
+    return Object.fromEntries(ids.map((id) => [id, detail[id]]));
+  }
+  if (js.includes("/page/")) return pages[Number((url.match(/page_(\d+)/) || [])[1])] || [];
+  return null;
+};
+"""
+
+
+def test_fanqie_library(tmp: Path) -> None:
+    stub = tmp / "cdp-stub.js"
+    stub.write_text(CDP_STUB, encoding="utf-8")
+    out = tmp / "library"
+    proc = subprocess.run(
+        [NODE, "-r", str(stub), str(FANQIE), "--source", "library", "--channel", "1", "--pages", "3", "--outdir", str(out)],
+        capture_output=True, text=True, encoding="utf-8", timeout=60,
+        env={**__import__("os").environ, "CDP_UTILS": str(FANQIE.parent / "cdp-utils.js")},
+    )
+    check(proc.returncode == 0, f"library run failed: {proc.stderr}")
+    check("library/audience1-stat1-count0/page_1?sort=hottes" in proc.stderr, f"library URL shape: {proc.stderr}")
+    check("page_3" in proc.stderr, "keeps paging until a page brings no new books")
+    files = sorted(out.glob("*.md"))
+    check(len(files) == 1, f"one library file expected, got {files}")
+    if not files:
+        return
+    text = files[0].read_text(encoding="utf-8")
+    check(text.startswith("# 番茄 · 男频书库最热新书"), f"library heading: {text.splitlines()[0]}")
+    check("### #4 合院亿富翁" in text, "page-2 book ranked after page-1 books, duplicate 103 counted once")
+    check("182.5万 在读" in text and "30.8万字" in text, "read count / words decoded from detail page")
+    check("（标题待解析）" in text and "标题解析：成功 3 / 共 4" in text, "unresolved title kept and counted")
+    result = json.loads(run(LONG, str(out), "--json").stdout)
+    fq = platform(result, "番茄")
+    check(fq["bookCount"] == 4 and fq.get("unresolved") == 1, f"unresolved title counted once and surfaced: {fq}")
+    check(genre(fq, "传统玄幻")["count"] == 1, "genre comes from detail category, not the section header")
+
+
 def test_short_copy_identical() -> None:
     check(SHORT.read_bytes() == LONG.read_bytes(), "short-scan copy must stay byte-identical (shared-assets)")
 
@@ -375,6 +430,7 @@ def main() -> int:
         test_sample(scan)
         test_errors(tmp)
         test_compression(tmp)
+        test_fanqie_library(tmp)
         test_short_copy_identical()
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
