@@ -1055,6 +1055,531 @@
       "budget": 10900,
       "files": [],
       "why": "v0.8：日更 Step 1 与审查查设定时调用；书内资料按查询定点读，不在此计。"
+    },
+    {
+      "label": "审稿 full/lean 主会话",
+      "files": [
+        "skills/story-review/SKILL.md",
+        "skills/story-review/references/style-resolution.md",
+        "skills/story-review/references/agent-prompts.md"
+      ],
+      "branches": [
+        {
+          "label": "通用 rubric",
+          "files": [
+            "skills/story-review/references/quality-rubric.md"
+          ],
+          "budget": 20900
+        },
+        {
+          "label": "平台 rubric",
+          "files": [
+            "skills/story-review/references/quality-rubric.md",
+            "skills/story-review/references/rubrics/zhihu.md"
+          ],
+          "budget": 21350
+        },
+        {
+          "label": "长篇收尾维护追踪",
+          "files": [
+            "skills/story-review/references/quality-rubric.md",
+            "skills/story-review/references/review-tracking.md"
+          ],
+          "budget": 21800
+        }
+      ],
+      "why": "v0.8.2：审稿按时刻加载——派子代理的 prompt、solo 流程、追踪维护各自成文件，子代理的去味判据由它自己的读取表读，主会话不摘抄。"
+    },
+    {
+      "label": "审稿 solo（主会话一人审）",
+      "files": [
+        "skills/story-review/SKILL.md",
+        "skills/story-review/references/style-resolution.md",
+        "skills/story-review/references/solo.md",
+        "skills/story-review/references/anti-ai-writing.md",
+        "skills/story-review/references/quality-rubric.md"
+      ],
+      "branches": [
+        {
+          "label": "通用 rubric",
+          "files": [],
+          "budget": 31750
+        },
+        {
+          "label": "平台 rubric",
+          "files": [
+            "skills/story-review/references/rubrics/zhihu.md"
+          ],
+          "budget": 32250
+        }
+      ],
+      "why": "v0.8.2：一人审时 AI 味判断读 anti-ai-writing 的检测部分；一级词表由预检脚本承担，不再另读 banned-words。"
+    },
+    {
+      "label": "去AI味主会话",
+      "files": [
+        "skills/story-deslop/SKILL.md",
+        "skills/story-deslop/references/style-resolution.md"
+      ],
+      "branches": [
+        {
+          "label": "只检测或交给写手",
+          "files": [],
+          "budget": 11450
+        },
+        {
+          "label": "主会话自己改",
+          "files": [
+            "skills/story-deslop/references/deslop-gates.md",
+            "skills/story-deslop/references/anti-ai-writing.md",
+            "skills/story-deslop/references/banned-words.md"
+          ],
+          "budget": 34800
+        }
+      ],
+      "why": "v0.8.2：交给 narrative-writer 时主会话不读去味规则（写手自己的审查路径另有登记）；主会话自己改时读删除保护、改写方法与词表。"
+    },
+    {
+      "label": "部署写作环境（story-setup）",
+      "files": [
+        "skills/story-setup/SKILL.md",
+        "skills/story-setup/references/diagnostics.md"
+      ],
+      "branches": [
+        {
+          "label": "antigravity",
+          "files": [
+            "skills/story-setup/references/deploy-antigravity.md"
+          ],
+          "budget": 18500
+        },
+        {
+          "label": "claude-code",
+          "files": [
+            "skills/story-setup/references/deploy-claude-code.md"
+          ],
+          "budget": 17450
+        },
+        {
+          "label": "codex",
+          "files": [
+            "skills/story-setup/references/deploy-codex.md"
+          ],
+          "budget": 16100
+        },
+        {
+          "label": "generic",
+          "files": [
+            "skills/story-setup/references/deploy-generic.md"
+          ],
+          "budget": 13650
+        },
+        {
+          "label": "openclaw",
+          "files": [
+            "skills/story-setup/references/deploy-openclaw.md"
+          ],
+          "budget": 14050
+        },
+        {
+          "label": "opencode",
+          "files": [
+            "skills/story-setup/references/deploy-opencode.md"
+          ],
+          "budget": 19900
+        },
+        {
+          "label": "reasonix",
+          "files": [
+            "skills/story-setup/references/deploy-reasonix.md"
+          ],
+          "budget": 14250
+        },
+        {
+          "label": "zcode",
+          "files": [
+            "skills/story-setup/references/deploy-zcode.md"
+          ],
+          "budget": 16500
+        }
+      ],
+      "why": "v0.8.2：部署按宿主拆分，入口只读当前宿主那一份。"
+    },
+    {
+      "label": "长篇扫榜",
+      "files": [
+        "skills/story-long-scan/SKILL.md",
+        "skills/story-long-scan/references/genre-trends.md",
+        "skills/story-long-scan/references/reader-profiling.md",
+        "skills/story-long-scan/references/topic-decision.md",
+        "skills/story-long-scan/references/publishing-guide.md"
+      ],
+      "branches": [
+        {
+          "label": "起点",
+          "files": [
+            "skills/story-long-scan/references/platform-qidian.md"
+          ],
+          "budget": 13950
+        },
+        {
+          "label": "番茄",
+          "files": [
+            "skills/story-long-scan/references/platform-fanqie.md"
+          ],
+          "budget": 14250
+        },
+        {
+          "label": "晋江",
+          "files": [
+            "skills/story-long-scan/references/platform-jjwxc.md"
+          ],
+          "budget": 13600
+        }
+      ],
+      "why": "v0.8.2：先聚合再读，结论落盘交给选题与写作；按平台只读一份平台说明（上界：全部通用参考一起读）。"
+    },
+    {
+      "label": "短篇扫榜",
+      "files": [
+        "skills/story-short-scan/SKILL.md",
+        "skills/story-short-scan/references/real-market-data.md",
+        "skills/story-short-scan/references/topic-match.md",
+        "skills/story-short-scan/references/manual-rank-input.md"
+      ],
+      "branches": [
+        {
+          "label": "点众",
+          "files": [
+            "skills/story-short-scan/references/platform-dianzhong.md"
+          ],
+          "budget": 8000
+        },
+        {
+          "label": "黑岩",
+          "files": [
+            "skills/story-short-scan/references/platform-heiyan.md"
+          ],
+          "budget": 8100
+        }
+      ],
+      "why": "v0.8.2：同上，短篇。"
+    },
+    {
+      "label": "导入·确认来源与范围",
+      "files": [
+        "skills/story-import/SKILL.md",
+        "skills/story-import/references/length-routing.md"
+      ],
+      "branches": [
+        {
+          "label": "常规",
+          "files": [],
+          "budget": 8400
+        },
+        {
+          "label": "特殊情况",
+          "files": [
+            "skills/story-import/references/import-special-cases.md"
+          ],
+          "budget": 10050
+        }
+      ],
+      "why": "v0.8.2：导入按作者确认点分时刻，作者的决定落盘到导入记录，时刻之间只靠文件交接。"
+    },
+    {
+      "label": "导入·深度分析（导入部分+拆文入口）",
+      "files": [
+        "skills/story-import/SKILL.md",
+        "skills/story-import/references/deep-analysis.md",
+        "skills/story-long-analyze/SKILL.md",
+        "skills/story-long-analyze/references/author-facing.md",
+        "skills/story-long-analyze/references/pipeline-ops.md"
+      ],
+      "branches": [
+        {
+          "label": "常规",
+          "files": [],
+          "budget": 25500
+        }
+      ],
+      "why": "v0.8.2：导入交给拆文流程，拆文自己后续各 Stage 另有登记。"
+    },
+    {
+      "label": "导入·结构迁移",
+      "files": [
+        "skills/story-import/SKILL.md",
+        "skills/story-import/references/format-and-structure.md"
+      ],
+      "branches": [
+        {
+          "label": "长篇",
+          "files": [
+            "skills/story-import/references/structure-mapping-long.md"
+          ],
+          "budget": 19250
+        },
+        {
+          "label": "短篇",
+          "files": [
+            "skills/story-import/references/structure-mapping-short.md"
+          ],
+          "budget": 14500
+        }
+      ],
+      "why": "v0.8.2：结构迁移只读对应篇幅的映射规则。"
+    },
+    {
+      "label": "导入·追踪初始化",
+      "files": [
+        "skills/story-import/SKILL.md",
+        "skills/story-import/references/import-tracking.md",
+        "skills/story-import/references/character-state-reverse.md",
+        "skills/story-import/references/state-tracking.md"
+      ],
+      "branches": [
+        {
+          "label": "常规",
+          "files": [],
+          "budget": 12450
+        }
+      ],
+      "why": "v0.8.2：追踪初始化从结构迁移里独立出来，只读初始化约束，不整读追踪事务协议。"
+    },
+    {
+      "label": "导入·汇报与激活",
+      "files": [
+        "skills/story-import/SKILL.md",
+        "skills/story-import/references/import-report.md"
+      ],
+      "branches": [
+        {
+          "label": "常规",
+          "files": [],
+          "budget": 7750
+        }
+      ],
+      "why": "v0.8.2：汇报只读汇报模板。"
+    },
+    {
+      "label": "长篇拆文 Stage 0–1 开头三章",
+      "files": [
+        "skills/story-long-analyze/SKILL.md",
+        "skills/story-long-analyze/references/author-facing.md",
+        "skills/story-long-analyze/references/stage1-golden-chapters.md"
+      ],
+      "branches": [
+        {
+          "label": "常规",
+          "files": [],
+          "budget": 14500
+        },
+        {
+          "label": "章号对不上",
+          "files": [
+            "skills/story-long-analyze/references/index-rebuild.md"
+          ],
+          "budget": 15850
+        }
+      ],
+      "why": "v0.8.2：拆文按 Stage 分时刻，每个时刻只读自己那一行。"
+    },
+    {
+      "label": "长篇拆文 Stage 2 逐批提取",
+      "files": [
+        "skills/story-long-analyze/SKILL.md",
+        "skills/story-long-analyze/references/author-facing.md",
+        "skills/story-long-analyze/references/pipeline-ops.md"
+      ],
+      "branches": [
+        {
+          "label": "交给子代理",
+          "files": [],
+          "budget": 17100
+        },
+        {
+          "label": "主会话自己写批次",
+          "files": [
+            "skills/story-long-analyze/references/stage2-extraction.md"
+          ],
+          "budget": 22650
+        }
+      ],
+      "why": "v0.8.2：同上。"
+    },
+    {
+      "label": "长篇拆文 Stage 3 剧情与节奏",
+      "files": [
+        "skills/story-long-analyze/SKILL.md",
+        "skills/story-long-analyze/references/author-facing.md",
+        "skills/story-long-analyze/references/synthesis-inputs.md",
+        "skills/story-long-analyze/references/stage3-plot-rhythm.md"
+      ],
+      "branches": [
+        {
+          "label": "常规",
+          "files": [],
+          "budget": 25500
+        },
+        {
+          "label": "打桥段标签",
+          "files": [
+            "skills/story-long-analyze/references/deconstruction-notes.md"
+          ],
+          "budget": 29550
+        }
+      ],
+      "why": "v0.8.2：同上。"
+    },
+    {
+      "label": "长篇拆文 Stage 4 角色与设定",
+      "files": [
+        "skills/story-long-analyze/SKILL.md",
+        "skills/story-long-analyze/references/author-facing.md",
+        "skills/story-long-analyze/references/synthesis-inputs.md",
+        "skills/story-long-analyze/references/stage4-characters-settings.md"
+      ],
+      "branches": [
+        {
+          "label": "常规",
+          "files": [],
+          "budget": 18350
+        }
+      ],
+      "why": "v0.8.2：同上。"
+    },
+    {
+      "label": "长篇拆文 Stage 5 主报告",
+      "files": [
+        "skills/story-long-analyze/SKILL.md",
+        "skills/story-long-analyze/references/author-facing.md",
+        "skills/story-long-analyze/references/synthesis-inputs.md",
+        "skills/story-long-analyze/references/stage5-report.md"
+      ],
+      "branches": [
+        {
+          "label": "常规",
+          "files": [],
+          "budget": 15050
+        }
+      ],
+      "why": "v0.8.2：同上。"
+    },
+    {
+      "label": "长篇拆文 Stage 6 文风",
+      "files": [
+        "skills/story-long-analyze/SKILL.md",
+        "skills/story-long-analyze/references/author-facing.md",
+        "skills/story-long-analyze/references/style-profile-generator.md",
+        "skills/story-long-analyze/references/style-profile-protocol.md"
+      ],
+      "branches": [
+        {
+          "label": "常规",
+          "files": [],
+          "budget": 16650
+        }
+      ],
+      "why": "v0.8.2：同上。"
+    },
+    {
+      "label": "长篇拆文 全部拆完",
+      "files": [
+        "skills/story-long-analyze/SKILL.md",
+        "skills/story-long-analyze/references/author-facing.md",
+        "skills/story-long-analyze/references/final-checks.md"
+      ],
+      "branches": [
+        {
+          "label": "常规",
+          "files": [],
+          "budget": 12400
+        }
+      ],
+      "why": "v0.8.2：同上。"
+    },
+    {
+      "label": "短篇拆文 Stage 2–3",
+      "files": [
+        "skills/story-short-analyze/SKILL.md",
+        "skills/story-short-analyze/references/output-contract.md",
+        "skills/story-short-analyze/references/analysis-method.md",
+        "skills/story-short-analyze/references/stage2-3-structure-emotion.md",
+        "skills/story-short-analyze/references/quality-checklist.md",
+        "skills/story-short-analyze/references/analysis-report-style.md"
+      ],
+      "branches": [
+        {
+          "label": "常规",
+          "files": [],
+          "budget": 20150
+        }
+      ],
+      "why": "v0.8.2：短篇拆文分两个时刻。"
+    },
+    {
+      "label": "短篇拆文 Stage 4–6",
+      "files": [
+        "skills/story-short-analyze/SKILL.md",
+        "skills/story-short-analyze/references/output-contract.md",
+        "skills/story-short-analyze/references/analysis-method.md",
+        "skills/story-short-analyze/references/stage4-6-reversal-summary.md",
+        "skills/story-short-analyze/references/quality-checklist.md",
+        "skills/story-short-analyze/references/analysis-report-style.md"
+      ],
+      "branches": [
+        {
+          "label": "常规",
+          "files": [],
+          "budget": 27100
+        },
+        {
+          "label": "判断源文好坏",
+          "files": [
+            "skills/story-short-analyze/references/source-story-quality.md"
+          ],
+          "budget": 31200
+        },
+        {
+          "label": "查写作技法表",
+          "files": [
+            "skills/story-short-analyze/references/analysis-writing-techniques.md"
+          ],
+          "budget": 35000
+        }
+      ],
+      "why": "v0.8.2：同上；写作技法只查需要的那一张表，按整份计上界。"
+    },
+    {
+      "label": "导入·逐批反推细纲（主会话自己做）",
+      "files": [
+        "skills/story-import/SKILL.md",
+        "skills/story-import/references/outline-reverse.md",
+        "skills/story-import/references/outline-reverse-rules.md"
+      ],
+      "branches": [
+        {
+          "label": "常规",
+          "files": [],
+          "budget": 9400
+        }
+      ],
+      "why": "v0.8.2：细纲分批，每批的规则与本批数据由 build_outline_brief.py 拼包；数据表随批次变化不计入。"
+    },
+    {
+      "label": "导入·逐批反推细纲（story-architect 任务包）",
+      "agent": "skills/story-setup/references/templates/agents/story-architect.md",
+      "files": [
+        "skills/story-import/references/outline-reverse-rules.md"
+      ],
+      "branches": [
+        {
+          "label": "常规",
+          "files": [],
+          "budget": 7350
+        }
+      ],
+      "why": "v0.8.2：同上，交给 story-architect 在新上下文里做。"
     }
   ],
   "path_ceiling": {
