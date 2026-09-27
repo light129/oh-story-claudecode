@@ -292,6 +292,18 @@ class PipelineTests(unittest.TestCase):
         self.assertIn('召回降档：成立', result.stdout)
         self.assertIn('第2章质疑', result.stdout)
 
+    def test_no_benchmark_book_downgrades_without_style(self):
+        # 作者定了不对标、也没写文风：情绪与节奏取细纲与单元卡，不因缺文风走全量召回
+        style = self.book / '设定' / '文风.md'
+        if style.exists():
+            style.unlink()
+        result = self.build()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('召回降档：成立，无对标', result.stdout)
+        (self.book / '对标' / '某书').mkdir(parents=True)
+        (self.book / '对标' / '某书' / '文风.md').write_text('x', encoding='utf-8')
+        self.assertIn('召回降档：不成立', self.build().stdout)
+
     def test_one_sentence_style_beats_stale_digest(self):
         style = self.put('设定/文风.md', '采用有限全知，允许进入母女各自内心。')
         digest = self.put('设定/_文风摘要.md', '旧规则：深度限知，不得进入他人内心。')

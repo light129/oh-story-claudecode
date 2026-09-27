@@ -427,7 +427,10 @@ def build(project: Path, chapter: int, report: list):
     needs = {"题材正文提示卡": card_text, "目标情绪": target_emotion,
              "单元情绪引擎": engine, "单元节拍/章功能分配": tempo}
     why = [name + "缺有效内容" for name, value in needs.items() if not substantive(value)]
-    if not custom_style:
+    # 无对标（项目与工作区都没有对标书）时文风本就没有对标可召回：不因 custom_style 缺失拒绝降档
+    no_benchmark = not any(d.is_dir() for base in (project / "对标", project / "拆文库", project.parent / "拆文库")
+                           if base.is_dir() for d in base.iterdir())
+    if not custom_style and not no_benchmark:
         why.append("custom_style=false")
     downgrade = not why
 
@@ -442,7 +445,7 @@ def build(project: Path, chapter: int, report: list):
         if tempo:
             lines.append(f"  {tempo}")
         slot_recall = "——— 情绪与节奏召回 ———\n" + "\n".join(lines)
-        report.append(f"召回降档：成立，文风、题材卡、目标情绪和单元 {unit_id} 情绪/节拍均可用")
+        report.append(f"召回降档：成立，{'无对标，' if no_benchmark and not custom_style else '文风、'}题材卡、目标情绪和单元 {unit_id} 情绪/节拍均可用")
     else:
         slot_recall = ("——— 情绪与节奏召回 ———\n"
                        f"{SLOT_MARK} 降档不成立（" + "、".join(why) +
