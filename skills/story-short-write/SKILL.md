@@ -50,7 +50,6 @@ Phase 2 必须在第一次写入 `设定.md` / `小节大纲.md` 前按顺序完
 
 除了上面的执行规则，构思和写作时遵循：
 
-- **从验证过的模式出发**：有对标书就先拆解，没有就从 `genre-styles/{题材}.md`（核心 10 题材）或 `genre-writing-formulas.md`（冷门题材）找对应的短篇剧情模式
 - **定方向就换风格**：题材一旦确定，立刻读对应 `references/genre-styles/{题材}.md`，腔调、开篇、钩子、情绪烈度、金句、招式、收尾全部切到该题材（追妻含时代变体与小三/死人文学分支）；冷门题材用 `genre-writing-formulas.md` 结构骨架兜底，腔调按 `short-craft.md`
 - **只加载必需信息**：写每节前明确目标情绪和要用的技法，答不出就先回读参考
 - **复用作者习惯**：若作者记忆已存在，正文前用 `scripts/author_memory_commit.py query --workspace {工作区} --book-root {项目目录} --kind prose_style --kind story_design [--genre {题材}] [--workflow 短篇]` 获取 active 条目（≤2KB），传给正文/改写 agent 作为自然倾向，不逐条展示或最大化命中，不牺牲连贯、节奏和字数；硬门禁、当前请求和本篇设定优先。长期声明在收尾用 `record` 写入并回传回执，细则见 [references/author-memory.md](references/author-memory.md)。
@@ -60,6 +59,8 @@ Phase 2 必须在第一次写入 `设定.md` / `小节大纲.md` 前按顺序完
 ## 写作流程
 
 ### Phase 1：确定目标情绪
+
+项目根或上一级目录有 `短篇扫榜结论.md` 时先读其「选题匹配」，排第一的方向带着目标情绪当候选问作者；过了复扫日期就提醒可能过期。
 
 问用户：**「你想让读者读完什么感觉？有没有想写的题材方向或灵感？」**
 

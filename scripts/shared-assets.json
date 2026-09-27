@@ -69,6 +69,13 @@
       ]
     },
     {
+      "name": "scan-rank-aggregator",
+      "source": "skills/story-long-scan/scripts/aggregate-rank.js",
+      "targets": [
+        "skills/story-short-scan/scripts/aggregate-rank.js"
+      ]
+    },
+    {
       "name": "story-hook-core",
       "source": "skills/story-setup/references/templates/hooks/story_hook_core.js",
       "targets": [

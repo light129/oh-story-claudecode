@@ -84,6 +84,7 @@ PR 自动运行 `.github/workflows/cross-platform.yml`。static-check job 跑以
 - `scripts/check-shared-files.sh` — 共享 runtime 资产清单 + 跨 skill reference 副本一致性
 - `scripts/check-scan-runtime-policy.sh` — scraper 本地日期依赖与 CDP 源码策略守卫
 - `python3 scripts/test-scan-runtime-policy.py` — 验证无关/死代码关键词不能骗过 scan/browser 策略守卫
+- `python3 scripts/test-scan-aggregate.py` — 扫榜聚合脚本的解析、去重、分布与抽样行为回归
 - `scripts/check-story-setup-deployment.sh` — story-setup 部署完整性
 - `python3 scripts/test-plugin-packaging.py` — 通过公开 CLI 对 catalog/manifest 做黑盒变异回归
 - `scripts/check-claude-adapter.sh` — Claude marketplace、根 plugin manifest 与 13 个 skill 自动发现检查；可选真实 CLI 生命周期
@@ -124,6 +125,7 @@ python3 scripts/test-style-precedence.py
 node scripts/test-scan-runtime.js
 bash scripts/check-scan-runtime-policy.sh
 python3 scripts/test-scan-runtime-policy.py
+python3 scripts/test-scan-aggregate.py
 bash scripts/test-ai-patterns.sh
 node scripts/test-phase2-contract.js
 node scripts/test-delivery-contract.js
