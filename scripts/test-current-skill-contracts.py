@@ -766,7 +766,7 @@ def test_style_profile_is_not_a_book_existence_probe() -> None:
     """
 
     rules = {rule.code: rule for rule in VALIDATOR.LEGACY_RULES}
-    explorer = "skills/story-setup/references/templates/agents/story-explorer.md"
+    explorer = "skills/story-setup/references/agent-references/benchmark-style-load.md"
     cases = {
         "style-profile-as-book-existence-probe": (
             explorer,

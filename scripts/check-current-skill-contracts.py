@@ -230,6 +230,7 @@ LEGACY_RULES = (
         r"(?:优先探|回退探)[^\n]{0,60}\{书名\}/文风\.md|"
         r"Glob\s*`?(?:对标|拆文库)/\*/文风\.md",
         (
+            "skills/story-setup/references/agent-references/benchmark-style-load.md",
             "skills/story-setup/references/templates/agents/story-explorer.md",
             "skills/story-setup/references/opencode/agents/story-explorer.md",
             "skills/story-setup/references/codex/agents/story-explorer.toml",
@@ -1321,7 +1322,8 @@ def validate_repository(repo_root: Path, manifest: ContractManifest) -> List[Fin
     # 目录块剔除由 build_chapter_index.py 执行，test-long-analyze-runtime-refactor.py 用带目录原文覆盖；
     # 章号连续性校验目前没有运行时回归，暂留 Stage 0 的文字锚点。
     findings.extend(require_pattern(long_analyze, r"落表前校验章号连续", "stage0-chapter-table-validation", "Stage 0 must validate chapter numbers before writing the boundary table"))
-    explorer = repo_root / "skills/story-setup/references/templates/agents/story-explorer.md"
+    # 对标召回流程在 story-explorer 的按需参考里（query_type=benchmark_style_load 才读）。
+    explorer = repo_root / "skills/story-setup/references/agent-references/benchmark-style-load.md"
     findings.extend(require_pattern(explorer, r"missing_primary_contract", "explorer-primary-failure", "story-explorer must fail closed on missing current benchmark artifacts"))
     findings.extend(require_pattern(explorer, r"repair_action", "explorer-repair-action", "story-explorer must return an explicit repair action"))
 
@@ -1378,7 +1380,7 @@ def validate_repository(repo_root: Path, manifest: ContractManifest) -> List[Fin
             )
         )
 
-    explorer_template = repo_root / "skills/story-setup/references/templates/agents/story-explorer.md"
+    explorer_template = repo_root / "skills/story-setup/references/agent-references/benchmark-style-load.md"
     findings.extend(
         require_pattern(
             explorer_template,

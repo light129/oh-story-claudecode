@@ -1050,11 +1050,24 @@
       "why": "v0.8：长篇拆文每批调用一次，一本书几十到上百次；#446 让它自读原文、自写批次输入并机械自查后涨到约 6.7K，锁住。"
     },
     {
-      "label": "日更查旧信息（story-explorer 每次调用）",
+      "label": "查资料（story-explorer 每次调用）",
       "agent": "skills/story-setup/references/templates/agents/story-explorer.md",
-      "budget": 10900,
       "files": [],
-      "why": "v0.8：日更 Step 1 与审查查设定时调用；书内资料按查询定点读，不在此计。"
+      "branches": [
+        {
+          "label": "普通查询（角色 / 伏笔 / 设定 / 时间线 / 进度 / 关系）",
+          "files": [],
+          "budget": 5400
+        },
+        {
+          "label": "写前对标召回（benchmark_style_load）",
+          "files": [
+            "skills/story-setup/references/agent-references/benchmark-style-load.md"
+          ],
+          "budget": 10400
+        }
+      ],
+      "why": "v0.8：日更查旧信息、写前对标召回与审查查设定时调用；书内资料按查询定点读，不在此计。 v0.8.2：对标召回流程与输出结构迁入 benchmark-style-load.md，只在该查询类型读（普通查询 10.7K→5.3K）；无调用方的 context_load 删除。"
     },
     {
       "label": "审稿 full/lean 主会话",

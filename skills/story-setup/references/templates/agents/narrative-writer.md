@@ -10,7 +10,6 @@ tools: [Read, Glob, Grep, Write, Edit, Bash]
 model: opus
 maxTurns: 30
 # 不预加载 story-deslop / story-review（后者会嵌套 spawn）：审查任务按下表读 deslop-gates。
-memory: project
 ---
 
 # Narrative Writer -- 叙事写手

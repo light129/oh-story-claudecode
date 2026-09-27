@@ -785,10 +785,17 @@ listed_ref_dirs="$(printf '%s\n' "$selfcheck_text" | grep -oE '`[a-z][a-z-]*`' |
 for ref_name in $listed_ref_dirs; do
   [ -d "$SKILL_DIR/references/$ref_name" ] || fail "story-setup Phase 1 self-check lists a reference dir that does not exist: $ref_name"
 done
-assert_grep '剧情/情绪模块\.md.*missing_primary_contract|missing_primary_contract.*剧情/情绪模块\.md' "$SKILL_DIR/references/templates/agents/story-explorer.md" "story-explorer must require the current emotion-module artifact"
-assert_grep '剧情/节奏\.md.*missing_primary_contract|missing_primary_contract.*剧情/节奏\.md' "$SKILL_DIR/references/templates/agents/story-explorer.md" "story-explorer must require the current rhythm artifact"
-assert_grep 'missing_primary_contract: true|missing_primary_contract": true' "$SKILL_DIR/references/templates/agents/story-explorer.md" "story-explorer must emit missing_primary_contract for broken canonical artifacts"
-assert_grep 'repair_action.*Stage 3|Stage 3.*repair_action|重跑 /story-long-analyze Stage 3' "$SKILL_DIR/references/templates/agents/story-explorer.md" "story-explorer must provide a repair action instead of silent fallback"
+assert_grep '剧情/情绪模块\.md.*missing_primary_contract|missing_primary_contract.*剧情/情绪模块\.md' "$AGENT_REFS_DIR/benchmark-style-load.md" "story-explorer must require the current emotion-module artifact"
+assert_grep '剧情/节奏\.md.*missing_primary_contract|missing_primary_contract.*剧情/节奏\.md' "$AGENT_REFS_DIR/benchmark-style-load.md" "story-explorer must require the current rhythm artifact"
+assert_grep 'missing_primary_contract: true|missing_primary_contract": true' "$AGENT_REFS_DIR/benchmark-style-load.md" "story-explorer must emit missing_primary_contract for broken canonical artifacts"
+assert_grep 'repair_action.*Stage 3|Stage 3.*repair_action|重跑 /story-long-analyze Stage 3' "$AGENT_REFS_DIR/benchmark-style-load.md" "story-explorer must provide a repair action instead of silent fallback"
+# 对标召回流程只在 benchmark_style_load 时读，模板里只留指针；context_load 已无调用方并删除。
+assert_grep 'agent-references/benchmark-style-load\.md' "$SKILL_DIR/references/templates/agents/story-explorer.md" "story-explorer must route benchmark_style_load to its agent reference"
+assert_no_grep 'missing_primary_contract|context_load' "$SKILL_DIR/references/templates/agents/story-explorer.md" "story-explorer template must not inline the benchmark recall flow or the removed context_load"
+# 交接只靠落盘文件：agent 不带跨任务的持久记忆（memory 还会隐性开 Write/Edit）。
+for agent_template in "$SKILL_DIR"/references/templates/agents/*.md; do
+  assert_no_grep '^memory:' "$agent_template" "agent templates must not enable persistent agent memory"
+done
 assert_grep 'missing_primary_contract' "$REPO_ROOT/skills/story-long-write/references/project-files.md" "story-long-write must not silently fallback for missing primary artifacts"
 assert_grep '内容概括（五段式）|情节安排（多线）|人物关系和出场顺序|结尾设定和钩子' "$SKILL_DIR/references/templates/agents/story-architect.md" "story-architect must output v13 chapter blueprint fields"
 assert_grep '逻辑线|人物关系变化|行动成本（可无）/收益归属|结尾设定' "$SKILL_DIR/references/templates/agents/consistency-checker.md" "consistency-checker must consume current outline blueprint fields"
