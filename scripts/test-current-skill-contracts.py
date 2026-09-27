@@ -592,6 +592,29 @@ def test_spawn_preflight_uses_agents_version_not_file_existence() -> None:
     )
 
 
+def test_author_note_preflight_keeps_engine_words_in_tech_note() -> None:
+    bare = "能力缺失时报告 `Fallback: project custom agents unavailable -> solo`。技术备注：…\n"
+    require(
+        "author-note-preflight" in finding_codes(
+            VALIDATOR.author_note_preflight_findings(bare, Path("bare-fixture.md"))
+        ),
+        "a bare Fallback report to the author must be flagged",
+    )
+    no_note = "同时用一句白话提示作者，`Notice: agents bundle 版本不匹配` 原文另行记录。\n"
+    require(
+        "author-note-preflight" in finding_codes(
+            VALIDATOR.author_note_preflight_findings(no_note, Path("no-note-fixture.md"))
+        ),
+        "a Skill without a 技术备注 route must be flagged",
+    )
+    for relative in VALIDATOR.AUTHOR_NOTE_PREFLIGHT_SKILLS:
+        path = REPO_ROOT / relative
+        require(
+            not VALIDATOR.author_note_preflight_findings(path.read_text(encoding="utf-8"), path),
+            "{} must route Fallback/Notice into the 技术备注 line".format(relative),
+        )
+
+
 def test_reviewed_benchmark_wording_stays_removed() -> None:
     cases = {
         "benchmark-primary-nonblocking-wording": "缺失按原流程，不阻塞。\n",
@@ -937,6 +960,7 @@ def main() -> int:
     test_old_artifact_prose_silent_only()
     test_story_import_keeps_self_out_of_benchmarks()
     test_spawn_preflight_uses_agents_version_not_file_existence()
+    test_author_note_preflight_keeps_engine_words_in_tech_note()
     test_reviewed_benchmark_wording_stays_removed()
     test_p1_deletion_guards()
     test_analyze_portability_guards()

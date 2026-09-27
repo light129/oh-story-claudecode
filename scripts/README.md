@@ -17,7 +17,7 @@
 |---|---|---|
 | `static-check.sh` + `static-check.py` | 结构化验证 frontmatter、Markdown 路径/锚点、Agent 引用、references 可达性；除基础组件 `browser-cdp` 外禁止跨 Skill 文件引用 | CI |
 | `skill-numbering.py check` | 工作流 Step/Phase/Stage 编号策略、引用绑定、SKILL.md 裸编号/子步骤小数守卫 | CI；改工作流结构后 |
-| `check-current-skill-contracts.sh` + `.py` + `current-contract.json` | 从结构化 manifest 校验当前版本、Phase、schema、主产物与细纲契约；保留 legacy/path 守卫并拦截缺主产物后的静默替代 | CI |
+| `check-current-skill-contracts.sh` + `.py` + `current-contract.json` | 从结构化 manifest 校验当前版本、Phase、schema、主产物与细纲契约；保留 legacy/path 守卫并拦截缺主产物后的静默替代；短篇写作与去 AI 味的降级/版本提示原文只进技术备注行 | CI |
 | `check-shared-files.sh` | 调两个显式 manifest 验 runtime/reference 副本，拦截未声明 exact/near-copy，并检查 setup profile 契约与消费可达性 | CI |
 | `check-reference-similarity.py` | 对跨 Skill Markdown 做行级 Jaccard/containment 近似扫描；高相似派生关系必须在 `shared-references.json` 的 `derived_groups` 说明来源与分化原因 | CI（由 check-shared-files 调用） |
 | `check-agent-reference-consumers.py` | 检查 Agent 模板的已部署资料引用全前缀并报告文件/行号，遍历引用可达性，验证唯一 profile 清单、long/short 所有权与 story-architect 不维护第二份 inventory；不证明实际读取行为 | CI（由 check-shared-files 调用） |
@@ -50,7 +50,7 @@
 | `test-phase2-contract.js` | 短篇 Phase 2 verifier 行为回归：设计字段、12 列大纲、字数区间、具名失败与 repair_scope | Linux / Windows / macOS CI |
 | `test-doc-budget.py` | 临时文档工程中的路径求和、超限和缺失文件失败 | CI |
 | `test-delivery-contract.js` | 短篇最终字数、节数、标记与空行交付契约回归 | Linux / Windows / macOS CI |
-| `check-reference-gates.js` | 长短篇「写前必读」的首屏位置、关键路由、长篇「记下本轮约束」锚点与短篇交付预检命令的静态守卫（gate 是提示词，无运行时入口可断言） | Linux / Windows / macOS CI |
+| `check-reference-gates.js` | 长短篇「写前必读」的首屏位置、关键路由、长篇「记下本轮约束」锚点、短篇交付预检命令与写正文只靠设计文件交接（不回查构思方法论、「像」不设硬上限）的静态守卫（gate 是提示词，无运行时入口可断言） | Linux / Windows / macOS CI |
 | `test-outline-contract.js` | 长篇细纲结构验收：字段、小节、五段式、四列情节点表、字数口径与「契约风险」取值的正负例回归 | Linux / Windows / macOS CI |
 | `test-degeneration.sh` | 模型退化检测器 `check-degeneration.js` 回归 | CI |
 | `test-prose-net-parity.sh` | 正文兜底「轻量确定性网」、写正文守卫与命令目标抽取的 JS 核 / Codex Python / Claude bash parity | CI |

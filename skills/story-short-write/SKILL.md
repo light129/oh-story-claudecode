@@ -12,21 +12,24 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 ## 写前必读（强制，先读后写）
 
-任何创建或修改故事文件的动作之前，先判断当前 Phase，并完成该阶段的 reference gate。**只读本 SKILL.md 不算完成门禁。**
+短篇按作者时刻加载：每个时刻只读自己的文件，后一时刻只靠落盘文件接上前一时刻。创建或修改故事文件前，先判断当前时刻并完整读取它的必读项（分块直到 EOF；`rg` 检索或局部摘读不算读完）。**只读本 SKILL.md 不算完成门禁。**
 
-Phase 2 必须在第一次写入 `设定.md` / `小节大纲.md` 前按顺序完整读取（分块直到 EOF；`rg` 检索或局部摘读不算读完）：
+| 时刻 | 作者确认什么 | 读什么 | 落盘 |
+|---|---|---|---|
+| 定情绪（Phase 1） | 读者读完的感觉、题材方向 | 本文件 | 进构思时写入 `设定.md` |
+| 构思（Phase 2） | 故事核、人物、反转、付费点 | ① `references/workflow-design.md` + `references/writing-workflow.md`、`references/submission-craft.md`、`references/short-craft.md`、`references/short-reversal.md` ② 核心 10 题材读一个精确的 `references/genre-styles/{题材}.md`，冷门题材读 `references/genre-writing-formulas.md` ③ 有反派或真相揭露设计时读 `references/villain-and-reveal.md`，不适用时在设计校验区写明原因 | `设定.md`、`小节大纲.md` |
+| 写正文（Phase 3–4） | 成稿 | Phase 3 写正文前完整读取 `references/workflow-draft.md`，按其「写前加载」读写作手法；Phase 4 精修前完整读取 `references/workflow-revision.md` | `正文.md` |
 
-1. `references/workflow-design.md` + `references/writing-workflow.md`、`references/submission-craft.md`、`references/short-craft.md`、`references/short-reversal.md`
-2. 核心 10 题材再读取一个精确的 `references/genre-styles/{题材}.md`；冷门题材改读 `references/genre-writing-formulas.md`
-3. 有反派或真相揭露设计时再读 `references/villain-and-reveal.md`；不适用时在设计校验区写明原因
+构思必读项在第一次写入 `设定.md` / `小节大纲.md` 前读完。任一必需路径不存在、不可读或题材尚未解析到唯一 reference 时，立即停止，报告准确路径/待定项，**不得创建或修改故事产物**。不要把“已读 references”的回执写进故事文件；选出的题材招式、反转计算等应用证据写进正常设计字段。每个时刻按当前任务完整回读，不得用早先读过代替。
 
-任一必需路径不存在、不可读或题材尚未解析到唯一 reference 时，立即停止，报告准确路径/待定项，**不得创建或修改故事产物**。不要把“已读 references”的回执写进故事文件；要把选出的题材招式、反转计算等应用证据写进正常设计字段。Phase 3 写正文前完整读取 `references/workflow-draft.md`，Phase 4 精修前完整读取 `references/workflow-revision.md`，再按各阶段的写前准备和精修检查加载所需资料，不得用早先读过代替当前任务完整回读。
+**交接只靠落盘**：作者在对话里定下的字数、平台、人称、偏好、红线和否掉的方案，构思交付前写进 `设定.md`；写正文只读两份设计文件与本时刻的写作手法，不重读构思方法论，也不回翻对话。
+**换上下文**：构思读得最多。构思汇报末尾建议作者新开一个对话说「写正文」；作者要在本对话接着写也照做。新对话里两份设计文件已通过构思完成门禁时，直接进入写正文。
 
 ---
 
-> Agent 只查当前端 canonical 目录（Claude `.claude/agents`、OpenCode `.opencode/agents`、Codex `.codex/agents` TOML、Antigravity `.agents/agents`），不跨端误判。Claude 用 `subagent_type`，OpenCode 用 `subagent` 的 `agent`，Codex 用 `agent_type`，Antigravity 用 `invoke_subagent` + `TypeName`；能力/文件缺失、unknown agent 或 ZCode 3.3.4 时报告 `Fallback: project custom agents unavailable -> solo`。
+> Agent 只查当前端 canonical 目录（Claude `.claude/agents`、OpenCode `.opencode/agents`、Codex `.codex/agents` TOML、Antigravity `.agents/agents`），不跨端误判。Claude 用 `subagent_type`，OpenCode 用 `subagent` 的 `agent`，Codex 用 `agent_type`，Antigravity 用 `invoke_subagent` + `TypeName`；能力/文件缺失、unknown agent 或 ZCode 3.3.4 时由主会话直接做，汇报里一句白话告诉作者（如「这次由我直接写，没交给写作助手」），`Fallback: project custom agents unavailable -> solo` 原文只写进汇报最后一行「技术备注：」。
 >
-> Spawn 版本提示（不阻断 spawn）：先读取项目根 `.story-deployed` 的 `agents_version`。与本版 `agents_version: 33` 不一致时（标记缺失、字段缺失/非整数、小于或大于 33）**照常按文件存在性检查并 spawn**，同时报告 `Notice: agents bundle 版本不匹配（项目 {N}，本版 33）` 并提示重新运行 `/story-setup` 后新开会话；大于 33 时额外提示先更新 oh-story-claudecode，不要用本地旧版 setup 降级覆盖。只有 agent 文件缺失、或运行时不暴露 custom agent 时才降级 solo/direct，报告 `Fallback: ... -> solo`。
+> Spawn 版本提示（不阻断 spawn）：先读取项目根 `.story-deployed` 的 `agents_version`。与本版 `agents_version: 33` 不一致时（标记缺失、字段缺失/非整数、小于或大于 33）**照常按文件存在性检查并 spawn**，同时用一句白话提示作者「写作助手是旧版，运行 /story-setup 后新开对话」，`Notice: agents bundle 版本不匹配（项目 {N}，本版 33）` 原文写进技术备注行；大于 33 时额外提示先更新 oh-story-claudecode，不要用本地旧版 setup 降级覆盖。只有 agent 文件缺失、或运行时不暴露 custom agent 时才降级 solo/direct，`Fallback: ... -> solo` 同样只进技术备注行。
 
 **文风裁决**：正文写作、改写或审稿前先读 [references/style-resolution.md](references/style-resolution.md)，加载本书文风并形成 `style_resolution`；无作者记忆也执行。当前请求、本书文风和 active 偏好按维度覆盖通用 references；同一裁决交给后续执行者。
 
@@ -40,18 +43,11 @@ Phase 2 必须在第一次写入 `设定.md` / `小节大纲.md` 前按顺序完
 
 ---
 
-## 格式规范（最高优先级）
-
-正文只存 `正文.md`，主会话与写手同一套格式：段间只允许一个换行符、不留空行，引号风格全篇统一（默认半角双引号，盐言可用「」），小节标记统一（默认 `###1.`）；细则写正文前读 `references/short-format.md`，子代理输出不一致时按此重排。
-
----
-
 ## 核心方法
 
 除了上面的执行规则，构思和写作时遵循：
 
-- **定方向就换风格**：题材一旦确定，立刻读对应 `references/genre-styles/{题材}.md`，腔调、开篇、钩子、情绪烈度、金句、招式、收尾全部切到该题材（追妻含时代变体与小三/死人文学分支）；冷门题材用 `genre-writing-formulas.md` 结构骨架兜底，腔调按 `short-craft.md`
-- **只加载必需信息**：写每节前明确目标情绪和要用的技法，答不出就先回读参考
+- **定方向就换风格**：题材一旦确定，腔调、开篇、钩子、情绪烈度、金句、招式、收尾全部切到该题材包（追妻含时代变体与小三/死人文学分支）；冷门题材用公式结构骨架兜底，腔调按 `short-craft.md`
 - **复用作者习惯**：若作者记忆已存在，正文前用 `scripts/author_memory_commit.py query --workspace {工作区} --book-root {项目目录} --kind prose_style --kind story_design [--genre {题材}] [--workflow 短篇]` 获取 active 条目（≤2KB），传给正文/改写 agent 作为自然倾向，不逐条展示或最大化命中，不牺牲连贯、节奏和字数；硬门禁、当前请求和本篇设定优先。长期声明在收尾用 `record` 写入并回传回执，细则见 [references/author-memory.md](references/author-memory.md)。
 
 ---
@@ -81,8 +77,6 @@ Phase 2 必须在第一次写入 `设定.md` / `小节大纲.md` 前按顺序完
 
 ### Phase 2：构思核心框架
 
-> 用户有参考小说时先用 `/story-short-analyze` 拆解（默认存入项目根 `拆文库/{书名}/`），写作时自动查找读取。
-
 #### 对标上下文加载
 
 存在本篇 `对标/`、项目根 `拆文库/` 或用户提供参考小说时，先完整读取 [references/benchmark-recall.md](references/benchmark-recall.md)，执行对标发现、排除本书续写基线、题材匹配与召回。无外部对标时仍按原题材包执行。
@@ -95,7 +89,7 @@ Phase 2 必须在第一次写入 `设定.md` / `小节大纲.md` 前按顺序完
 
 ### Phase 3：逐场景写作
 
-进入正文写作前，完整读取 [references/workflow-draft.md](references/workflow-draft.md)，执行交付参数锁定、写前验收、逐场景写作与 Phase 3 完成门槛。只做构思或精修时不加载本阶段细则。
+进入正文写作前，完整读取 [references/workflow-draft.md](references/workflow-draft.md)，执行交付参数锁定、写前验收与逐场景写作；只做构思或精修时不加载。
 
 **小节完整性流程**：
 1. **写作时**：每节围绕一个主问题推进；让风险、信息、关系、资源、决定、行动或读者理解至少发生一项可见变化。相关情节点可以由同一动作链或对话同时兑现，不为拆成多个“子事件”重复铺陈。
@@ -119,7 +113,7 @@ Phase 2 必须在第一次写入 `设定.md` / `小节大纲.md` 前按顺序完
 
 ### Phase 4：精修打磨
 
-精修或质量自检前，完整读取 [references/workflow-revision.md](references/workflow-revision.md)，执行语义去味、一致性检查、最终文件扫描与交付验收；修改后按其中职责分工复核。只做构思时不加载本阶段细则。
+精修或质量自检前，完整读取 [references/workflow-revision.md](references/workflow-revision.md)，按其职责分工去味、查一致性、做最终扫描与交付验收；只做构思时不加载。
 
 ---
 
