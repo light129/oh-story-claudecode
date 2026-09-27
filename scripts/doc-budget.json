@@ -1426,10 +1426,10 @@
           "files": [
             "skills/story-import/references/import-special-cases.md"
           ],
-          "budget": 10050
+          "budget": 10100
         }
       ],
-      "why": "v0.8.2：导入按作者确认点分时刻，作者的决定落盘到导入记录，时刻之间只靠文件交接。"
+      "why": "v0.8.2：导入按作者确认点分时刻，作者的决定落盘到导入记录，时刻之间只靠文件交接。 +50：导入记录加「首期深拆」一栏、细纲进度改成「已验收到第 B 章」以便续跑整批重做；超过 200 章时简化摘要的固定落点。"
     },
     {
       "label": "导入·深度分析（导入部分+拆文入口）",
@@ -1444,10 +1444,10 @@
         {
           "label": "常规",
           "files": [],
-          "budget": 25500
+          "budget": 25550
         }
       ],
-      "why": "v0.8.2：导入交给拆文流程，拆文自己后续各 Stage 另有登记。"
+      "why": "v0.8.2：导入交给拆文流程，拆文自己后续各 Stage 另有登记。 +50：写明导入场景不用拆书流程自带的完工汇报，由导入的交付句代替（原先两套收尾会对作者说两遍、短篇还会引去写下一篇）。"
     },
     {
       "label": "导入·结构迁移",
@@ -1500,10 +1500,10 @@
         {
           "label": "常规",
           "files": [],
-          "budget": 7750
+          "budget": 7800
         }
       ],
-      "why": "v0.8.2：汇报只读汇报模板。"
+      "why": "v0.8.2：汇报只读汇报模板。 +50：收尾自检对全部细纲再跑一次契约检查（续跑整批重做后兜底）。"
     },
     {
       "label": "长篇拆文 Stage 0–1 开头三章",
@@ -1690,9 +1690,30 @@
             "skills/story-short-analyze/references/analysis-writing-techniques.md"
           ],
           "budget": 35000
+        },
+        {
+          "label": "细拆人物反差",
+          "files": [
+            "skills/story-short-analyze/references/analysis-character-design.md"
+          ],
+          "budget": 33050
+        },
+        {
+          "label": "查人设要素",
+          "files": [
+            "skills/story-short-analyze/references/analysis-character-basics.md"
+          ],
+          "budget": 33200
+        },
+        {
+          "label": "查关系类型",
+          "files": [
+            "skills/story-short-analyze/references/analysis-character-relations.md"
+          ],
+          "budget": 32700
         }
       ],
-      "why": "v0.8.2：同上；写作技法只查需要的那一张表，按整份计上界。"
+      "why": "v0.8.2：同上；写作技法只查需要的那一张表，按整份计上界。Stage 5 的人物标尺一次只查一份，各计一条分支；数「有反差人物」的判定已搬进 stage4-6，不再为计数整读人物设计标尺。"
     },
     {
       "label": "导入·逐批反推细纲（主会话自己做）",
@@ -1705,10 +1726,10 @@
         {
           "label": "常规",
           "files": [],
-          "budget": 9400
+          "budget": 9450
         }
       ],
-      "why": "v0.8.2：细纲分批，每批的规则与本批数据由 build_outline_brief.py 拼包；数据表随批次变化不计入。"
+      "why": "v0.8.2：细纲分批，每批的规则与本批数据由 build_outline_brief.py 拼包；数据表随批次变化不计入，由脚本把执行者一次要读的总量（包 + 缺摘要章的正文）卡在约 25K。 +50：写明按总量少排章与续跑整批重做；执行者不再整读每章约 4K 字的摘要，一批从 80K+ 降到 25K 内。"
     },
     {
       "label": "导入·逐批反推细纲（story-architect 任务包）",

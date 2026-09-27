@@ -36,7 +36,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 **导入记录**：`{书目录}/.story/work/导入记录.md`（书目录：长篇 `{导入书名}/`，短篇 `{短篇标题}/`），Phase 1 建立，格式见下方 Step 5。每个时刻开头先读它，不回翻对话；时刻交付前把作者在对话里新定的事（决定、偏好、红线、否掉的方案）和进度写回它，再往下走。
 **换上下文**：深度分析、每批细纲、追踪初始化读的东西多。每个时刻交付后，汇报末尾加一句「下一步建议新开一个对话，说『继续导入』，会更专注」；作者要在本对话继续也照做。作者说「继续导入」时，在项目根下找进度没勾完的 `*/.story/work/导入记录.md`，从第一个未完成的进度接着做。
-**导入续写入口顺序**：用户只问流程（先装环境还是先导入、已有小说怎么续写）时，先答结论再收原文——推荐先 `/story-setup` 装好写作环境，新开对话运行 `/story-import`，导完用 `/story-long-write 日更` 续写；也可以直接导入，缺环境时 Step 4 会给选择。已经导入过的书、旧版追踪的书、超过 200 章的书，按 [import-special-cases.md](references/import-special-cases.md) 处理。
+**导入续写入口顺序**：用户只问流程时先答结论再收原文——推荐先 `/story-setup`，新开对话 `/story-import`，导完 `/story-long-write 日更`；也可直接导入，缺环境时 Step 4 给选择。导入过的书、旧版追踪的书、超过 200 章的书按 [import-special-cases.md](references/import-special-cases.md) 处理。
 
 ---
 
@@ -75,7 +75,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 # 导入记录：《{导入书名}》
 - 原文：{源文件或目录路径；贴入文本写 .story/work/导入原文.md}
 - 篇幅：{长篇 | 短篇}（{判定依据一句}）
-- 范围：第 1–{N} 章，约 {Y} 万字；{完本 | 半成品}
+- 范围：第 1–{N} 章，约 {Y} 万字；{完本 | 半成品}；首期深拆：{全书 | 第 1–50 章，其余用简化摘要（超过 200 章）}
 - 最后一章：{完整 | 残稿：第 {N+1} 章写了一半，作者决定{接着残章写 | 先补完再导入}}
 - 题材：{题材类型}；目标平台：{平台}
 - 外部对标：{对标书名 | 未绑定}
@@ -86,7 +86,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 ## 进度
 - [ ] 深度分析
 - [ ] 结构迁移（卷划分已确认、卷纲已写）
-- [ ] 细纲：已完成第 {A}–{B} 章（长篇）
+- [ ] 细纲：已验收到第 {B} 章（长篇；续跑从第 {B+1} 章整批重做）
 - [ ] 追踪初始化（长篇，检查通过）
 - [ ] 汇报与激活
 ```
@@ -99,7 +99,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 ## Phase 3：结构迁移
 
-长篇（3-L）按 [structure-mapping-long.md](references/structure-mapping-long.md) 的迁移步骤把 `拆文库/{导入书名}/` 迁成 `{导入书名}/` 工程；原文没有明确卷界时，卷划分必须等作者确认，确认结果写进导入记录。细纲最后一步按 [outline-reverse.md](references/outline-reverse.md) 每批 10–20 章反推。短篇（3-S）按 [structure-mapping-short.md](references/structure-mapping-short.md) 迁成 `{短篇标题}/` 的三个单文件，**不产** `追踪/`、`大纲/`、`正文/` 等长篇目录，迁完直接到 Phase 5。
+长篇（3-L）按 [structure-mapping-long.md](references/structure-mapping-long.md) 的迁移步骤把 `拆文库/{导入书名}/` 迁成 `{导入书名}/` 工程；原文没有明确卷界时，卷划分必须等作者确认，确认结果写进导入记录。细纲最后一步按 [outline-reverse.md](references/outline-reverse.md) 分批反推。短篇（3-S）按 [structure-mapping-short.md](references/structure-mapping-short.md) 迁成 `{短篇标题}/` 的三个单文件，**不产** `追踪/`、`大纲/`、`正文/` 等长篇目录，迁完直接到 Phase 5。
 
 ## Phase 4：追踪初始化（仅长篇）
 

@@ -7,7 +7,7 @@ Phase 5 只读本文件和导入记录（`{书目录}/.story/work/导入记录.m
 这是你自己的自检，不念给作者：全部通过就不提；没通过先回到对应时刻修，修不了才用故事话告诉作者影响和办法。
 
 - 导入记录的进度全部勾上（短篇没有细纲与追踪两项）。
-- **长篇**：`正文/` 章节文件数等于导入范围章数；每章都有 `大纲/细纲_第XXX章.md`；再跑一次 `{PYTHON} {story-import skill 根}/scripts/tracking_commit.py check --project {项目根}`（按 `python3` → `python` → `py -3` 探测）通过；原文没分卷时卷划分已经作者确认；`拆文库/{导入书名}/` 未被复制到 `对标/`。
+- **长篇**：`正文/` 章节文件数等于导入范围章数；每章都有 `大纲/细纲_第XXX章.md`，且对全部细纲再跑一次 `node {story-import skill 根}/scripts/check-outline-contract.js --json {书目录}/大纲/细纲_第*.md` 通过；再跑一次 `{PYTHON} {story-import skill 根}/scripts/tracking_commit.py check --project {书目录}`（按 `python3` → `python` → `py -3` 探测）通过；原文没分卷时卷划分已经作者确认；`拆文库/{导入书名}/` 未被复制到 `对标/`。
 - **短篇**：`正文.md`、`设定.md`、`小节大纲.md` 都在，未误建 `追踪/`、`大纲/`、`正文/`。
 
 ## Step 2：导入完成报告

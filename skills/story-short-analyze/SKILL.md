@@ -126,7 +126,7 @@ word_count = 全文字数
 |------|------|------|------|----------|
 | 2 | 结构+情节节点 | 全文 | 故事核 + 故事梗概 + 功能分段（4-6段，必须含开端/发展/高潮/结局）+ 情节节点清单（以语义变化为边界提取）。 | 结构划分 ≥4 段 + 故事核已提取 |
 | 3 | 情感线+爆点 | 故事核+结构划分+情节节点数据 | 情感曲线（≥5节点）+ 爆点分析（6维度）+ 期待感分析。 | 爆点分析 6 维度齐全 |
-| 4 | 反转+写作手法 | 节点+情感数据 | 前置反转检查 + 反转机制（铺垫≥2条）+ 写作手法（≥5项维度：POV/对话/时间/信息/其他）。 | 写作手法 ≥5 项 |
+| 4 | 反转+写作手法 | 节点+情感数据 | 前置反转检查 + 反转机制（铺垫≥3条）+ 写作手法（≥5项维度：POV/对话/时间/信息/其他）。 | 写作手法 ≥5 项 |
 | 5 | 人物+开头结尾 | 情节节点+全文 | 所有人物（分类+功能标签+功能评估）+ 开头分析（前50/100字）+ 结尾分析（收束检查）。 | 人物功能评估完成 |
 | 6 | 综合评估 + `_meta.json` 写计数 | 全部数据 | 五维评分 + 爆点性 + 话题性 + 共鸣分析（≥3层）+ 可复用结构（≥3条）+ 节奏速报 + **算出并写入 `_meta.json.structure_counts`**。 | 左列输出齐全 + `structure_counts` 各字段达「structure_counts 数值校验」阈值 |
 
@@ -188,7 +188,7 @@ Stage 6 内容写完后**不**立刻 append `6`，先按 output-contract.md「�
 
 核心方法与模板按上方「按时刻读」加载；以下是对照标尺，按条件读。
 
-### 按需加载（拆解对应题材 / 维度时作为对照标尺）
+### 按需加载（拆解对应题材 / 维度时作为对照标尺，一次只查一份）
 
 | 文件 | 何时加载 |
 |------|----------|
@@ -199,7 +199,7 @@ Stage 6 内容写完后**不**立刻 append `6`，先按 output-contract.md「�
 | [references/analysis-short-suspense.md](references/analysis-short-suspense.md) | Stage 3 / 4：主副问题、信息差、证据释放、阶段答案与回收 |
 | [references/analysis-paragraph-hooks.md](references/analysis-paragraph-hooks.md) | Stage 3 / 5：11 种段落级钩子对照 |
 | [references/analysis-character-basics.md](references/analysis-character-basics.md) | Stage 5：人设要素对照 |
-| [references/analysis-character-design.md](references/analysis-character-design.md) | Stage 5：三层标签反差（contradiction_axis 来源） |
+| [references/analysis-character-design.md](references/analysis-character-design.md) | Stage 5 细拆反差手法：按标题查「三层标签反差人设法」（数反差人物用 stage4-6 的判定，不读本文件） |
 | [references/analysis-character-relations.md](references/analysis-character-relations.md) | Stage 5：关系类型对照 |
 | [references/analysis-short-mechanics.md](references/analysis-short-mechanics.md) | Stage 2 / 6：核心梗、有限复现、规则兑现、代价与主角代理权 |
 | [references/analysis-reader-profile.md](references/analysis-reader-profile.md) | Stage 3 / 6：读者心理与期待管理 |
