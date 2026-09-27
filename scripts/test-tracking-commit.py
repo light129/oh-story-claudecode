@@ -519,6 +519,59 @@ class TrackingCommitTests(unittest.TestCase):
         self.assertEqual(self.read_state()["last_committed_chapter"], 1)
         self.assertEqual(self.read_state()["context"]["position"]["scene"], "剪辑室")
 
+    def test_common_model_spellings_commit_on_first_try(self) -> None:
+        # 实测（v0.8.1 solo A/B，10 章）首次提交全被退回：章号写成字符串、自造 planned_chapter、
+        # action 写 add、新书快照的 identity 写成列表。这些写法含义明确，照收并规范成正式形状。
+        self.init()
+        document = transaction(1, character=True, foreshadow=True, timeline=True)
+        row = document["delta"]["foreshadow_changes"][0]
+        row["action"] = "add"
+        row["planted_chapter"] = "1"
+        row["planned_chapter"] = row.pop("planned_resolution_chapter")
+        event = document["delta"]["timeline_events"][0]
+        event["action"] = "新增"
+        document["character_snapshots"]["江晨"]["identity"] = ["火箭军文工团宣传兵", "军宣爆款创作者"]
+        document["character_snapshots"]["江晨"]["relationships"] = "与钟嘉嘉协作"
+        self.run_tool("commit", document)
+        state = self.read_state()
+        self.assertEqual(state["foreshadow"]["F027"]["planted_chapter"], 1)
+        self.assertEqual(state["foreshadow"]["F027"]["planned_resolution_chapter"], 9)
+        self.assertEqual(state["characters"]["江晨"]["identity"], "火箭军文工团宣传兵；军宣爆款创作者")
+        self.assertEqual(state["characters"]["江晨"]["relationships"], ["与钟嘉嘉协作"])
+
+    def test_rejections_name_the_fix(self) -> None:
+        self.init()
+        document = transaction(1, foreshadow=True)
+        document["delta"]["foreshadow_changes"][0]["payoff_note"] = "看片会后"
+        completed = self.run_tool("commit", document, expect=2)
+        self.assertIn("contains unsupported fields: payoff_note", completed.stderr)
+        self.assertIn("只收 action, id, importance, planned_resolution_chapter, planted_chapter, status, summary",
+                      completed.stderr)
+        document = transaction(1, foreshadow=True)
+        document["delta"]["foreshadow_changes"][0]["action"] = "merge"
+        self.assertIn("action is invalid: use upsert or delete", self.run_tool("commit", document, expect=2).stderr)
+        self.run_tool("commit", transaction(1, character=True))
+        document = transaction(2, character=True)
+        document["character_snapshots"] = {}
+        self.assertIn("current_snapshots", self.run_tool("commit", document, expect=2).stderr)
+
+    def test_draft_shows_entry_shapes_from_the_validator_constants(self) -> None:
+        self.init()
+        completed = subprocess.run(
+            [sys.executable, str(TOOL), "draft", "--project", str(self.project), "--chapter", "1"],
+            text=True, capture_output=True, check=False, encoding="utf-8")
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        shapes = json.loads(completed.stdout)["shapes"]
+        foreshadow = shapes["delta.foreshadow_changes[]"]
+        self.assertEqual(foreshadow["planted_chapter"], 1)
+        self.assertEqual(foreshadow["status"], "已埋|已回收|已过期|放弃")
+        self.assertEqual(set(foreshadow), {"action", "id", "summary", "planted_chapter",
+                                           "planned_resolution_chapter", "status", "importance"})
+        self.assertEqual(shapes["delta.timeline_events[]"]["reveal_status"], "未揭示|部分揭示|已揭示")
+        snapshot_shape = shapes["character_snapshots.{角色名}"]
+        self.assertEqual(snapshot_shape["identity"], "一句话")
+        self.assertEqual(snapshot_shape["open_threads"], ["一条一句"])
+
     def test_redraft_with_stale_revision_rebuilds_context_and_keeps_filled_parts(self) -> None:
         self.init()
         (self.project / "大纲").mkdir(exist_ok=True)
