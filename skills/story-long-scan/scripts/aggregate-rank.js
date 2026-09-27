@@ -155,7 +155,8 @@ function parseRankFile(filePath) {
   const firstHeading = lines.find((line) => /^#\s/.test(line));
   const tm = firstHeading ? firstHeading.match(TITLE_RE) : null;
   if (!tm) return null;
-  if (!lines.some((line) => ENTRY_RE.test(line))) return null;
+  // 首行像榜单、却一条条目都没有：多半是采集没拿到数据。仍返回，交给「采集情况」列进「没采到」，
+  // 但不进题材统计。
 
   const file = {
     path: filePath,
@@ -385,6 +386,7 @@ function titleGrams(titles, minCount) {
 function aggregate(parsedFiles, opts) {
   const byPlatform = new Map();
   for (const file of parsedFiles) {
+    if (!file.entries.length) continue;
     if (!byPlatform.has(file.platform)) byPlatform.set(file.platform, []);
     byPlatform.get(file.platform).push(file);
   }
@@ -490,7 +492,8 @@ function aggregate(parsedFiles, opts) {
     const unresolved = f.entries.filter((e) => !e.resolved).length;
     if (unresolved) problems.push(`书名待解析 ${unresolved} 条`);
     const failed = f.sections.filter((s) => /失败/.test(s.status) || s.count === 0).map((s) => s.name);
-    if (failed.length) problems.push(`没采到：${failed.join("、")}`);
+    if (!f.entries.length) problems.push("没采到：整份榜单一本都没有");
+    else if (failed.length) problems.push(`没采到：${failed.join("、")}`);
     return {
       name: f.name,
       platform: f.platform,
@@ -526,6 +529,24 @@ function pct(x) {
   return `${Math.round(x * 100)}%`;
 }
 
+// 文件头「数据质量」是给脚本和维护者看的标记；「扫榜聚合.md」落在作者文件夹，翻成白话。
+const QUALITY_WORDS = {
+  "[OK]": "正常",
+  "[标题解析异常]": "书名大多没解出来",
+  "[书名解析异常]": "书名大多没解出来",
+  "[无数据]": "没有数据",
+  "[存在问题]": "有问题",
+  "[仅列表-无核心指标]": "只有书单，缺热度等关键数字",
+  "[详情解析异常/登录态缺失]": "详情大多没取到，可能没登录",
+  "[部分详情缺失]": "部分详情没取到",
+  "未标注": "质量未标",
+};
+
+function qualityWords(quality) {
+  if (Object.prototype.hasOwnProperty.call(QUALITY_WORDS, quality)) return QUALITY_WORDS[quality];
+  return String(quality || "").replace(/^\[(.*)\]$/, "$1") || "质量未标";
+}
+
 function renderMarkdown(result) {
   const out = ["# 扫榜聚合", ""];
   out.push(`- 来源：${result.files.length} 个榜单文件，${result.platforms.map((p) => `${p.platform} ${p.bookCount} 本`).join("，")}`);
@@ -534,7 +555,7 @@ function renderMarkdown(result) {
   out.push("## 采集情况", "");
   for (const f of result.files) {
     const note = f.problems.length ? `；${f.problems.join("；")}` : "";
-    out.push(`- ${f.platform} · ${f.list}：${f.entries} 条，${f.time || "日期未标"}，${f.quality}${note}`);
+    out.push(`- ${f.platform} · ${f.list}：${f.entries} 条，${f.time || "日期未标"}，${qualityWords(f.quality)}${note}`);
   }
   out.push("");
 
@@ -591,7 +612,6 @@ function renderMarkdown(result) {
       out.push("");
     }
   }
-  out.push("原始条目按需抽样：`--sample {题材/标签/书名词} --n 5`。");
   return out.join("\n") + "\n";
 }
 
@@ -628,8 +648,12 @@ function main(argv) {
     return 2;
   }
   const parsed = collectFiles(opts.inputs).map(parseRankFile).filter(Boolean);
-  if (!parsed.length) {
-    process.stderr.write("没有找到可聚合的榜单文件（首行须是「# 平台 · 榜单名」，且含「### #排名 书名」条目）。\n");
+  if (!parsed.some((f) => f.entries.length)) {
+    const empty = parsed.map((f) => f.name);
+    process.stderr.write(
+      "没有找到可聚合的榜单文件（首行须是「# 平台 · 榜单名」，且含「### #排名 书名」条目）。" +
+        (empty.length ? `这些榜单一本都没有：${empty.join("、")}。` : "") + "\n"
+    );
     return 1;
   }
   if (opts.sample) {

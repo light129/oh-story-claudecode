@@ -10,7 +10,7 @@
    - 主版本 ≥ 2 → 继续
    - 主版本 < 2 → 停止 OpenCode 部署（其它 target 照常），告诉用户先升级到 2.x（先 `npm rm -g opencode-ai`，再 `npm i -g @opencode/cli` 或 `curl -fsSL https://opencode.ai/v2/install | bash`），装好后重跑 story-setup
    - 命令不可用或解析不出版本 → 同样停止 OpenCode 部署，请用户在自己的终端运行 `opencode --version`：用户在对话里确认显示 2.x 后才继续；是 1.x 按上一条处理
-   - 停止 OpenCode 部署时：target 只有 opencode 则不写、不更新 `.story-deployed`（已有的原样保留，不抬 `agents_version`），也不写任何 OpenCode 文件；多 target 时其它端照常部署，写入的 `target_cli` 不含 opencode，报告首行写明 OpenCode 未部署及原因，并告诉作者升级后重跑 story-setup、选择把 OpenCode 加回来
+   - 停止 OpenCode 部署时：target 只有 opencode 则不写、不更新 `.story-deployed`（已有的原样保留，不抬 `agents_version`），也不写任何 OpenCode 文件；多 target 时其它端照常部署，写入的 `target_cli` 不含 opencode；安装报告「现在可以做什么」只写装上的端，「你还需要做的事」里用白话说 OpenCode 这次没装上及原因（如版本太旧），升级后重新部署时选把它加回来
 2. 插件由 OpenCode 自动发现 `.opencode/plugins/*.ts` 加载，不写 `opencode.json`。项目根已有 `opencode.json` / `opencode.jsonc` 时，从其 `plugin`、`plugins` 数组删掉指向 `.opencode/plugins/story-hooks.ts` 的项（旧版部署留下；2.x 丢弃单文件路径并告警），数组删空就删掉该键，其余内容原样保留。
 
 ## 部署清单（机械可检查）
@@ -37,7 +37,7 @@
 
 ## 配置 Agent 模型
 
-> OpenCode 子代理不指定模型时继承主模型，导致低成本 Agent 也消耗主模型额度。此步骤自动检测用户模型并写入 `model:` 字段。
+> 子代理不指定模型时继承主模型，低成本 Agent 也耗主模型额度；此步骤自动检测用户模型并写入 `model:` 字段。
 
 ### 保留已有模型配置（必须在 `.opencode/agents/` 的 replace 之前执行）
 
@@ -83,7 +83,7 @@ OpenCode agents 部署是 `replace`，会覆盖上次写入的 `model:`。所以
 选项：
   - provider/model-id
   - provider/model-id
-  - 自定义输入（手动输入完整模型 ID，ID 拼写错误要到运行时才会暴露；中端提示请勿使用低端模型，会影响正文质量）
+  - 自定义输入（手动输入完整模型 ID，ID 拼写错误要到运行时才会暴露；高端提示请勿使用低端模型，会影响正文质量）
   - 保留现有模型（有缓存时才显示）
   - 跳过，用主模型（低端/高端说明「成本可能较高」；中端说明「主模型质量通常足够」）
 ```
@@ -91,7 +91,7 @@ OpenCode agents 部署是 `replace`，会覆盖上次写入的 `model:`。所以
 规则：
 - 候选最多显示 5 个，超过则截断并提示"更多模型请使用自定义输入"。**每一级无论候选数是否为 0 都用 AskUserQuestion 弹出**，选项至少含：候选模型（如有）、`自定义输入`、`保留现有模型`（「保留已有模型配置」缓存到该 agent 的 model，无则不显示此项）、`跳过，用主模型`。候选为 0 时仍弹窗，并在问题说明里给出对应警告 + 列出未分级/未入档模型供参考——不再静默跳过交互（否则用户够不到自定义输入）。
 - `自定义输入`：用户输入 `provider/model-id` 完整 ID；写入前校验为单行、无控制字符、匹配 `^[A-Za-z0-9._-]+/[A-Za-z0-9._:+-]+$`，不符则提示重输或改选跳过。
-- `保留现有模型`：写回「保留已有模型配置」缓存的该 agent model（重新部署时保住用户上次配置），不算"跳过"。
+- `保留现有模型`：写回「保留已有模型配置」缓存的该 agent model（重新部署时保住用户上次配置），不算"跳过"。写手的缓存模型按本次分级落在低端或中端时（旧版把写手按中端配），高端这级的问题说明加一句「写手上次配的是中档模型，写正文建议换高端的」，推荐重选。
 - `跳过，用主模型`：显式清除——不写该 agent 的 `model:`，agent 继承主模型。想保留上次配置请选 `保留现有模型`。
 - 各级候选为 0 时在问题说明里给出提示：
   - 低端："没找到便宜的模型，拆书助手、资料检索员和校对员会用主模型，花费可能较高"
@@ -121,7 +121,7 @@ model: provider/model-id
 - 如果 agent 文件已有 `model:` 字段（重新部署场景），替换该顶层 `model:` 的值，不新增重复键
 - `保留现有模型`：写回「保留已有模型配置」缓存的该 agent model
 - `跳过，用主模型`：不写入 `model:` 字段
-- 检测失败/超时、没走到本步骤的等级：用「保留已有模型配置」缓存回填 `model:`，避免 replace 抹掉用户上次配置
+- 检测失败/超时、没走到本步骤的等级：用「保留已有模型配置」缓存回填 `model:`，避免 replace 抹掉用户上次配置；回填的写手模型按关键词落在低端或中端时，在「你还需要做的事」里提醒作者给写手换高端模型
 
 ## 验证
 
@@ -149,16 +149,9 @@ model: provider/model-id
     校对员（consistency-checker）     → <低端模型>（provider/model-id）
     资料检索员（story-explorer）      → <低端模型>（provider/model-id）
   ```
-- 自动检测失败（`opencode models` 不可用）时，在「部署明细」里输出手动配置指南：
+- 自动检测失败（读不到模型列表）时，在「你还需要做的事」里用白话写：
+  <!-- author-report -->
+  ```md
+  这次没能读到你能用的模型列表，拆书助手、校对员和资料检索员先用你的主模型，花费可能偏高。想省钱就告诉我一个便宜的模型名，我帮它们换上；写手和总指挥建议用你最好的模型。
   ```
-  无法自动检测模型列表。以下 Agent 未配置模型，将使用主模型，成本可能较高：
-    - 拆书助手 chapter-extractor（建议使用低成本模型）
-    - 校对员 consistency-checker（建议使用低成本模型）
-    - 资料检索员 story-explorer（建议使用低成本模型）
-
-  手动配置方法：编辑 .opencode/agents/{agent名}.md，在 frontmatter 中添加：
-    model: provider/model-id
-
-  可用模型列表可通过 opencode models 查看；成本与上下文长度见 opencode api model.list 的 cost/limit 字段。
-  模型库与定价见 OpenCode 官方模型源 https://models.dev/。
-  ```
+  「部署明细」只留一行：模型写在 `.opencode/agents/{agent名}.md` frontmatter 的 `model:`，可用模型见 `opencode models`，定价见 https://models.dev/。

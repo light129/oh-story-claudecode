@@ -52,8 +52,8 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 | 3 | **内置知识** | 基于知识库中的趋势数据和方法论做分析 | 无法联网、作者也没有数据时 |
 
 1. 只读所选平台那一份：[点众](references/platform-dianzhong.md) / [黑岩](references/platform-heiyan.md) / [没有脚本的平台](references/manual-rank-input.md)。里面有网址、命令、字段、故障排查、平台分析维度，以及作者提供的榜单怎么整理成文件。
-2. 所有榜单写进同一个输出目录，文件名 `{平台}{类型}_{YYYYMMDD}.md`。某个平台采集失败就跳过，继续其他平台。
-3. 聚合：`node scripts/aggregate-rank.js {输出目录} --out {输出目录}/扫榜聚合.md --sparse 10`。**主会话只读这份聚合**，要看开头与人设原文时再抽样：`node scripts/aggregate-rank.js {输出目录} --sample {题材/标签/书名词} --n 5`。
+2. 每次扫榜新建输出目录 `扫榜/{YYYYMMDD}/`（同日再扫加 `-2`）存本次榜单，不往旧目录追加；文件名 `{平台}{类型}_{YYYYMMDD}.md`，某平台失败就跳过。对比读上个日期目录的 `扫榜聚合.md`。
+3. 聚合：`node scripts/aggregate-rank.js {输出目录} --out {输出目录}/扫榜聚合.md --sparse 10 --scale short`。**主会话只读这份聚合**，要看开头与人设原文再抽样：`node scripts/aggregate-rank.js {输出目录} --sample {题材/标签/书名词} --n 5`。
 
 **内置知识：** 加载 `references/real-market-data.md`（跨平台写作差异对照），明确标注「以下分析基于历史趋势数据；未完成实时榜单校验前只能作为候选假设。」并列出需要复扫的平台页面。
 

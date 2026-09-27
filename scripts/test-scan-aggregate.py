@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -376,26 +377,37 @@ u.ab = (port, cmd, target) => { url = target || url; process.stderr.write("OPEN 
 u.sleep = () => {};
 u.scrollLoad = () => {};
 u.evalJSONBase64 = (port, js) => {
-  if (js.includes("hasState")) return {host: "fanqienovel.com", hasState: true};
+  if (js.includes("hasState")) {
+    // 女频页被重定向到验证页：该频道应计为失败，男频照常写出
+    if (process.env.STUB_BLOCK_FEMALE && url.includes("audience0")) return {host: "verify.example.com", hasState: false};
+    return {host: "fanqienovel.com", hasState: true};
+  }
   if (js.includes("XMLHttpRequest")) {
     const ids = JSON.parse(js.match(/var ids=(\[[^\]]*\])/)[1]);
     return Object.fromEntries(ids.map((id) => [id, detail[id]]));
   }
-  if (js.includes("/page/")) return pages[Number((url.match(/page_(\d+)/) || [])[1])] || [];
+  if (js.includes("/page/")) {
+    if (process.env.STUB_EMPTY_LIBRARY) return [];
+    return pages[Number((url.match(/page_(\d+)/) || [])[1])] || [];
+  }
   return null;
 };
 """
 
 
-def test_fanqie_library(tmp: Path) -> None:
+def run_library(tmp: Path, out: Path, channel: str, **env: str) -> subprocess.CompletedProcess:
     stub = tmp / "cdp-stub.js"
     stub.write_text(CDP_STUB, encoding="utf-8")
-    out = tmp / "library"
-    proc = subprocess.run(
-        [NODE, "-r", str(stub), str(FANQIE), "--source", "library", "--channel", "1", "--pages", "3", "--outdir", str(out)],
+    return subprocess.run(
+        [NODE, "-r", str(stub), str(FANQIE), "--source", "library", "--channel", channel, "--pages", "3", "--outdir", str(out)],
         capture_output=True, text=True, encoding="utf-8", timeout=60,
-        env={**__import__("os").environ, "CDP_UTILS": str(FANQIE.parent / "cdp-utils.js")},
+        env={**os.environ, "CDP_UTILS": str(FANQIE.parent / "cdp-utils.js"), **env},
     )
+
+
+def test_fanqie_library(tmp: Path) -> None:
+    out = tmp / "library"
+    proc = run_library(tmp, out, "1")
     check(proc.returncode == 0, f"library run failed: {proc.stderr}")
     check("library/audience1-stat1-count0/page_1?sort=hottes" in proc.stderr, f"library URL shape: {proc.stderr}")
     check("page_3" in proc.stderr, "keeps paging until a page brings no new books")
@@ -412,6 +424,138 @@ def test_fanqie_library(tmp: Path) -> None:
     fq = platform(result, "番茄")
     check(fq["bookCount"] == 4 and fq.get("unresolved") == 1, f"unresolved title counted once and surfaced: {fq}")
     check(genre(fq, "传统玄幻")["count"] == 1, "genre comes from detail category, not the section header")
+
+
+def test_fanqie_library_failures(tmp: Path) -> None:
+    # --channel all 时女频被跳验证页：男频照常写出，整体报部分失败（exit 2）并说明哪个频道没采到
+    out = tmp / "library-partial"
+    proc = run_library(tmp, out, "all", STUB_BLOCK_FEMALE="1")
+    check(proc.returncode == 2, f"one blocked channel must be a partial failure (exit 2), got {proc.returncode}: {proc.stderr}")
+    check("partial: wrote 1/2; failed 1" in proc.stderr, f"partial summary: {proc.stderr}")
+    check("书库女频" in proc.stderr and "验证页" in proc.stderr, f"partial reason names the channel and cause: {proc.stderr}")
+    files = sorted(p.name for p in out.glob("*.md"))
+    check(len(files) == 1 and "男频" in files[0], f"only the male-channel file is written: {files}")
+
+    # 书库一本都没抓到：不写空文件，整次采集失败（exit 1）
+    out = tmp / "library-empty"
+    proc = run_library(tmp, out, "1", STUB_EMPTY_LIBRARY="1")
+    check(proc.returncode == 1, f"empty library must fail, got {proc.returncode}: {proc.stderr}")
+    check("一本都没抓到" in proc.stderr, f"empty library reason: {proc.stderr}")
+    check(not list(out.glob("*.md")) if out.exists() else True, "empty library must not write a file")
+
+
+# 详情页夹具：推荐书对象排在正文书之前，数字一个是数字一个是字符串，最新章节带转义引号。
+DETAIL_WITH_BOOK_ID = (
+    '<html><head><title>诡舍2完整版在线免费阅读_番茄小说官网</title>'
+    '<meta property="og:novel:author" content="乙"></head><body>'
+    '<script>window.__INITIAL_STATE__={"recommend":{"bookList":[{"bookId":"9001","bookName":"推荐书",'
+    '"author":"别人","readCount":999999,"wordNumber":"12345","creationStatus":"0",'
+    '"lastChapterTitle":"第9章 推荐{别看}"}]},'
+    '"page":{"bookId":"7001","bookName":"诡舍2","author":"乙",'
+    '"abstract":"【悬疑+灵异】永夜降临，\\"诡舍\\"开门。",'
+    '"categoryV2":"[{\\"ObjectId\\":1,\\"Name\\":\\"悬疑灵异\\"}]",'
+    '"readCount":488046,"wordNumber":"217097","creationStatus":"1",'
+    '"lastChapterTitle":"第100章 他说\\"开门\\"","chapterList":[{"title":"x}y"}]}};</script></body></html>'
+)
+# 没有 bookId 的形状：按 <title> 里的书名定位正文书
+DETAIL_TITLE_ONLY = (
+    '<html><head><title>合院亿富翁最新章节_番茄小说</title></head><body>'
+    '<script>window.__INITIAL_STATE__={"rec":[{"bookName":"推荐书","readCount":5,"lastChapterTitle":"推荐章"}],'
+    '"book":{"bookName":"合院亿富翁","author":"丙","readCount":"90000","wordNumber":120000,'
+    '"lastChapterTitle":"第30章"}};</script></body></html>'
+)
+# 定位不到正文书：数字宁可留空，也不拿推荐书的
+DETAIL_UNANCHORED = (
+    '<html><head><title>番茄小说</title></head><body>'
+    '<script>window.__INITIAL_STATE__={"rec":[{"bookName":"推荐书","readCount":5,"lastChapterTitle":"推荐章"}]};'
+    '</script></body></html>'
+)
+
+DETAIL_VM = r"""
+const fs = require("fs");
+const vm = require("vm");
+const { buildDetailJS } = require(process.argv[2]);
+const pages = JSON.parse(fs.readFileSync(process.argv[3], "utf8"));
+class FakeXHR {
+  open(method, url, async) { this.url = url; if (async !== false) throw new Error("expected sync XHR"); }
+  send() { this.responseText = pages[this.url] || ""; }
+}
+const js = buildDetailJS(Object.keys(pages).map((u) => u.replace("/page/", "")));
+const result = vm.runInNewContext(js, { XMLHttpRequest: FakeXHR });
+process.stdout.write(result);
+"""
+
+
+def test_fanqie_detail_parsing(tmp: Path) -> None:
+    fixture = tmp / "detail-pages.json"
+    fixture.write_text(json.dumps({
+        "/page/7001": DETAIL_WITH_BOOK_ID,
+        "/page/7002": DETAIL_TITLE_ONLY,
+        "/page/7003": DETAIL_UNANCHORED,
+    }, ensure_ascii=False), encoding="utf-8")
+    runner = tmp / "detail-vm.js"
+    runner.write_text(DETAIL_VM, encoding="utf-8")
+    proc = subprocess.run([NODE, str(runner), str(FANQIE), str(fixture)],
+                          capture_output=True, text=True, encoding="utf-8", timeout=60)
+    check(proc.returncode == 0, f"buildDetailJS must run in a plain JS context: {proc.stderr}")
+    if proc.returncode != 0:
+        return
+    got = json.loads(proc.stdout)
+    main = got.get("7001", {})
+    check(main.get("title") == "诡舍2" and main.get("author") == "乙", f"title/author from the page book: {main}")
+    check(main.get("readCount") == "488046", f"numeric readCount from the page book, not the recommendation: {main}")
+    check(main.get("wordNumber") == "217097", f"string wordNumber from the page book: {main}")
+    check(main.get("creationStatus") == "1", f"creationStatus from the page book: {main}")
+    check(main.get("lastChapterTitle") == '第100章 他说"开门"', f"lastChapterTitle keeps escaped quotes: {main}")
+    check(main.get("category") == "悬疑灵异", f"category from categoryV2: {main}")
+    check(main.get("tags") == "悬疑、灵异", f"tags from the abstract prefix: {main}")
+    by_title = got.get("7002", {})
+    check(by_title.get("readCount") == "90000" and by_title.get("wordNumber") == "120000",
+          f"without bookId, the book is located by the <title> name: {by_title}")
+    check(by_title.get("lastChapterTitle") == "第30章", f"lastChapterTitle from the located book: {by_title}")
+    lost = got.get("7003", {})
+    check(lost.get("readCount") == "" and lost.get("lastChapterTitle") == "",
+          f"unlocated book must not borrow the recommendation's numbers: {lost}")
+
+
+def test_empty_rank_file_surfaces(tmp: Path) -> None:
+    scan = tmp / "with-empty"
+    scan.mkdir()
+    (scan / "番茄男频阅读榜_全题材_20260926.md").write_text(fanqie("男频", "阅读榜", {
+        "都市日常": [("开局签到神豪系统", "甲", "88.2万", "120.5万", "系统")],
+    }), encoding="utf-8")
+    (scan / "番茄女频书库最热新书_audience0-stat1-count0_20260926.md").write_text(
+        "# 番茄 · 女频书库最热新书\n\n- 标题解析：成功 0 / 共 0\n- 数据质量：[无数据]\n\n---\n\n## 全部（书库最热） — 0 本\n",
+        encoding="utf-8")
+    proc = run(LONG, str(scan))
+    check(proc.returncode == 0, f"aggregate with an empty list failed: {proc.stderr}")
+    text = proc.stdout
+    situation = text.split("## 采集情况", 1)[1].split("\n## ", 1)[0] if "## 采集情况" in text else ""
+    check("女频书库最热新书：0 条" in situation and "没采到" in situation,
+          f"an empty rank file must be listed as 没采到 in 采集情况: {situation}")
+    check("正常" in situation and "[OK]" not in situation and "[无数据]" not in situation,
+          f"quality marks are translated for the author: {situation}")
+    check("--sample" not in text and "--n" not in text, "aggregate file must not carry command-line flags")
+    result = json.loads(run(LONG, str(scan), "--json").stdout)
+    check(platform(result, "番茄")["bookCount"] == 1, "empty list adds no books")
+    empty = next((f for f in result["files"] if f["entries"] == 0), None)
+    check(empty is not None and empty["quality"] == "[无数据]", f"JSON keeps the raw quality mark: {empty}")
+
+    only_empty = tmp / "only-empty"
+    only_empty.mkdir()
+    shutil.copy(next(scan.glob("*女频*")), only_empty)
+    proc = run(LONG, str(only_empty))
+    check(proc.returncode == 1 and "一本都没有" in proc.stderr, f"only empty lists must fail clearly: {proc.stderr}")
+
+
+def test_title_parse_failure_words(tmp: Path) -> None:
+    scan = tmp / "bad-titles"
+    scan.mkdir()
+    (scan / "番茄男频阅读榜_全题材_20260926.md").write_text(fanqie("男频", "阅读榜", {
+        "都市日常": [("（标题待解析）", "未知", "未知", "未知", ""), ("开局签到", "甲", "1万", "2万", "")],
+    }, quality="[标题解析异常]"), encoding="utf-8")
+    text = run(LONG, str(scan)).stdout
+    check("书名大多没解出来" in text and "[标题解析异常]" not in text, "title-parse failure is shown in plain words")
 
 
 def test_short_copy_identical() -> None:
@@ -431,6 +575,10 @@ def main() -> int:
         test_errors(tmp)
         test_compression(tmp)
         test_fanqie_library(tmp)
+        test_fanqie_library_failures(tmp)
+        test_fanqie_detail_parsing(tmp)
+        test_empty_rank_file_surfaces(tmp)
+        test_title_parse_failure_words(tmp)
         test_short_copy_identical()
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

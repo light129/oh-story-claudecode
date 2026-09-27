@@ -123,7 +123,7 @@ chapter,source_chapter,volume,title,start_line,end_line,char_count,source_locato
 
 报告按 author-facing.md「拆文报告.md」写：拆到哪、核心发现、读者在追什么、故事怎么推进、人物与关系、读者与角色的信息差、节奏、核心机制、可借鉴套路、不建议模仿、文风一句话、还不确定的地方。生成新报告前运行 `manage_analysis_run.py mark-stage --stage stage5 --prepare`，新报告与完整概要落盘后再运行 `manage_analysis_run.py mark-stage --stage stage5`（细则见 [references/stage5-report.md](references/stage5-report.md)）。报告只综合底层结果，不再次阅读全文。
 
-如项目存在 `选题决策.md`，只回填仍标记“待拆文验证”且题材匹配的项。文件存在但缺少当前契约必需的“能爆的原因”等字段时返回 `invalid_topic_decision_contract`，提示重跑 `story-long-scan` Phase 5；文件不存在不影响拆文。
+如项目存在 `选题决策.md`，只回填仍标记“待拆文验证”且题材匹配的项。没有「推荐选题」一节（只扫了榜）就跳过回填，不算无效；有推荐选题但缺少当前契约必需的“能爆的原因”等字段时返回 `invalid_topic_decision_contract`，提示重跑 `story-long-scan` Phase 5；文件不存在不影响拆文。
 
 ## Stage 6：文风与单独重建
 

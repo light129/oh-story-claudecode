@@ -483,6 +483,13 @@ cmp -s "$TMP_DIR/claude-v25.json" "$TMP_DIR/claude-v25-again.json" \
 
 # 重部署时 sentinel 的 target_cli 是权威：不认它就会每次重问，且 skills-only 三端根本无从探测。
 assert_grep '已部署项目以 sentinel 里的值为准' "$SKILL_FILE" "story-setup must reuse the deployed target_cli on redeploy"
+# 但沿用 sentinel 不能跳过当前宿主判断：作者换了软件再跑部署，新宿主必须有机会装上。
+assert_no_grep '跳过下面第 4-6 步的宿主判断' "$SKILL_FILE" "story-setup must still detect the current host when the sentinel already lists targets"
+assert_grep '第 4 步仍判断当前宿主' "$SKILL_FILE" "story-setup must detect the current host on redeploy"
+assert_grep '你现在用的是.*要一起装上吗' "$SKILL_FILE" "story-setup must offer to add a new current host missing from the sentinel"
+# 判断不出宿主时，项目里的宿主标记只是上次装给谁，不等于这次在哪个软件里。
+assert_no_grep '恰好只有一个宿主的标记就用它' "$SKILL_FILE" "story-setup must not silently treat a lone project marker as the current host"
+assert_grep '这次还是它吗' "$SKILL_FILE" "story-setup must confirm a lone project marker with the author"
 # metadata.openclaw 在 13 个 skill 上全都有，拿它判定会把 reasonix / generic 项目误认成 OpenClaw。
 assert_no_grep '中的 `metadata\.openclaw`' "$SKILL_FILE" "story-setup must not detect OpenClaw from the skills bundle it deploys itself"
 assert_grep '不作 OpenClaw 信号' "$SKILL_FILE" "story-setup must explain why metadata.openclaw is not a detection signal"
@@ -812,7 +819,7 @@ assert_grep '至于X不X，怎么X' "$AGENT_REFS_DIR/deslop-gates.md" "narrative
 assert_grep 'check-ai-patterns\.js --check' "$SKILL_DIR/references/templates/agents/narrative-writer.md" "narrative-writer must require detector rescan handoff"
 assert_grep '裸调用.*不得自动进入正文写作|不得自动进入正文写作.*裸调用' "$REPO_ROOT/skills/story-long-write/SKILL.md" "story-long-write bare invocation must not auto-write prose"
 assert_grep '不得把已有项目默认为日更 3 章|默认为日更 3 章' "$REPO_ROOT/skills/story-long-write/SKILL.md" "story-long-write must not default existing projects to daily 3 chapters on bare invocation"
-assert_grep '默认停在细纲交付|默认停靠.*Phase 1→3' "$REPO_ROOT/skills/story-long-write/SKILL.md" "story-long-write opening flow must stop after outline by default"
+assert_grep '默认停在细纲交付|最远停在细纲交付|默认停靠.*Phase 1→3' "$REPO_ROOT/skills/story-long-write/SKILL.md" "story-long-write opening flow must stop after outline by default"
 assert_grep '本轮 K（最多 3 章）后必须进入 Step 3/4 收尾并停止|最多 3 章.*收尾并停止' "$REPO_ROOT/skills/story-long-write/references/workflow-daily.md" "daily workflow must stop after bounded batch"
 assert_grep '细纲边界|不得自造剧情' "$SKILL_DIR/references/templates/agents/narrative-writer.md" "narrative-writer must enforce the outline boundary"
 # 锚在源模板；OpenCode/Codex 生成副本由 sync-opencode.py --check 与 Codex 生成器确定性检查保持一致。
