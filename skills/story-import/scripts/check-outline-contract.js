@@ -407,7 +407,7 @@ function verifySupply(volumeFile, unitId) {
     const ok = hasSupplyHeading(draft.text)
     return {
       schema_version: 1, verifier: 'story-long-write.outline-supply', file: path.resolve(draftFile), unit: unitId, ok,
-      evidence: ok ? '排纲底稿含「供给自查」小节' : `${path.basename(draftFile)} 里没有「供给自查」小节——每批出细纲前须做供给自查（含「无缺口」情形），见 workflow-setup.md「排纲自查与细纲」步骤 3`,
+      evidence: ok ? '排纲底稿含「供给自查」小节' : `${path.basename(draftFile)} 里没有「供给自查」小节——每批出细纲前须做供给自查（含「无缺口」情形），见 workflow-outline.md 步骤 3`,
     }
   }
   const read = readUtf8(volumeFile)
@@ -450,7 +450,7 @@ function verifySupply(volumeFile, unitId) {
     file: path.resolve(volumeFile),
     unit: unitId,
     ok,
-    evidence: ok ? '单元卡含「供给自查」小节' : `没有 排纲底稿_${unitId}.md，剧情单元 ${unitId} 的卡内也没有「供给自查」小节——每批出细纲前须做供给自查（含「无缺口」情形），见 workflow-setup.md「排纲自查与细纲」步骤 3`,
+    evidence: ok ? '单元卡含「供给自查」小节' : `没有 排纲底稿_${unitId}.md，剧情单元 ${unitId} 的卡内也没有「供给自查」小节——每批出细纲前须做供给自查（含「无缺口」情形），见 workflow-outline.md 步骤 3`,
   }
 }
 

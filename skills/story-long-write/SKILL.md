@@ -76,6 +76,8 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 ### 路径与术语约定
 
+> `{PYTHON}` 依次试 `python3`、`python`、`py -3`，用第一个能跑的；`{skill 根}` 是本 skill 所在目录。
+>
 > **对标书路径查找**：优先 `{项目}/对标/{书名}/`，不存在则回退 `拆文库/{书名}/`（`拆文库/` 是拆文原始产出，`对标/` 是本项目引用视图，首次引用的复制规则见 workflow-setup.md「对标发现」第 3 条）。
 >
 > **卷纲不整读**：一律走 `{PYTHON} {skill 根}/scripts/outline_view.py --unit {单元ID} {卷纲路径}`（只要契约用 `--contract`，看目录用 `--toc`）；找不到单元就核对单元ID或先补卷纲，不改用整读。排纲底稿放 `大纲/排纲底稿_{单元ID}.md`，只在排纲/补纲时读；取段器的作用域、历史与校验选项见 artifact-protocols.md 卷纲模板。
@@ -90,7 +92,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 ### Phase 1–3：开书与规划
 
-按作者确认点分时刻读（见首屏写前必读第 1 条）；时刻表、交接与换上下文规则见 [references/workflow-setup.md](references/workflow-setup.md) 开头。
+按作者确认点分时刻读（见首屏写前必读第 1 条）；每个时刻文件开头写了本时刻的交接规则，出卷纲、出细纲时不必再读 workflow-setup.md。
 
 ---
 

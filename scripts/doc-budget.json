@@ -12,8 +12,8 @@
   "files": [
     {
       "path": "skills/story-long-write/SKILL.md",
-      "budget": 6650,
-      "why": "长篇入口与阶段路由；目录/产物与完整资料索引按原文迁出，锁住无条件加载节省。 调高：新增「面向作者的汇报」通则（每个流程的汇报都受它约束，必须入口常驻）与「继续写」一句话确认规则；真机会话里作者看不懂脚本名、字段名、状态码，汇报口径只能放在每次都加载的入口。 v0.8.2：开书改为按时刻路由（写前必读第 1 条列三份时刻文件）。 v0.8.2 调高 300：规划、改稿任务的作者记忆 query 命令写进入口（不再为查询整读 author-memory.md 协议）；主会话自己写时本章技法只读路由指向的一节、日更一批一份；「定设定」进场景表与触发词；Notice/Fallback 只进技术备注行。"
+      "budget": 6750,
+      "why": "长篇入口与阶段路由；目录/产物与完整资料索引按原文迁出，锁住无条件加载节省。 调高：新增「面向作者的汇报」通则（每个流程的汇报都受它约束，必须入口常驻）与「继续写」一句话确认规则；真机会话里作者看不懂脚本名、字段名、状态码，汇报口径只能放在每次都加载的入口。 v0.8.2：开书改为按时刻路由（写前必读第 1 条列三份时刻文件）。 v0.8.2 调高 300：规划、改稿任务的作者记忆 query 命令写进入口（不再为查询整读 author-memory.md 协议）；主会话自己写时本章技法只读路由指向的一节、日更一批一份；「定设定」进场景表与触发词；Notice/Fallback 只进技术备注行。 e2e（出细纲）：{PYTHON} 的探测顺序写进入口；各时刻文件自带交接规则；排纲底稿加「批次定位」；新书无追踪时视角取设定与卷纲。"
     },
     {
       "path": "skills/story-long-write/references/workflow-daily.md",
@@ -252,8 +252,8 @@
     },
     {
       "path": "skills/story-long-write/references/workflow-outline.md",
-      "budget": 8000,
-      "why": "v0.8.2：开书按时刻拆出的流程文件，只在该时刻读（也进 story-architect 任务包）。"
+      "budget": 8100,
+      "why": "v0.8.2：开书按时刻拆出的流程文件，只在该时刻读（也进 story-architect 任务包）。 e2e（出细纲）：{PYTHON} 的探测顺序写进入口；各时刻文件自带交接规则；排纲底稿加「批次定位」；新书无追踪时视角取设定与卷纲。"
     },
     {
       "path": "skills/story-short-write/references/scene-craft.md",
@@ -407,14 +407,14 @@
         {
           "label": "常规",
           "files": [],
-          "budget": 12450
+          "budget": 12550
         },
         {
           "label": "没方向：查题材目录",
           "files": [
             "skills/story-long-write/references/long-genre-catalog.md"
           ],
-          "budget": 19200
+          "budget": 19300
         },
         {
           "label": "女频",
@@ -428,7 +428,7 @@
           "files": [
             "skills/story-long-write/references/genre-readers.md"
           ],
-          "budget": 16550
+          "budget": 16650
         },
         {
           "label": "特殊题材（决策路由表＋指向的一节）",
@@ -436,18 +436,18 @@
             "skills/story-long-write/references/plot-special-topics.md#决策路由表",
             "skills/story-long-write/references/plot-special-topics.md#脑洞文完整写作框架"
           ],
-          "budget": 14300
+          "budget": 14400
         },
         {
           "label": "派子代理编排后续时刻",
           "files": [
             "skills/story-long-write/references/agent-calls.md"
           ],
-          "budget": 16050
+          "budget": 16150
         }
       ],
       "stacking": {
-        "budget": 28800,
+        "budget": 28900,
         "slots": [
           [
             "没方向：查题材目录",
@@ -480,32 +480,32 @@
         {
           "label": "常规",
           "files": [],
-          "budget": 24400
+          "budget": 24500
         },
         {
           "label": "女频",
           "files": [
             "skills/story-long-write/references/female-audience-writing.md"
           ],
-          "budget": 28650
+          "budget": 28750
         },
         {
           "label": "对标登记 ≥2 本",
           "files": [
             "skills/story-long-write/references/cross-book-recall.md"
           ],
-          "budget": 27600
+          "budget": 27700
         },
         {
           "label": "有灵感库",
           "files": [
             "skills/story-long-write/references/cross-book-recall.md#公共灵感标签召回"
           ],
-          "budget": 25350
+          "budget": 25450
         }
       ],
       "stacking": {
-        "budget": 31850,
+        "budget": 31950,
         "slots": [
           [
             "女频"
@@ -772,32 +772,32 @@
         {
           "label": "常规",
           "files": [],
-          "budget": 20800
+          "budget": 20950
         },
         {
           "label": "首批含前 3 章",
           "files": [
             "skills/story-long-write/references/opening-design.md"
           ],
-          "budget": 25600
+          "budget": 25700
         },
         {
           "label": "对标登记 ≥2 本",
           "files": [
             "skills/story-long-write/references/cross-book-recall.md"
           ],
-          "budget": 24000
+          "budget": 24150
         },
         {
           "label": "有灵感库",
           "files": [
             "skills/story-long-write/references/cross-book-recall.md#公共灵感标签召回"
           ],
-          "budget": 21750
+          "budget": 21900
         }
       ],
       "stacking": {
-        "budget": 28750,
+        "budget": 28900,
         "slots": [
           [
             "首批含前 3 章"
@@ -844,14 +844,14 @@
         {
           "label": "常规",
           "files": [],
-          "budget": 13300
+          "budget": 13400
         },
         {
           "label": "追踪提交报错",
           "files": [
             "skills/story-long-write/references/tracking-transaction.md"
           ],
-          "budget": 21000
+          "budget": 21100
         }
       ],
       "why": "v0.8.2：大修按时刻走——先定范围，按范围加载，改写交写手，追踪协议只在报错时读；字数出带、缺 Node 的处置与作者问法写进 workflow-revision，不再借读单章流程。"
@@ -1057,14 +1057,14 @@
         {
           "label": "常规",
           "files": [],
-          "budget": 22100
+          "budget": 22200
         },
         {
           "label": "追踪提交报错",
           "files": [
             "skills/story-long-write/references/tracking-transaction.md"
           ],
-          "budget": 29850
+          "budget": 29950
         },
         {
           "label": "本章技法·打脸",
@@ -1080,7 +1080,7 @@
             "skills/story-long-write/references/long-reversal.md#决策路由",
             "skills/story-long-write/references/long-reversal.md#6. 认知反转"
           ],
-          "budget": 23000
+          "budget": 23100
         },
         {
           "label": "本章技法·感情",
@@ -1089,7 +1089,7 @@
             "skills/story-long-write/references/emotional-methods.md#情感虐心三板斧",
             "skills/story-long-write/references/emotion-on-page.md"
           ],
-          "budget": 25050
+          "budget": 25150
         },
         {
           "label": "本章技法·悬疑",
@@ -1097,7 +1097,7 @@
             "skills/story-long-write/references/long-suspense.md#决策路由表",
             "skills/story-long-write/references/long-suspense.md#拉期待手法速查"
           ],
-          "budget": 23500
+          "budget": 23600
         },
         {
           "label": "本章技法·日常",
@@ -1105,11 +1105,11 @@
             "skills/story-long-write/references/long-chapter-hooks.md#决策路由",
             "skills/story-long-write/references/long-chapter-hooks.md#章尾实战模板"
           ],
-          "budget": 23550
+          "budget": 23650
         }
       ],
       "stacking": {
-        "budget": 32750,
+        "budget": 32850,
         "slots": [
           [
             "追踪提交报错"
