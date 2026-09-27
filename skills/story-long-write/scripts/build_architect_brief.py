@@ -29,12 +29,11 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from outline_view import parse as parse_volume, unit_chapter_range  # noqa: E402
+from outline_view import parse as parse_volume, slice_arc, strip_retired, unit_chapter_range  # noqa: E402
 
 REFERENCES = Path(__file__).resolve().parent.parent / "references"
 WORK_DIR = (".story", "work", "排纲")
@@ -62,21 +61,41 @@ def emit(text: str, stream) -> None:
     stream.flush()
 
 
+def render(sections, chosen, span, preamble) -> str:
+    """与 outline_view.emit 同一取法（剔除已退役条目、情绪弧线按单元截段），只是返回文本。"""
+    out = ["\n".join(strip_retired(preamble, False)).rstrip()] if preamble else []
+    for sec in sections:
+        if sec not in chosen:
+            continue
+        body = slice_arc(sec, span) if ("情绪弧线" in sec.title or "排班" in sec.title) else sec.lines
+        out.append("\n".join(strip_retired(body, False)).rstrip())
+    return "\n\n".join(out) + "\n"
+
+
 def unit_closures(project: Path, first: int, last: int) -> list[tuple[str, str]]:
-    """story-architect 没有执行命令的权限：由脚本先把覆盖本批章节的剧情单元闭包取出来放进包里。"""
+    """story-architect 没有执行命令的权限：由脚本先把覆盖本批章节的剧情单元闭包取出来放进包里。
+
+    取法同 `outline_view.py --unit U --stage outline`；一卷里有几个单元时，卷契约与卷级常任只随第一个单元给一次。"""
     found: list[tuple[str, str]] = []
     for volume in sorted((project / "大纲").glob("卷纲_第*卷.md")):
-        _, sections = parse_volume(volume.read_text(encoding="utf-8"))
-        units = sorted({s.unit for s in sections if s.unit and s.kind == "单元级"})
+        lines, sections = parse_volume(volume.read_text(encoding="utf-8"))
+        if any(s.scope and (s.kind is None or (s.kind != "卷级常任" and s.unit is None)) for s in sections):
+            raise SystemExit(f"ERROR: {volume.name} 作用域声明无效，先跑 outline_view.py --check 修正")
+        active = [s for s in sections if s.status != "已退役"]
+        shared = [s for s in active if s.kind == "卷级常任" or s.scope is None]
+        units = sorted({s.unit for s in active if s.unit and s.kind == "单元级"})
+        given = False
         for unit in units:
-            span = unit_chapter_range(sections, unit)
-            if span and span[0] <= last and span[1] >= first:
-                view = subprocess.run([sys.executable, str(Path(__file__).with_name("outline_view.py")),
-                                       "--unit", unit, "--stage", "outline", str(volume)],
-                                      capture_output=True, encoding="utf-8")
-                if view.returncode != 0:
-                    raise SystemExit(f"ERROR: 取单元 {unit} 失败：{view.stderr.strip()}")
-                found.append((f"{volume.name} · 单元 {unit}（第{span[0]}-{span[1]}章）", view.stdout))
+            span = unit_chapter_range(active, unit)
+            if not (span and span[0] <= last and span[1] >= first):
+                continue
+            live = [s for s in active if s.unit == unit and s.kind in ("单元级", "批次底稿")]
+            if given:
+                text = "（卷契约与卷级常任同上一段，不重复。）\n\n" + render(sections, set(live), span, None)
+            else:
+                text = render(sections, set(shared + live), span, lines[:sections[0].start] if sections else None)
+            given = True
+            found.append((f"{volume.name} · 单元 {unit}（第{span[0]}-{span[1]}章）", text))
     if not found:
         raise SystemExit(f"ERROR: 卷纲里找不到覆盖第{first}-{last}章的剧情单元（单元卡要写「章节范围：第A-B章」），先补卷纲")
     return found

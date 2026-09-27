@@ -318,6 +318,11 @@ class PipelineTests(unittest.TestCase):
         outline_text = Path(first['brief']).read_text(encoding='utf-8')
         self.assertIn('卷首约束', outline_text)  # 卷级常任随闭包进包
         self.assertIn('你不执行命令', outline_text)
+        both = json.loads(self.call('build_architect_brief.py', '--project', self.book, '--task', 'outline',
+                                    '--chapters', '2-5').stdout)
+        both_text = Path(both['brief']).read_text(encoding='utf-8')
+        self.assertIn('保管→被追查', both_text)
+        self.assertEqual(both_text.count('信件内容本卷不揭示'), 1)  # 跨两个单元，卷级常任只给一次
         uncovered = self.call('build_architect_brief.py', '--project', self.book, '--task', 'outline', '--chapters', '30-31')
         self.assertEqual(uncovered.returncode, 2)
         self.assertIn('找不到覆盖第30-31章的剧情单元', uncovered.stderr)
