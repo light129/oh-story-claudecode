@@ -1,6 +1,6 @@
 # workflow-chapter.md：单章正文工作流（Phase 4-5）
 
-每章正文走本文件（日更批次见 `workflow-daily.md`）。**缺文件就停下修，本轮不写**：追踪类按 `tracking_commit.py check` 的提示修，登记了对标却缺情绪模块／节奏时请作者用 `/story-long-analyze` 补拆（作者定了不对标不算缺，组装脚本会报「召回降档：成立，无对标」，照它走），要找某类文件放哪才读 [project-files.md](project-files.md)；修好再从步骤 1 开始。
+每章正文走本文件（日更批次见 `workflow-daily.md`）。**缺文件就停下修，本轮不写**：`tracking_commit.py check` 不过、缺 `_tracking-state.json`、登记了对标却缺情绪模块／节奏时，读 [stop-and-fix.md](stop-and-fix.md) 照做（作者定了不对标不算缺，组装脚本会报「召回降档：成立，无对标」，照它走）；修好再从步骤 1 开始。
 
 **工作目录**：本章临时文件（前组.md、后组.md、writer_prompt.md、tracking.json）只放书目录下 `.story/work/第NNN章/`，不写系统 `/tmp`、`正文/`、`大纲/` 或书根；提交成功后脚本自动删除。
 
@@ -8,7 +8,7 @@
 
 ## 单章写作流程
 
-缺 `_tracking-state.json` 时先按 workflow-daily「缺 state 或视图不一致」处理，`check` 通过才往下走。
+新书还没有 `_tracking-state.json` 时先按 [tracking-initialization.md](tracking-initialization.md) 初始化；已有正文却缺它，按 stop-and-fix 停下修。
 
 1. **检查细纲**：读 `大纲/细纲_第{N}章.md` 全文，取「单元ID/位置」，跑 `outline_view.py --unit {单元ID} {卷纲路径}` 取卷契约、全卷常任裁定、当前剧情单元与终局底牌边界（日更同单元本批复用，不重跑）——**不整读卷纲**。细纲缺失或缺九个必填字段时**先补建再写**：按 workflow-outline.md 细纲模板补齐九个必填字段和四个小节，无证据的写 `[待补充]`，补完跑 `check-outline-contract.js` 验收。
 2. **读取上下文**：`tracking_commit.py check`（取 `last_committed_chapter` / `state_revision`，完整 state 不进 prompt）→ `追踪/上下文.md` 全 7 栏 → 细纲点名的 `设定/势力/`、`设定/世界观/` 相关条目（为「必读设定」槽摘句）；角色卡交给写手时只在「涉及角色」列名字、由写手读，主会话自己写时才读。上一章结尾由脚本代读，承接存疑才自己读。久别角色读 `追踪/角色状态/{名}.md`；更旧的信息按 workflow-daily「旧信息查找步骤」定点查。
@@ -21,7 +21,7 @@
 4. **资料研究**（按需）：需查证外部事实时 spawn story-researcher 输出到 `参考资料/`，不可用则主会话查。
 5. **标题预检**：看核对报告的重名结论；重名或明显重复才按核心事件改名，并同步细纲标题与正文文件名。
 6. **写作准备**：交给写手时按 [agent-calls.md](agent-calls.md)「写一章」分前后两组交付；主会话自己写时也分两组：前组写到 `前组.md` 后跑一次 `storyctl.py wordcount checkpoint --file {前组} --project {项目根} --chapter {N}`，后组按 `remaining_user_range` 收、原文拼接；作者要一次成文才写全章。批准内容写完即停，不为字数加剧情；实际长度由步骤 8 收口。
-7. **正文执行**：已部署 narrative-writer 时按 [agent-calls.md](agent-calls.md)「写一章」填槽交给它，交付后核对它只消费了批准情节点。未部署则主会话自己写：不填槽，按脚本输出与本节速记直接写，新增物自列申报表。
+7. **正文执行**：已部署 narrative-writer 时按 [agent-calls.md](agent-calls.md)「写一章」填槽交给它，交付后核对它只消费了批准情节点。未部署则主会话自己写：不填槽，按脚本输出与本节速记直接写，新增物自列申报表。写完逐段再看一遍检测器抓不住的三类 AI 腔：用工整对仗或金句替读者点题；叙述者跳出来总结情绪、解释动机、说出细纲的结论；章尾用感悟、升华或预告收。遇到就删，或改成人物的动作、对话、物件，让读者自己看出来。
 8. **核情节点落点，再一次检测收口**：
    - 细纲每个情节点**至少出现一次**，漏即退回补写批准内容。不以字数为由。
    - 运行 `{PYTHON} {skill 根}/scripts/storyctl.py chapter check --project {项目根} --chapter {N} --fix-punctuation`：一次整理标点并跑 AI 句式、`check-degeneration.js` 退化、细纲照搬与字数检测（去味管线：检测器 → 选 Gate → 一次定点改写 → 复扫）；文件改动后重跑，不再分别调各检测脚本。
@@ -79,7 +79,7 @@
 
 ## 质量检查
 
-字数以细纲 `字数目标` + `visible_chars_v1` 为准，默认 ±15%，作者给了范围写进细纲「字数范围：2000-2600」行（`--min-chars/--max-chars` 只作临时覆盖）。三个维度：**情绪交付**（交付了目标情绪吗）、**契约风险**（步骤 9 契约四问）、**技术质量**（一致性、格式、禁用词；排查具体问题时才读 [long-chapter-quality.md](long-chapter-quality.md)）。
+字数范围按 SKILL.md 写前必读第 4 条。三个维度：**情绪交付**（交付了目标情绪吗）、**契约风险**（步骤 9 契约四问）、**技术质量**（一致性、格式、禁用词；排查具体问题时才读 [long-chapter-quality.md](long-chapter-quality.md)）。
 
 **写后同轮清零**：同一轮内完成步骤 8-11，blocking（含写后 hook 推回的毒句式）清零才算本章完成。**唯一豁免**：用户显式说"本章不去味/跳过检查"时，在该章标题行下加一行 `<!-- 去味:跳过 -->`（写后 hook 与下一章前的欠账拦截都认它）。退化类 blocking（复读、截断、拒绝语、工程词泄漏）只重写受影响段落，最多 2 次，仍失败按停下问法请作者定夺；故事内系统用语、弹幕、有功能的重复台词保留。
 

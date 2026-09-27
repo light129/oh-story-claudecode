@@ -1131,6 +1131,9 @@ def main() -> None:
         ),
         REPO / "skills/story-deslop/SKILL.md": (
             "query --workspace {工作区} --book-root {书目录} --kind prose_style",
+        ),
+        # 去味交给写手的 prompt 随「只在交给写手时才用」迁到 agent-calls.md（v0.8.3）。
+        REPO / "skills/story-deslop/references/agent-calls.md": (
             "\\n作者偏好：{",
         ),
         REPO / "skills/story-review/SKILL.md": (
