@@ -25,7 +25,7 @@
 ## Step 2：按范围加载
 
 - 都要：待改章全文、`大纲/细纲_第{X}章.md`、`tracking_commit.py check`（取 `state_revision`）与 `追踪/上下文.md`；缺 state 时停止，已有正文的项目先经 `story-import` 生成标准追踪。
-- 局部修改：前一章只看最后几段、后一章只看开头几段，确认衔接；涉及的角色读 `设定/角色/{名}.md` 与 `追踪/角色状态/{名}.md`。
+- 局部修改：前一章只看最后几段（第 1 章没有就不看）、后一章只看开头几段，确认衔接；涉及的角色读 `设定/角色/{名}.md` 与 `追踪/角色状态/{名}.md`。
 - 整章重写：前后两章全文，加上细纲点名的角色与设定；第 1 章没有前一章时看 `设定/题材定位.md`。
 
 ---
@@ -33,7 +33,7 @@
 ## Step 3：改写与提交前检查
 
 1. **备份**：原文复制为 `正文/第{X}章_章名_原稿_{YYYYMMDD}.md`；用 `{PYTHON} {skill 根}/scripts/storyctl.py wordcount measure --file {正文文件}` 记下原字数。
-2. **改写**：已部署 narrative-writer 时按 [agent-calls.md](agent-calls.md)「改写一章」交给它；否则主会话自己改，读 `references/writing-craft.md` 与 `references/long-format.md`。局部修改只动点到的段落，其余一字不改；不借改稿新增细纲外的剧情。
+2. **改写**：已部署 narrative-writer 时按 [agent-calls.md](agent-calls.md)「改写一章」交给它；否则主会话自己改，读 `references/writing-craft.md` 与 `references/long-format.md`；改的是情绪对抗、打脸这类戏时，按 SKILL.md「本章技法」只读对应那一节。局部修改只动点到的段落，其余一字不改；不借改稿新增细纲外的剧情。
 3. **检测**：`{PYTHON} {skill 根}/scripts/storyctl.py chapter check --project {项目根} --chapter {X} --fix-punctuation`，按返回的 `status` 走：
 
 | 状态 | 处理 |
@@ -82,7 +82,7 @@
 ```md
 第{X}章《{章名}》改好了，原稿留着，想退回随时说：
 - {改了什么，用故事话：原来怎样 → 现在怎样}
-- 篇幅：{约 X 字，比原来多/少约 Y 字}
+- 篇幅：{差异超过步骤 3 第 5 条的阈值才写：约 X 字，比原来多/少约 Y 字；没超就删掉这行}
 {后面受影响的章：「第{X+1}章《{章名}》里{谁/什么}还按旧说法写，要一起改吗？1. 一起改（推荐）2. 先不动」；没有就写「后面的章不受影响」}
 ```
 

@@ -172,8 +172,8 @@
     },
     {
       "path": "skills/story-long-write/references/workflow-revision.md",
-      "budget": 3050,
-      "why": "大修 route 写前必读的强制完整读取项 调高：大修后白话汇报模板，字数对比不再报状态码。 v0.8.2：Step 3 加检测状态处置表、Step 4 加字数出带的作者问法（大修只读本文件，原先要借单章流程）。"
+      "budget": 3150,
+      "why": "大修 route 写前必读的强制完整读取项 调高：大修后白话汇报模板，字数对比不再报状态码。 v0.8.2：Step 3 加检测状态处置表、Step 4 加字数出带的作者问法（大修只读本文件，原先要借单章流程）。 e2e（改稿）：第 1 章局部修改没有前一章、改情绪对抗戏时读本章技法对应一节、篇幅行只在超阈值时写。"
     },
     {
       "path": "skills/story-long-write/references/style-resolution.md",
@@ -1057,7 +1057,7 @@
         {
           "label": "常规",
           "files": [],
-          "budget": 22200
+          "budget": 22300
         },
         {
           "label": "追踪提交报错",
@@ -1072,7 +1072,7 @@
             "skills/story-long-write/references/style-combat-face.md#决策路由",
             "skills/story-long-write/references/style-combat-face.md#打斗/智斗写作"
           ],
-          "budget": 23900
+          "budget": 24000
         },
         {
           "label": "本章技法·反转",
@@ -1080,7 +1080,7 @@
             "skills/story-long-write/references/long-reversal.md#决策路由",
             "skills/story-long-write/references/long-reversal.md#6. 认知反转"
           ],
-          "budget": 23100
+          "budget": 23200
         },
         {
           "label": "本章技法·感情",
@@ -1109,7 +1109,7 @@
         }
       ],
       "stacking": {
-        "budget": 32850,
+        "budget": 32950,
         "slots": [
           [
             "追踪提交报错"
