@@ -126,7 +126,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 ## 参考资料索引
 
-阶段必读项按首屏「写前必读」执行；其他题材、结构与写作技法按 [参考索引](references/reference-index.md) 的加载条件选用。
+阶段必读项按首屏「写前必读」执行；写正文不按索引加读；规划或作者点名问技法时按 [参考索引](references/reference-index.md) 的加载条件选用。
 
 ## 语言
 

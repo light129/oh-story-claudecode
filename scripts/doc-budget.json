@@ -421,7 +421,7 @@
           "files": [
             "skills/story-long-write/references/female-audience-writing.md"
           ],
-          "budget": 16700
+          "budget": 16800
         },
         {
           "label": "市场与读者",
@@ -797,7 +797,7 @@
         }
       ],
       "stacking": {
-        "budget": 28650,
+        "budget": 28750,
         "slots": [
           [
             "首批含前 3 章"
@@ -1072,7 +1072,7 @@
             "skills/story-long-write/references/style-combat-face.md#决策路由",
             "skills/story-long-write/references/style-combat-face.md#打斗/智斗写作"
           ],
-          "budget": 23800
+          "budget": 23900
         },
         {
           "label": "本章技法·反转",
