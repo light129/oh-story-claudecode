@@ -303,13 +303,24 @@ class PipelineTests(unittest.TestCase):
         self.assertIn((refs / 'workflow-volume.md').read_text(encoding='utf-8').strip()[:200], text)
         self.assertNotIn('## 细纲（第 N 章）', text)
         self.assertLess(info['chars'], 30000)
+        # story-architect 不能执行命令：覆盖本批章节的单元闭包由脚本取好放进包里。
+        self.volume.write_text(self.volume_text() + '### 剧情单元 L1-02\n> 作用域：单元级 L1-02\n'
+                               '- 章节范围：第4-12章\n- 单元情绪引擎：保管→被追查→反将一军\n', encoding='utf-8')
         first = json.loads(self.call('build_architect_brief.py', '--project', self.book, '--task', 'outline',
-                                     '--chapters', '1-10').stdout)
+                                     '--chapters', '1-3').stdout)
         later = json.loads(self.call('build_architect_brief.py', '--project', self.book, '--task', 'outline',
-                                     '--chapters', '11-20').stdout)
+                                     '--chapters', '4-10').stdout)
         self.assertIn('opening-design.md', first['includes'])
         self.assertNotIn('opening-design.md', later['includes'])
+        self.assertTrue(any('单元 L1-01' in name for name in first['includes']))
+        self.assertTrue(any('单元 L1-02' in name for name in later['includes']))
+        self.assertFalse(any('单元 L1-01' in name for name in later['includes']))
         outline_text = Path(first['brief']).read_text(encoding='utf-8')
+        self.assertIn('卷首约束', outline_text)  # 卷级常任随闭包进包
+        self.assertIn('你不执行命令', outline_text)
+        uncovered = self.call('build_architect_brief.py', '--project', self.book, '--task', 'outline', '--chapters', '30-31')
+        self.assertEqual(uncovered.returncode, 2)
+        self.assertIn('找不到覆盖第30-31章的剧情单元', uncovered.stderr)
         self.assertIn('## 细纲（第 N 章）', outline_text)
         self.assertIn('第1节：主角卡', outline_text)
         self.assertNotIn('第3节：反派设计', outline_text)

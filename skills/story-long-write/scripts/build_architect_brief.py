@@ -29,8 +29,12 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import subprocess
 import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from outline_view import parse as parse_volume, unit_chapter_range  # noqa: E402
 
 REFERENCES = Path(__file__).resolve().parent.parent / "references"
 WORK_DIR = (".story", "work", "排纲")
@@ -58,11 +62,32 @@ def emit(text: str, stream) -> None:
     stream.flush()
 
 
+def unit_closures(project: Path, first: int, last: int) -> list[tuple[str, str]]:
+    """story-architect 没有执行命令的权限：由脚本先把覆盖本批章节的剧情单元闭包取出来放进包里。"""
+    found: list[tuple[str, str]] = []
+    for volume in sorted((project / "大纲").glob("卷纲_第*卷.md")):
+        _, sections = parse_volume(volume.read_text(encoding="utf-8"))
+        units = sorted({s.unit for s in sections if s.unit and s.kind == "单元级"})
+        for unit in units:
+            span = unit_chapter_range(sections, unit)
+            if span and span[0] <= last and span[1] >= first:
+                view = subprocess.run([sys.executable, str(Path(__file__).with_name("outline_view.py")),
+                                       "--unit", unit, "--stage", "outline", str(volume)],
+                                      capture_output=True, encoding="utf-8")
+                if view.returncode != 0:
+                    raise SystemExit(f"ERROR: 取单元 {unit} 失败：{view.stderr.strip()}")
+                found.append((f"{volume.name} · 单元 {unit}（第{span[0]}-{span[1]}章）", view.stdout))
+    if not found:
+        raise SystemExit(f"ERROR: 卷纲里找不到覆盖第{first}-{last}章的剧情单元（单元卡要写「章节范围：第A-B章」），先补卷纲")
+    return found
+
+
 def weight(text: str) -> int:
     return len(re.sub(r"\s", "", text))
 
 
-def build(task: str, volume: int | None, chapters: tuple[int, int] | None) -> tuple[str, list[str]]:
+def build(task: str, volume: int | None, chapters: tuple[int, int] | None,
+          project: Path | None = None) -> tuple[str, list[str]]:
     if task == "world":
         head = ("# 任务包：出核心设定提案\n\n"
                 "按下面 Phase 2 的流程，把核心设定写成文件：`设定/题材定位.md`（在定方向时已写的部分上补全，不删作者已定的内容）、"
@@ -95,17 +120,17 @@ def build(task: str, volume: int | None, chapters: tuple[int, int] | None) -> tu
         first, last = chapters
         head = (f"# 任务包：出第{first}-{last}章细纲\n\n"
                 f"只交付 `大纲/细纲_第{first:03d}章` 到第{last:03d}章，以及排纲底稿与必要的设定补全，不写正文、"
-                "不建 `追踪/`。卷纲只用 `outline_view.py --unit {单元ID}` 取本单元闭包；设定从 `设定/` 定点读；"
-                "不要另读本包以外的写作技法文件。每章落盘后按包里的验收命令检查。交付后只回：写了哪些文件、"
+                "不建 `追踪/`。本批涉及的卷纲单元段附在包末（已按单元取好），卷纲本身不整读；设定从 `设定/` 定点读；"
+                "不要另读本包以外的写作技法文件。交付后只回：写了哪些文件、"
                 "每章一句核心事件、要作者定的事（没有写「无」）。")
         basics = read_reference("character-basics.md")
         parts = [("workflow-outline.md", read_reference("workflow-outline.md")),
                  ("character-basics.md（主角卡、配角卡）", section(basics, "第1节：主角卡", "第3节"))]
         if first <= 3:
             parts.append(("opening-design.md", read_reference("opening-design.md")))
-    skill_root = REFERENCES.parent
-    body = [head + (f"\n\n包里命令的 `scripts/…` 与 `{{skill 根}}/scripts/…` 都指 `{skill_root / 'scripts'}`；"
-                    "`{PYTHON}` 用本机可用的 python3（没有就 python）；`{书目录}` 是本书目录。")]
+        parts += [(f"卷纲取段：{name}", text) for name, text in unit_closures(project, first, last)]
+    body = [head + ("\n\n包里流程写到的脚本命令（取段、`--check`、`check-outline-contract.js`）由主会话在你交付后跑，"
+                    "你不执行命令；需要的取段结果已放进包里。")]
     for name, text in parts:
         body.append(f"\n---\n\n<!-- 资料：{name} -->\n\n{text.strip()}\n")
     return "\n".join(body), [name for name, _ in parts]
@@ -135,7 +160,7 @@ def main(argv=None) -> int:
         chapters = parse_range(args.chapters) if args.task == "outline" else None
         if args.task == "outline" and chapters[1] - chapters[0] >= 10:
             raise SystemExit("ERROR: 一批细纲最多 10 章，拆成两批")
-        text, included = build(args.task, args.volume, chapters)
+        text, included = build(args.task, args.volume, chapters, args.project)
     except SystemExit as exc:
         emit(str(exc), sys.stderr)
         return 2
