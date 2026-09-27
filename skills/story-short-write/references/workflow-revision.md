@@ -4,7 +4,7 @@
 
 Phase 3 写手只做内容覆盖与格式自检（该分工随写作 prompt 传入）。Phase 4 去味由一个执行者（下方 narrative-writer 或主会话）按 `references/short-deslop.md` 自检清单完成；一致性检查职责不变。S1/S2 与 blocking 必须修，S3 与 advisory 建议看，S4 仅提示。最终扫描与交付验收由主会话对落盘文件执行，修改后只复核改动、重跑受影响检查，不另开整轮去味。
 
-按文末「精修清单」完成检查。文件模式依次运行 `node scripts/check-ai-patterns.js --check --fail-on=blocking 正文.md`、`node scripts/check-outline-copy.js --outline 小节大纲.md 正文.md`、`node scripts/normalize-punctuation.js 正文.md`、`node scripts/check-degeneration.js --check 正文.md`，blocking 或确属细纲照搬先改正文再复扫；功能性写法可保留。
+按文末「精修清单」完成检查。文件模式依次运行 `node scripts/check-ai-patterns.js --check --fail-on=blocking 正文.md`、`node scripts/check-outline-copy.js --outline 小节大纲.md 正文.md`、`node scripts/normalize-punctuation.js 正文.md`、`node scripts/check-degeneration.js --check 正文.md`，blocking 先改正文再复扫。照搬检测报出的誓词、关键原话等功能性台词保留，登记进 `小节大纲.md` 末尾「复沓锚句」再复检，其余现场重写。
 
 全部落盘后运行 `node scripts/check-delivery-contract.js --json --min-chars {MIN} --max-chars {MAX} --sections {N} {短篇目录}`。exit 0 才可交付；exit 1 只按 `repair_scope` 最小修复并重跑受影响的质量检查与本命令，最多 2 轮；仍失败则停止，按下方交付说明告诉作者哪项没达标、差多少。exit 2、脚本缺失或不可执行时不得声称交付契约通过。它只验字数、节数与排版。
 
@@ -90,17 +90,10 @@ Phase 3 写手只做内容覆盖与格式自检（该分工随写作 prompt 传�
 | 开头不抓人 | 在做背景铺垫 | 直接从冲突开始 |
 | 中间拖沓 | 信息密度太低 | 删减或合并场景 |
 | 反转没力度 | 铺垫不够或太明显 | 增加误导线索 |
-| 结尾无力 | 反转后拖太长 | 反转后 500 字内收尾 |
+| 结尾无力 | 反转后还在补交代 | 篇幅按小节大纲；反转后只写兑现与余韵 |
 | 全篇平淡 | 情绪曲线太平 | 加大情绪落差 |
 | 感觉像流水账 | 缺乏情绪描写 | 加入人物内心感受 |
 
 ### 冷门题材公式核对
 
-设定.md 的题材参考写的是 `genre-writing-formulas.md` 时，精修再按所用公式核对（不必重读公式全文，对照设定.md 里记下的公式与招式）：
-
-- [ ] **公式对位**：所用公式与题材标签匹配，没有混用不相关公式
-- [ ] **情绪节拍完整**：情绪曲线与公式要求的节拍一致，没有跳过或乱序
-- [ ] **必选场景齐全**：公式的每个"必选场景"都在文中出现
-- [ ] **核心规则遵守**：公式"规则"部分的每一条都已落实
-- [ ] **牵引不断线**：钩子落在预期、行动方向或关系判断变化处，没有连续多个小节只提问不兑现
-- [ ] **开头3秒抓人**：第一段/第一句已建立核心冲突或信息炸弹，没有慢热铺垫
+设定.md 的题材参考写的是 `genre-writing-formulas.md` 时，对照「题材招式」区记下的公式核对（不重读公式全文）：情绪节拍不跳不乱，必选场景都出现，规则都落实，没混用不相关公式。牵引与开头按上方清单。

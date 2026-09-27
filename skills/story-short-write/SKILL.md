@@ -27,7 +27,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 ---
 
-> Agent 只查当前端 canonical 目录（Claude `.claude/agents`、OpenCode `.opencode/agents`、Codex `.codex/agents` TOML、Antigravity `.agents/agents`），不跨端误判。Claude 用 `subagent_type`，OpenCode 用 `subagent` 的 `agent`，Codex 用 `agent_type`，Antigravity 用 `invoke_subagent` + `TypeName`；能力/文件缺失、unknown agent 或 ZCode 3.3.4 时由主会话直接做，汇报里一句白话告诉作者（如「这次由我直接写，没交给写作助手」），`Fallback: project custom agents unavailable -> solo` 原文只写进汇报最后一行「技术备注：」。
+> Agent 只查当前端 canonical 目录（Claude `.claude/agents`、OpenCode `.opencode/agents`、Codex `.codex/agents` TOML、Antigravity `.agents/agents`），不跨端误判。Claude 用 `subagent_type`，OpenCode 用 `subagent` 的 `agent`，Codex 用 `agent_type`，Antigravity 用 `invoke_subagent` + `TypeName`。主会话自己写正文、去味是常态，不报；作者明确要交给写作助手而能力/文件缺失、unknown agent 或 ZCode 3.3.4 时，由主会话接手并一句白话告诉作者（如「写作助手用不了，由我直接写」），`Fallback: project custom agents unavailable -> solo` 原文只写进汇报最后一行「技术备注：」。
 >
 > Spawn 版本提示（不阻断 spawn）：先读取项目根 `.story-deployed` 的 `agents_version`。与本版 `agents_version: 33` 不一致时（标记缺失、字段缺失/非整数、小于或大于 33）**照常按文件存在性检查并 spawn**，同时用一句白话提示作者「写作助手是旧版，运行 /story-setup 后新开对话」，`Notice: agents bundle 版本不匹配（项目 {N}，本版 33）` 原文写进技术备注行；大于 33 时额外提示先更新 oh-story-claudecode，不要用本地旧版 setup 降级覆盖。只有 agent 文件缺失、或运行时不暴露 custom agent 时才降级 solo/direct，`Fallback: ... -> solo` 同样只进技术备注行。
 
@@ -48,7 +48,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 除了上面的执行规则，构思和写作时遵循：
 
 - **定方向就换风格**：题材一旦确定，腔调、开篇、钩子、情绪烈度、金句、招式、收尾全部切到该题材包（追妻含时代变体与小三/死人文学分支）；冷门题材用公式结构骨架兜底，腔调按 `short-craft.md`
-- **复用作者习惯**：若作者记忆已存在，正文前用 `scripts/author_memory_commit.py query --workspace {工作区} --book-root {项目目录} --kind prose_style --kind story_design [--genre {题材}] [--workflow 短篇]` 获取 active 条目（≤2KB），传给正文/改写 agent 作为自然倾向，不逐条展示或最大化命中，不牺牲连贯、节奏和字数；硬门禁、当前请求和本篇设定优先。长期声明在收尾用 `record` 写入并回传回执，细则见 [references/author-memory.md](references/author-memory.md)。
+- **复用作者习惯**：有作者记忆时，正文前用 `scripts/author_memory_commit.py query --workspace {工作区} --book-root {项目目录} --kind prose_style --kind story_design [--genre {题材}] [--workflow 短篇]` 获取 active 条目（≤2KB），传给正文/改写 agent 作为自然倾向，不逐条展示或最大化命中，不牺牲连贯、节奏和字数；硬门禁、当前请求和本篇设定优先。长期声明在收尾用 `record` 写入并回传回执，细则见 [references/author-memory.md](references/author-memory.md)。
 
 ---
 
