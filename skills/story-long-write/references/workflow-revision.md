@@ -60,7 +60,7 @@
 6. **提交与重试**：跑 `{PYTHON} {skill 根}/scripts/storyctl.py chapter commit --project {项目根} --chapter {X} --input {项目根}/.story/work/第{XXX}章/tracking.json`，它重新计数并清理本章工作目录。带外时作者决定保留当前长度就改用 `chapter accept-current-length`；不到目标一半、或超字还没压缩过一次会被拒，作者明确坚持才加 `--force`。失败时保留草稿，修正后重跑同一命令；通过 `check` 前不修下一章、不写新章。
 7. **后续影响**：如果修改改变了角色状态/关系/世界观设定，扫描后续章节正文标记受影响项，放进下方汇报。
 
-8. **正文元信息扫描**：按 [workflow-chapter.md](workflow-chapter.md) 步骤 6「正文元信息隔离」扫描标题行以外的正文，沿用其中的改写方式与故事内真实阅读/读者身份例外。
+8. **正文元信息扫描**：按 [workflow-chapter.md](workflow-chapter.md) 步骤 10「元信息扫描」清掉工程词。
 9. **收口**：运行 `{PYTHON} {skill 根}/scripts/tracking_commit.py check --project {项目根}` 验证 state 与全部派生视图一致
 
 ---

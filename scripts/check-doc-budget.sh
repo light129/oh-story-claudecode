@@ -80,7 +80,11 @@ for (const entry of manifest.files) {
 console.log("");
 console.log("已登记路径合计（不含项目资料与未登记条件项）");
 console.log("".padEnd(78, "-"));
-const checkPath = (label, budget, files) => {
+// 路径硬上限：每个角色每次调用（含每条条件分支）的加载不得超过 path_ceiling.limit；
+// 豁免只列在 path_ceiling.exempt 里并写明原因，预算值本身也不许调过上限。
+const ceiling = manifest.path_ceiling || null;
+const exemptGroups = new Set((ceiling && ceiling.exempt) || []);
+const checkPath = (label, budget, files, group) => {
   let total = 0;
   const missing = [];
   for (const rel of files) {
@@ -93,9 +97,13 @@ const checkPath = (label, budget, files) => {
     return;
   }
   const left = budget - total;
-  console.log(`  ${String(total).padStart(6)} / ${String(budget).padStart(6)} ${String(left).padStart(6)}  ${label}  [${left < 0 ? "OVER" : "ok"}]`);
+  const exempt = ceiling && exemptGroups.has(group);
+  console.log(`  ${String(total).padStart(6)} / ${String(budget).padStart(6)} ${String(left).padStart(6)}  ${label}  [${left < 0 ? "OVER" : "ok"}${exempt ? "，上限豁免" : ""}]`);
   if (left < 0) {
     fail.push(`路径「${label}」超预算 ${-left} 字（${total} > ${budget}）`);
+  }
+  if (ceiling && !exempt && (total > ceiling.limit || budget > ceiling.limit)) {
+    fail.push(`路径「${label}」超过硬上限 ${ceiling.limit} 字（实际 ${total}，预算 ${budget}）：${ceiling.why}`);
   }
 };
 // agent 模板 frontmatter 的 `skills: [...]` 会把整份 SKILL.md 预加载进该 agent 的每次调用；
@@ -125,13 +133,19 @@ for (const group of manifest.paths || []) {
   }
   if (group.branches) {
     for (const branch of group.branches) {
-      checkPath(`${group.label}（${branch.label}）`, branch.budget, [...files, ...branch.files]);
+      checkPath(`${group.label}（${branch.label}）`, branch.budget, [...files, ...branch.files], group.label);
     }
   } else {
-    checkPath(group.label, group.budget, files);
+    checkPath(group.label, group.budget, files, group.label);
   }
 }
 const agentDir = path.join(repoRoot, AGENT_DIR);
+if (ceiling) {
+  const labels = new Set((manifest.paths || []).map((g) => g.label));
+  for (const name of exemptGroups) {
+    if (!labels.has(name)) fail.push(`path_ceiling.exempt 列了不存在的路径：${name}`);
+  }
+}
 if (fs.existsSync(agentDir)) {
   for (const name of fs.readdirSync(agentDir).filter((n) => n.endsWith(".md")).sort()) {
     const rel = `${AGENT_DIR}/${name}`;

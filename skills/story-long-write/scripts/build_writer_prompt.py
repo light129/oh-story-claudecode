@@ -410,8 +410,8 @@ def build(project: Path, chapter: int, report: list):
     # 代价是它依赖主会话逐章想起来，所以这里把提示语写成写死的三问清单。
     parts.append(
         "——— 参考技法 ———\n"
-        f"{SLOT_MARK} 借鉴哪个参考文件的哪个技法、用在哪些段落；没有就写「无」。"
-        "按 reference 表的任务条件读取；本书文风只覆盖冲突表达条款，不停读整份文件。")
+        f"{SLOT_MARK} 按 SKILL.md「本章技法」表至多选一份，写借它的哪个技法、用在哪些段落；"
+        "都不对应写「无」。本书文风只覆盖冲突表达条款，不停读整份文件。")
     parts.append(
         "——— 本节速记 ———\n"
         f"{SLOT_MARK} 按 workflow-chapter 步骤 3「状态筛选」产出（`追踪/上下文.md` 不注入"

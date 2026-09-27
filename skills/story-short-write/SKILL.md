@@ -42,7 +42,7 @@ Phase 2 必须在第一次写入 `设定.md` / `小节大纲.md` 前按顺序完
 
 ## 格式规范（最高优先级）
 
-详细规则见 `references/short-format.md`，写作前必须加载。**主会话与 narrative-writer 子代理使用同一套正文格式**：正文只允许保存在 `正文.md`，正文相邻段落之间只允许一个换行符 `\n`（不得出现空行/`\n\n`），对话引号风格按项目/平台约定统一（默认半角双引号，盐言可用「」），短篇小节标记全文统一（默认 `###1.`/`###2.`）。如果子代理输出与主会话格式不一致，按本格式规范重排后再写入文件。
+正文只存 `正文.md`，主会话与写手同一套格式：段间只允许一个换行符、不留空行，引号风格全篇统一（默认半角双引号，盐言可用「」），小节标记统一（默认 `###1.`）；细则写正文前读 `references/short-format.md`，子代理输出不一致时按此重排。
 
 ---
 
@@ -51,7 +51,7 @@ Phase 2 必须在第一次写入 `设定.md` / `小节大纲.md` 前按顺序完
 除了上面的执行规则，构思和写作时遵循：
 
 - **从验证过的模式出发**：有对标书就先拆解，没有就从 `genre-styles/{题材}.md`（核心 10 题材）或 `genre-writing-formulas.md`（冷门题材）找对应的短篇剧情模式
-- **定方向就换风格**：题材方向一旦确定（如追妻火葬场），立刻加载 `references/genre-styles/{题材}.md`——正文的腔调、开篇、钩子、情绪烈度、对话金句、招式、收尾全部切到该题材。核心 10 题材（追妻火葬场 / 世情打脸 / 复仇打脸 / 总裁豪门 / 宅斗宫斗 / 民俗怪谈 / 悬疑 / 甜宠 / 双男主 / 沙雕脑洞）有专属风格包，其中追妻含 现代/古代/民国 时代变体与 小三文学/死人文学 流派分支；冷门题材用 `genre-writing-formulas.md` 的结构骨架兜底，腔调仍按 `short-craft.md` 通用底座
+- **定方向就换风格**：题材一旦确定，立刻读对应 `references/genre-styles/{题材}.md`，腔调、开篇、钩子、情绪烈度、金句、招式、收尾全部切到该题材（追妻含时代变体与小三/死人文学分支）；冷门题材用 `genre-writing-formulas.md` 结构骨架兜底，腔调按 `short-craft.md`
 - **只加载必需信息**：写每节前明确目标情绪和要用的技法，答不出就先回读参考
 - **复用作者习惯**：若作者记忆已存在，正文前用 `scripts/author_memory_commit.py query --workspace {工作区} --book-root {项目目录} --kind prose_style --kind story_design [--genre {题材}] [--workflow 短篇]` 获取 active 条目（≤2KB），传给正文/改写 agent 作为自然倾向，不逐条展示或最大化命中，不牺牲连贯、节奏和字数；硬门禁、当前请求和本篇设定优先。长期声明在收尾用 `record` 写入并回传回执，细则见 [references/author-memory.md](references/author-memory.md)。
 
@@ -80,7 +80,7 @@ Phase 2 必须在第一次写入 `设定.md` / `小节大纲.md` 前按顺序完
 
 ### Phase 2：构思核心框架
 
-> 如果用户有参考小说，先用 `/story-short-analyze` 拆解。默认输出存入项目根目录 `拆文库/{书名}/`；如用户指定当前短篇引用目录，则可输出/同步到 `{短篇标题}/对标/{书名}/`。写作时会自动查找并读取这些拆文结果，不需要用户手动复制到 prompt。
+> 用户有参考小说时先用 `/story-short-analyze` 拆解（默认存入项目根 `拆文库/{书名}/`），写作时自动查找读取。
 
 #### 对标上下文加载
 
@@ -127,13 +127,7 @@ Phase 2 必须在第一次写入 `设定.md` / `小节大纲.md` 前按顺序完
 **流水线：** 短篇
 **位置：** 写作（第 3/3 步）
 
-| 时机 | 跳转到 | 命令 |
-|---|---|---|
-| 有参考小说想对标 | story-short-analyze | `/story-short-analyze` → 输出存入 `拆文库/{书名}/` |
-| 写完，去 AI 味 | story-deslop | `/story-deslop` |
-| 想自检 | 本 skill 质量自检 | 用 Phase 4 自检流程 + `references/short-prose-quality.md` 逐项核对 |
-| 需要市场方向 | story-short-scan | `/story-short-scan` |
-| 设定太大，适合长篇 | story-long-write | `/story-long-write` |
+有参考小说想对标 → `/story-short-analyze`（存入 `拆文库/{书名}/`）；写完去 AI 味 → `/story-deslop`；想自检 → Phase 4 流程 + `references/short-prose-quality.md`；要市场方向 → `/story-short-scan`；设定太大适合长篇 → `/story-long-write`。
 
 ---
 

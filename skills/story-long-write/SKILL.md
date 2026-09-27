@@ -15,8 +15,8 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 必须分块读到 EOF：
 
 1. 规划/开书/补纲先完整读取 `references/workflow-setup.md`；写指定章读取 `references/workflow-chapter.md`；日更/大修先读取 `references/workflow-daily.md` 或 `references/workflow-revision.md`，进入正文前再完整读取 `workflow-chapter.md`。
-2. 主会话直接写正文时，首次落笔前完整读取 `references/long-format.md`、`references/writing-craft.md`、`references/long-chapter-quality.md`、`references/long-chapter-hooks.md`；交给 narrative-writer 时，由该 agent 按自己的 reference 表完成同等写前读取，主会话不得用未读 reference 的临时 prompt 替代。
-3. 悬疑、惊悚、异常线索章加读 `references/long-suspense.md`；身份/认知/立场反转章加读 `references/long-reversal.md`。
+2. 主会话直接写正文时，首次落笔前完整读取 `references/long-format.md` 与 `references/writing-craft.md`（和写手同一套技法）；`references/long-chapter-quality.md`、`references/long-chapter-hooks.md` 只在排查具体问题时读，去味走检测器，不预读。交给 narrative-writer 时，由该 agent 按自己的 reference 表完成写前读取，主会话不得用未读 reference 的临时 prompt 替代。
+3. 本章技法按下方「核心方法」表至多读一份（悬疑读 `references/long-suspense.md`，反转读 `references/long-reversal.md`，其余见表）。
 4. 正文写前，references 读完后立即重读当前用户请求、本章细纲和卷纲，先在上下文里**记下本轮约束**：原样记录用户明确字数范围、必发生、禁止发生、精确时间锚与本章停笔点、章尾新债。references 只提供技法，不得覆盖这些项目事实；作者给的字数范围写在细纲「字数范围」行（命令参数只作临时覆盖），不用默认 ±15%。交付前逐项复核：字数带外按 `workflow-chapter.md` 的收口流程交用户处置，不自动补字；其余项越界不算完成。
 
 任一必需路径不存在、不可读或未读完时立即停止，报告准确路径，**不得先写正文再补读**。写前必读按当前任务、当前会话重新执行；旧会话的“读过”不能沿用。
@@ -31,24 +31,9 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 ## 核心方法
 
-我们写网文先抓情绪，再用验证过的方法可靠地交付这个情绪，灵感只做素材来源。
+先抓情绪，再用验证过的模式可靠交付，灵感只做素材：每个场景服务一个说得清的目标情绪；从对标里找验证过的剧情模式，把对标角色当功能位，用本书的角色和素材填；写每章只读「不知道就会写错」的状态、伏笔与设定。契约与推进决策先过 `references/reader-contract-and-progression.md`「契约四问」。作者记忆：写正文时组装脚本已代查注入；其他任务按 [references/author-memory.md](references/author-memory.md) 带 `--book-root` 查 ≤2KB active 项交执行者，当前请求与本书文风优先，长期声明用 `record` 写入、回传回执。
 
-1. **先定情绪，再定故事**。每个场景都必须服务于一个明确的目标情绪。说不清交付什么情绪的场景不该存在。
-2. **从验证过的模式出发**。先问"什么被验证过有效，我如何重新交付"，少从"我想写什么"直接起步。扫榜找方向，拆文找模块，对标找节奏。
-3. **用模块组装，不要重新发明**。找到题材里验证过的剧情模式（反转怎么铺、爽点怎么爆、感情怎么拉扯），把对标书的具体角色看成功能位（对手/盟友/催化剂），用你自己的角色和素材填进去。
-4. **只加载必需信息**。写每章只读“不知道就会写错”的角色状态、待收伏笔、相关设定。其余留在文件系统里。
-5. **契约与推进决策走权威参考文件**。涉及读者契约、主角代理权、终局底牌与升级台阶、契约风险判定时，先按 `references/reader-contract-and-progression.md`「契约四问」校准。
-6. **作者记忆**：写正文时组装脚本已代查并注入；其他任务按 [references/author-memory.md](references/author-memory.md) 带 `--book-root` 查询 ≤2KB active 项交执行者；当前请求、本书文风优先。长期声明用 `record` 写入、回传回执。
-
-| 题材 | 核心情绪 | 重点参考 |
-|------|---------|---------|
-| 打脸/逆袭 | 爽感释放 | plot-emotion-system.md + style-combat-face.md |
-| 身份反转 | 震撼+痛快 | long-reversal.md |
-| 感情拉扯 | 意难平 | emotional-methods.md |
-| 悬疑/惊悚 | 紧张+好奇 | long-suspense.md |
-| 日常装逼 | 期待感 | long-chapter-hooks.md |
-
-> **情绪反查题材**：如果用户先说了情绪感觉但没提题材，从上表反向匹配——例如「爽感释放」指向打脸/逆袭，再从 `long-genre-catalog.md` 找该题材下的细分方向。
+**本章技法（每章至多读一份）**：按细纲主功能选——打脸/逆袭（爽感释放）`style-combat-face.md`；身份/认知/立场反转（震撼+痛快）`long-reversal.md`；感情拉扯（意难平）`emotional-methods.md`；悬疑/惊悚/异常线索（紧张+好奇）`long-suspense.md`；日常装逼（期待感）`long-chapter-hooks.md`。都不对应就不读，按 writing-craft 写。作者先说情绪没说题材时按括号反查，再从 `long-genre-catalog.md` 找细分方向。
 
 ---
 
@@ -68,11 +53,9 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 **对象优先**："写/修改第N章细纲"是规划，不因命中"写/修改第N章"而写正文；"以后再写正文"不是本轮授权。仅规划要求优先于旧日更任务，停止旧批量。对象不明或同一请求范围冲突时，只确认冲突项。
 
-**规划续接**：保留当前任务范围；"继续/按这个来/确认方案"不扩大范围，完成即停，不自动转细纲或正文。"继续写/接着写"指正文：下一章已有细纲时按写正文处理，但上一轮在规划就只问一句「要接着写第N章正文吗？」（默认是），不列选项表；缺细纲则问是否先补这一章细纲。新明确请求可调整规划层级/范围；不把规划模式写入追踪或作者记忆，不调用 narrative-writer，委派传同一范围和停点。
+**规划续接**："继续/按这个来/确认方案"不扩大范围，完成即停，不自动转细纲或正文；"继续写/接着写"指正文——下一章有细纲就写，上一轮在规划就只问一句「要接着写第N章正文吗？」（默认是），缺细纲则问是否先补。规划模式不写入追踪或作者记忆，不调用 narrative-writer。开新卷时新角色/势力/设定回 Phase 2 增量补，Phase 3 只做到请求层级。
 
-**转入正文**：明确正文请求只授权进入既有写作流程，不等于可以直接落笔。创建/修改正文前，重新完成本轮正文「写前必读」，并按 workflow-chapter 处理缺 state、使 `tracking_commit.py check` 通过；任一未完成则停止，不落正文。之后仍按原流程写作、质检、提交追踪，无须再问是否继续。
-
-**开新卷**：新角色/势力/设定按需回 Phase 2 增量补充；Phase 3 只做到本次请求的层级，不自动转正文。
+**转入正文**：明确的正文请求只授权进入写作流程。落正文前重新完成本轮「写前必读」，按 workflow-chapter 处理缺 state、使 `tracking_commit.py check` 通过，任一未完成就停止；之后按原流程写作、质检、提交，不再问是否继续。
 
 ### 裸调用与停靠点（防失控）
 
@@ -82,11 +65,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 - 有纲无正文 → 「补细纲」「写第1章」；
 - 有正文+追踪 → 展示进度与下一章细纲状态，列「规划下一卷」「日更2章」「修改第X章」。
 
-**正文批量上限**：写正文必须由用户显式给出章节范围或日更意图。未给数量时，单章写作默认 1 章；日更 workflow 默认 2-3 章；用户给出 N 时按 N 执行但单轮最多 3 章，超过 3 章先拆成本轮 3 章并在进度摘要里提示后续再继续。
-
-**匹配顺序**：只规划按 结构讨论 → 细纲规划 → 大纲规划 → 开书，越窄越优先；要正文按 大修 → 写指定章 → 日更续写。日更前置不齐则提示补齐或写第1章，不直接写一批。
-
-**日更续接**：同批"继续/续写/日更"仍走 `references/workflow-daily.md` 的完整串行流程，不直接落正文；切到规划后按「规划续接」，不恢复旧日更批量。
+**正文批量上限**：写正文须用户显式给出章节范围或日更意图；单章默认 1 章，日更默认 2-3 章，单轮最多 3 章，超出的在汇报里提示下轮继续。**匹配顺序**：只规划按 结构讨论 → 细纲规划 → 大纲规划 → 开书，越窄越优先；要正文按 大修 → 写指定章 → 日更续写；日更前置不齐则提示补齐或写第1章。同批"继续/续写/日更"仍走 workflow-daily 的完整串行流程；切到规划后不恢复旧日更批量。
 
 无法判断场景时，给 2-4 个白话选项（如「只聊结构」「写大纲」「写第N章正文」）让用户选，不贴场景表，也不开放式提问。
 
@@ -96,18 +75,9 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 ### 路径与术语约定
 
-> **拆文库/对标关系**：`拆文库/` = analyze skill 的原始产出，是数据源。`对标/` = 写作项目的引用视图，存放与本项目相关的对标数据子集。首次引用对标书时，从 `拆文库/{书名}/` 复制相关子目录（章节/角色/剧情/设定）、`剧情/节奏.md`、`剧情/情绪模块.md`、`文风.md` 和 `拆文报告.md` 到 `对标/{书名}/`。
+> **对标书路径查找**：优先 `{项目}/对标/{书名}/`，不存在则回退 `拆文库/{书名}/`（`拆文库/` 是拆文原始产出，`对标/` 是本项目引用视图，首次引用的复制规则见 artifact-protocols.md）。
 >
-> **对标书路径查找**：优先 `{项目}/对标/{书名}/`，不存在则回退 `拆文库/{书名}/`。下文所有对标数据加载均使用此规则。
->
-> **卷纲不整读（取段器）**：任何场景要卷纲内容一律走
-> `{PYTHON} {skill 根}/scripts/outline_view.py --unit {单元ID} {卷纲路径}`（脚本统一输出 UTF-8），
-> 只要契约不要单元时用 `--contract`，先看一屏目录用 `--toc`。
-> 排纲期的工作底稿（供给自查、建纲追加）不写进卷纲，放 `大纲/排纲底稿_{单元ID}.md`，只在排纲/补纲时读，写正文不读；底稿里对写作有约束力的条目，建纲时写进单元卡或细纲。
-> 老卷纲里还留着「作用域：批次底稿」段的，排纲时加 `--stage outline` 一并取出，写正文照常不加。
-> 输出是闭包：全部卷级常任段＋该单元的单元级段，逐章表按单元章区间裁行，退役行默认不输出（看历史加 `--history`）。
-> 找不到单元时 exit 1：核对单元ID或先补卷纲，不改用整读。
-> 段头 `> 作用域：` 声明格式见 `references/artifact-protocols.md` 卷纲模板；未声明的段会被保守纳入并告警，跑 `outline_view.py --check {卷纲路径}` 修。
+> **卷纲不整读**：一律走 `{PYTHON} {skill 根}/scripts/outline_view.py --unit {单元ID} {卷纲路径}`（只要契约用 `--contract`，看目录用 `--toc`）；找不到单元就核对单元ID或先补卷纲，不改用整读。排纲底稿放 `大纲/排纲底稿_{单元ID}.md`，只在排纲/补纲时读；取段器的作用域、历史与校验选项见 artifact-protocols.md 卷纲模板。
 >
 > **新增物三级**（排纲、写正文、处置共用；只看下一章需不需要知道它存在过）：
 > - **直接写**：微连接、路人、器物、地名细部、一次性对话、现场细节；不申报。

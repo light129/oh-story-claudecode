@@ -2,7 +2,7 @@
 
 #### Agent 调用：story-architect
 
-构思阶段，如果项目已部署 story-architect agent（查找顺序见 [SKILL.md](../SKILL.md)），可 spawn `Agent(subagent_type: "story-architect", prompt: "项目目录：{dir}\n任务类型：短篇构思\n查询参数：{目标情绪+题材方向}")` 辅助框架设计。如 agent 不可用，由主会话直接执行。
+已部署 story-architect 时可 spawn `Agent(subagent_type: "story-architect", prompt: "项目目录：{dir}\n任务类型：短篇构思\n查询参数：{目标情绪+题材方向}")` 辅助框架设计；不可用由主会话直接执行。
 
 帮用户确定短篇的核心框架：
 
@@ -61,7 +61,7 @@
 - 付费点：第 {N} 节末
 ```
 
-有反派时用 `villain-and-reveal.md` 的身份、动机、作恶方式、致命弱点、报应五字段替换“不适用”。`short-reversal.md` 判断确属无反转题材时，写 `反转类型：无反转` 和 `反转位置：不适用（{报应兑现/甜度递进等原因}）`，不要硬编节号。`小节大纲.md` 必须使用 `writing-workflow.md` 规定的固定 12 列 Markdown 表格，并在对应节末明确标出“付费点”。
+有反派时用 `villain-and-reveal.md` 的身份、动机、作恶方式、致命弱点、报应五字段替换“不适用”。`short-reversal.md` 判断确属无反转题材时，写 `反转类型：无反转` 和 `反转位置：不适用（{报应兑现/甜度递进等原因}）`，不要硬编节号。`小节大纲.md` 必须使用 `writing-workflow.md` 规定的固定 12 列 Markdown 表格，付费点写进对应节的“结尾承接/钩子”单元格。
 
 #### Phase 2 完成门禁
 
@@ -75,4 +75,4 @@
 
 #### Agent 调用：character-designer
 
-设计任务完成后，如果项目已部署 character-designer agent（查找顺序见 [SKILL.md](../SKILL.md)），可 spawn `Agent(subagent_type: "character-designer", prompt: "项目目录：{dir}\n任务类型：角色设定\n查询参数：{人设速写+关系}")` 辅助角色设定和语言风格档案。如 agent 不可用，由主会话直接执行。
+设计任务完成后，已部署 character-designer 时可 spawn `Agent(subagent_type: "character-designer", prompt: "项目目录：{dir}\n任务类型：角色设定\n查询参数：{人设速写+关系}")` 辅助角色设定和语言风格档案；不可用由主会话直接执行。

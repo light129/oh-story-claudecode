@@ -8,6 +8,8 @@
 
 > 术语说明：Phase 3 按「段」划分叙事结构（开头段/铺垫段/升级段/反转段/结尾段），每段包含若干「小节」（数字编号的 beat）。「场景」指写作时的具体画面。
 
+**写前加载**：`short-format.md`（正文格式）、`short-craft.md`（通用底座）、`short-deslop.md`（写作时自检 AI 腔）、Phase 2 选定的一个题材包（`genre-styles/{题材}.md` 或冷门 `genre-writing-formulas.md`）；按需 `villain-and-reveal.md`、`emotional-methods.md`。
+
 **交付参数先锁定**：用户明确的字数范围优先，逐字取其最小值/最大值与节数；只给单一目标时用目标的 95%-105%；都未给时用 8000-20000 字和大纲节数。后文的默认字数不得覆盖用户范围。
 
 **写前参数验收（锁定后、写 `正文.md` 前必跑）**：`node {skill 根}/scripts/check-delivery-contract.js --json --check-contract --min-chars {MIN} --max-chars {MAX} --sections {N} [--min-section-chars {用户逐节下限}] {短篇目录}`。exit 0 只说明参数能同时满足，不算交付；exit 2 即冲突，停在写前，用中文告诉用户字数范围与节数哪里对不上，请其选择调整项，不代改用户约束。

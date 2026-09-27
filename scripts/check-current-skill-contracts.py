@@ -1261,7 +1261,8 @@ def validate_repository(repo_root: Path, manifest: ContractManifest) -> List[Fin
     findings.extend(require_pattern(explorer, r"missing_primary_contract", "explorer-primary-failure", "story-explorer must fail closed on missing current benchmark artifacts"))
     findings.extend(require_pattern(explorer, r"repair_action", "explorer-repair-action", "story-explorer must return an explicit repair action"))
 
-    long_write = repo_root / "skills/story-long-write/SKILL.md"
+    # 主产物的读取与缺失即停在写前召回里定义（v0.8.2 起 SKILL.md 只留对标路径查找一行）。
+    long_write = repo_root / "skills/story-long-write/references/benchmark-recall.md"
     for artifact in manifest.primary_benchmark_artifacts:
         findings.extend(
             require_pattern(

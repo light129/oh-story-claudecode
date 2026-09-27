@@ -45,6 +45,34 @@ class DocBudgetCliTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout)
         self.assertRegex(result.stdout, re.compile(r"\b7\s*/\s*7\s+0\s+fixture route\s+\[ok\]"))
 
+    def test_path_ceiling_blocks_branch_over_limit_unless_exempt(self) -> None:
+        files = {"base.md": "甲" * 6, "big.md": "乙" * 5}
+        paths = [
+            {"label": "writing", "files": ["base.md"],
+             "branches": [{"label": "plain", "files": [], "budget": 10},
+                          {"label": "heavy", "files": ["big.md"], "budget": 10}]},
+            {"label": "planning", "budget": 20, "files": ["base.md", "big.md"]},
+        ]
+        over = self.run_checker(files, {"files": [], "paths": paths,
+                                        "path_ceiling": {"limit": 10, "exempt": ["planning"], "why": "fixture"}})
+        self.assertEqual(over.returncode, 1, over.stdout)
+        self.assertIn("路径「writing（heavy）」超过硬上限 10 字（实际 11，预算 10）", over.stdout)
+        self.assertNotIn("writing（plain）」超过硬上限", over.stdout)
+        self.assertNotIn("路径「planning」超过硬上限", over.stdout)
+        self.assertIn("planning  [ok，上限豁免]", over.stdout)
+
+        # 预算值本身也不许调过上限：实际没超、budget 写大了同样拦。
+        loose = self.run_checker(files, {"files": [], "paths": [{"label": "w", "budget": 11, "files": ["base.md"]}],
+                                         "path_ceiling": {"limit": 10, "exempt": [], "why": "fixture"}})
+        self.assertEqual(loose.returncode, 1, loose.stdout)
+        self.assertIn("路径「w」超过硬上限 10 字（实际 6，预算 11）", loose.stdout)
+
+    def test_path_ceiling_rejects_unknown_exempt_label(self) -> None:
+        result = self.run_checker({"a.md": "甲"}, {"files": [], "paths": [{"label": "w", "budget": 5, "files": ["a.md"]}],
+                                                   "path_ceiling": {"limit": 10, "exempt": ["不存在"], "why": "fixture"}})
+        self.assertEqual(result.returncode, 1, result.stdout)
+        self.assertIn("path_ceiling.exempt 列了不存在的路径：不存在", result.stdout)
+
     def test_agent_path_counts_preloaded_skill(self) -> None:
         agent = "skills/story-setup/references/templates/agents/w.md"
         result = self.run_checker(

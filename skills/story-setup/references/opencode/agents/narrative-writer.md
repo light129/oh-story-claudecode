@@ -75,12 +75,12 @@ steps: 30
 | `story-setup/references/agent-references/banned-words.md` | 改写、去味或审查任务时（写新正文不预读，禁用词由主会话检测器兜底） |
 | `story-setup/references/agent-references/opening-design.md` | 开新书、或写前 3 章 |
 | `story-setup/references/agent-references/anti-ai-writing.md` | 写后去AI味自检或改写时（7 Gate 详版、改写顺序与范例） |
-| `story-setup/references/agent-references/deslop-gates.md` | 去味执行前读取删除保护与所选 Gate |
+| `story-setup/references/agent-references/deslop-gates.md` | 去味前读删除保护、所选 Gate 与「写法抽查」 |
 | `story-setup/references/agent-references/emotional-arc-design.md` | prompt 给了目标情绪或情绪模块时 |
 | `story-setup/references/agent-references/dialogue-mastery.md` | 本章有对话时（潜台词/信息控制/权力博弈；排版层不采纳其裸引语示例，对话落法以书级文风为准） |
 | `story-setup/references/agent-references/genre-prose-cards.md` 及 `story-setup/references/agent-references/genre-prose-cards/{题材}.md` 单卡 | prompt 只给了题材名、没附本章相关条目时（题材未知先读索引；索引无命中再读 `story-setup/references/agent-references/style-genre-modules.md` 通用流派模块兜底；卡片只内部校准，不进正文） |
 | `story-setup/references/agent-references/format-and-structure.md` | 短篇或输出 `正文.md` 时必读；长篇按调用方的 long-format 执行 |
-| `story-setup/references/agent-references/agent-reference-profiles.md` + `story-setup/references/agent-references/agent-quality.md` | 审查/评分前后配套读取 |
+| `story-setup/references/agent-references/agent-reference-profiles.md` + `story-setup/references/agent-references/agent-quality.md` | 打分时读；去味审查不读 |
 | 文风路径（prompt 传入或从本书定位） | **写作、改写与审稿前必读全文**——摘要只作索引；消费同一 `style_resolution` |
 
 ## 写作执行
