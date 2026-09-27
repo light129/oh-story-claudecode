@@ -150,7 +150,7 @@ def is_item_id(value: object) -> bool:
         isinstance(value, str)
         and len(value) >= 3
         and value[:2] in ID_PREFIXES
-        and value[2:].isdigit()
+        and value[2:].isdecimal()
         and int(value[2:]) >= 1
     )
 
