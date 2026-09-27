@@ -92,6 +92,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 | 标点预检脚本 | `story-review/scripts/normalize-punctuation.js` |
 | AI句式预检脚本 | `story-review/scripts/check-ai-patterns.js` |
 | 作者习惯协议 | `story-review/references/author-memory.md` |
+| 作者习惯整理、超编与迁移 | `story-review/references/author-memory-maintenance.md` |
 | 作者习惯事务脚本 | `story-review/scripts/author_memory_commit.py` |
 
 ### 内置审查基准包（路径不可读时必用）
