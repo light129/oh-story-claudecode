@@ -247,8 +247,8 @@
     },
     {
       "path": "skills/story-long-write/references/workflow-volume.md",
-      "budget": 6650,
-      "why": "v0.8.2：开书按时刻拆出的流程文件，只在该时刻读（也进 story-architect 任务包）。"
+      "budget": 6900,
+      "why": "v0.8.2：开书按时刻拆出的流程文件，只在该时刻读（也进 story-architect 任务包）。 e2e 修正（+177）：没有子代理时先提案、作者确认后落盘与新开对话建议写进本时刻文件（原来只在 workflow-setup 开头，出卷纲时读不到）；无对标自排的八节点占比就地给出；出卷纲时新增物三级怎么用。"
     },
     {
       "path": "skills/story-long-write/references/workflow-outline.md",
@@ -661,39 +661,39 @@
         {
           "label": "常规",
           "files": [],
-          "budget": 24200
+          "budget": 24450
         },
         {
           "label": "对标登记 ≥2 本",
           "files": [
             "skills/story-long-write/references/cross-book-recall.md"
           ],
-          "budget": 27400
+          "budget": 27650
         },
         {
           "label": "弧线速查",
           "files": [
             "skills/story-long-write/references/emotional-arc-design.md#六种弧线速查"
           ],
-          "budget": 26050
+          "budget": 26300
         },
         {
           "label": "本卷有反转",
           "files": [
             "skills/story-long-write/references/long-reversal.md#反转类型"
           ],
-          "budget": 27100
+          "budget": 27350
         },
         {
           "label": "有灵感库",
           "files": [
             "skills/story-long-write/references/cross-book-recall.md#公共灵感标签召回"
           ],
-          "budget": 25150
+          "budget": 25400
         }
       ],
       "stacking": {
-        "budget": 32150,
+        "budget": 32400,
         "slots": [
           [
             "对标登记 ≥2 本"
@@ -772,28 +772,28 @@
         {
           "label": "常规",
           "files": [],
-          "budget": 20700
+          "budget": 20800
         },
         {
           "label": "首批含前 3 章",
           "files": [
             "skills/story-long-write/references/opening-design.md"
           ],
-          "budget": 25500
+          "budget": 25600
         },
         {
           "label": "对标登记 ≥2 本",
           "files": [
             "skills/story-long-write/references/cross-book-recall.md"
           ],
-          "budget": 23900
+          "budget": 24000
         },
         {
           "label": "有灵感库",
           "files": [
             "skills/story-long-write/references/cross-book-recall.md#公共灵感标签召回"
           ],
-          "budget": 21650
+          "budget": 21750
         }
       ],
       "stacking": {

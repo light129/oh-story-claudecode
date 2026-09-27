@@ -1,6 +1,6 @@
 # 产物创建模板
 
-大纲与卷纲的模板，看卷纲时（workflow-volume.md）读。
+大纲与卷纲的模板，出卷纲时（workflow-volume.md）读。
 
 **模板列表：**（设定/关系、设定/题材定位的模板在 workflow-setup.md 文末；细纲模板与排纲底稿模板在 workflow-outline.md）
 - 大纲/大纲.md（全书鸟瞰 + 全书体量与阶段总览）

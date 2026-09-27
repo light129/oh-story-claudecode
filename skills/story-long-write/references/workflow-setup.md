@@ -6,8 +6,8 @@
 |---|---|---|---|
 | 定方向 | 题材、卖点、对标书 | 本文件 Phase 1 | 书目录与 `.active-book`；`设定/题材定位.md` 的基本信息、对标登记、作者已定 |
 | 定设定 | 主角、世界、核心冲突 | 本文件 Phase 2 | 题材定位补全；关系；主角与关键角色卡；影响全书的世界观（见 Phase 2） |
-| 看卷纲 | 全书分段与第一卷 | [workflow-volume.md](workflow-volume.md) | `大纲/大纲.md`、`大纲/卷纲_第X卷.md` |
-| 看细纲 | 首批章节怎么走 | [workflow-outline.md](workflow-outline.md) | `大纲/细纲_第XXX章.md`、排纲底稿 |
+| 出卷纲 | 全书分段与第一卷 | [workflow-volume.md](workflow-volume.md) | `大纲/大纲.md`、`大纲/卷纲_第X卷.md` |
+| 出细纲 | 首批章节怎么走 | [workflow-outline.md](workflow-outline.md) | `大纲/细纲_第XXX章.md`、排纲底稿 |
 | 看第 1 章 | 正文 | workflow-chapter.md（新开对话） | `正文/` |
 
 **交接只靠落盘**：每个时刻交付前，把作者在对话里定下的事（方向、偏好、红线、否掉的方案）写进 `设定/题材定位.md` 的对应小节，再往下走；下一时刻不回翻对话。本书的事只落设定，作者跨书通用的写作习惯才走作者记忆。

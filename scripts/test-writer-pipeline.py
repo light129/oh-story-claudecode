@@ -60,6 +60,17 @@ class PipelineTests(unittest.TestCase):
 不能串卡
 '''
 
+    def test_arc_rows_sliced_in_template_form(self):
+        # 卷纲模板的情绪弧线首列写「第{N}章」：按单元取段时同样只留本单元的行
+        text = self.volume_text() + ('## 情绪弧线\n> 作用域：卷级常任\n| 章 | 定位 |\n|---|---|\n'
+                                     '| 第1章 | 高压 |\n| 第3章 | 推进 |\n| 第5章 | 低压 |\n| 7 | 关系 |\n')
+        self.volume.write_text(text, encoding='utf-8')
+        out = self.view('--unit', 'L1-01').stdout
+        self.assertIn('| 第1章 | 高压 |', out)
+        self.assertIn('| 第3章 | 推进 |', out)
+        self.assertNotIn('第5章', out)
+        self.assertNotIn('| 7 |', out)
+
     def test_declared_ids_and_closure(self):
         for unit in ['L1-01', 'D2-03', 'U03']:
             with self.subTest(unit=unit):

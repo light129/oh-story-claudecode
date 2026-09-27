@@ -1,6 +1,6 @@
-# workflow-outline.md：看细纲（按剧情批出细纲、补纲）
+# workflow-outline.md：出细纲（按剧情批出细纲、补纲）
 
-作者要看一批章节怎么走、或要补/改细纲时读本文件。卷纲只用 `outline_view.py --unit {单元ID}` 取本单元闭包，设定从 `设定/` 定点读，不回翻对话；前 3 章细纲另读 [opening-design.md](opening-design.md)，建角色档案时读 character-basics.md。
+作者要看一批章节怎么走、或要补/改细纲时读本文件。卷纲只用 `outline_view.py --unit {单元ID}` 取本单元闭包，设定从 `设定/` 定点读，不回翻对话；前 3 章细纲另读 [opening-design.md](opening-design.md)，建角色档案时读 character-basics.md。没有子代理时先给本批走向提案、作者确认后落盘；交付汇报最后一句建议新开对话说「写第N章」，技术备注在它后面。
 
 所请求范围内每章必须有 `大纲/细纲_第XXX章.md`，不跳章。
 
