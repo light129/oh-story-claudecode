@@ -1124,10 +1124,9 @@ def main() -> None:
             "`author_preferences`",
         ),
         # 查到的偏好要进子代理 prompt 的槽位，否则 query 照跑、结果到不了写手。
-        REPO / "skills/story-short-write/references/workflow-draft.md": (
+        # 短篇派写手的 prompt 同样随「只在交给写手时才用」迁到 agent-calls.md（v0.8.2）。
+        REPO / "skills/story-short-write/references/agent-calls.md": (
             "作者偏好 query",
-        ),
-        REPO / "skills/story-short-write/references/workflow-revision.md": (
             "\\n作者偏好：{",
         ),
         REPO / "skills/story-deslop/SKILL.md": (

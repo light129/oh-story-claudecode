@@ -37,8 +37,8 @@
     },
     {
       "path": "skills/story-short-write/references/workflow-design.md",
-      "budget": 2400,
-      "why": "短篇 Phase 2 首屏门禁必读；原入口构思/设计/验收原文迁出，非新增技法，Phase 3/4 不预加载。 +50：向作者汇报构思只讲故事与待拍板问题，不报脚本、检查 ID 与表格列数。 v0.8.2 +100：构思交付前把平台基调、作者已定、冷门公式要点写进 设定.md（写正文时刻不再重读构思方法论，只靠落盘接上），汇报末尾建议新开对话写正文；同批删去与 writing-workflow 重复的 12 列说明。"
+      "budget": 2550,
+      "why": "短篇 Phase 2 首屏门禁必读；原入口构思/设计/验收原文迁出，非新增技法，Phase 3/4 不预加载。 +50：向作者汇报构思只讲故事与待拍板问题，不报脚本、检查 ID 与表格列数。 v0.8.2 +100：构思交付前把平台基调、作者已定、冷门公式要点写进 设定.md（写正文时刻不再重读构思方法论，只靠落盘接上），汇报末尾建议新开对话写正文；同批删去与 writing-workflow 重复的 12 列说明。 v0.8.2 +150：设定.md 模板补「题材招式」小节与人设速写的声线／口头禅／禁忌、写明有反派时五字段放在设计校验块内，character-designer 结果在完成门禁前压进人设速写——写正文时刻只读设定.md，这些不落盘就丢。"
     },
     {
       "path": "skills/story-setup/references/templates/agents/narrative-writer.md",
@@ -92,8 +92,8 @@
     },
     {
       "path": "skills/story-short-write/references/short-craft.md",
-      "budget": 5000,
-      "why": "同上，Phase 2 与 Phase 3 通用底座"
+      "budget": 4100,
+      "why": "同上，Phase 2 与 Phase 3 通用底座 v0.8.2：场景写法（三维度揉进、疏密与主语节奏）只在写正文时用，迁到 scene-craft.md，构思时刻不再付；补知乎盐选小节标记一行，导语长度与 submission-craft 统一。"
     },
     {
       "path": "skills/story-short-write/references/short-reversal.md",
@@ -117,8 +117,8 @@
     },
     {
       "path": "skills/story-short-write/references/villain-and-reveal.md",
-      "budget": 2375,
-      "why": "短篇 Phase 2 有反派或真相揭露时的条件必读项。"
+      "budget": 2300,
+      "why": "短篇 Phase 2 有反派或真相揭露时的条件必读项。 v0.8.2：反转有效性自检不再另立一套时机百分比（与 writing-workflow、short-reversal 冲突），改指向「反转信息差验证」只补两条。"
     },
     {
       "path": "skills/story-short-write/references/genre-styles/世情打脸.md",
@@ -202,8 +202,8 @@
     },
     {
       "path": "skills/story-short-write/references/reference-index.md",
-      "budget": 1400,
-      "why": "定位额外资料时读取，首屏阶段 Gate 不变。"
+      "budget": 1450,
+      "why": "定位额外资料时读取，首屏阶段 Gate 不变。 v0.8.2 +50：登记 scene-craft 与 agent-calls。"
     },
     {
       "path": "skills/story-deslop/SKILL.md",
@@ -217,13 +217,13 @@
     },
     {
       "path": "skills/story-short-write/references/workflow-draft.md",
-      "budget": 4700,
-      "why": "Phase 3 写作细则由原 SKILL 原文迁入；根据同稿实验将小节完整性与完成门槛保留入口，原规则未增写。 +150：写前参数验收写出完整命令并前置于动笔，计数改用交付验收脚本——#418 拆分后本文件只指向 Phase 4 命令，实测模型先写正文、从未写前验收，再用 40 轮自写计数挤进字数范围。 v0.8.2 +200：Phase 3 写前加载清单由 writing-workflow 迁入（该文件同批减 2.3K）。 v0.8.2：写正文时刻自带格式规范与「只靠落盘接上构思」；写作指令与场景揉进段不再复述 short-craft / short-format（同一时刻已加载），反派、揭露、钩子、对标召回改读 设定.md 与小节大纲，不再指向构思时的方法论。"
+      "budget": 4650,
+      "why": "Phase 3 写作细则由原 SKILL 原文迁入；根据同稿实验将小节完整性与完成门槛保留入口，原规则未增写。 +150：写前参数验收写出完整命令并前置于动笔，计数改用交付验收脚本——#418 拆分后本文件只指向 Phase 4 命令，实测模型先写正文、从未写前验收，再用 40 轮自写计数挤进字数范围。 v0.8.2 +200：Phase 3 写前加载清单由 writing-workflow 迁入（该文件同批减 2.3K）。 v0.8.2：写正文时刻自带格式规范与「只靠落盘接上构思」；写作指令与场景揉进段不再复述 short-craft / short-format（同一时刻已加载），反派、揭露、钩子、对标召回改读 设定.md 与小节大纲，不再指向构思时的方法论。 v0.8.2：写前先跑构思完成门禁（新对话里构思没收口就请作者回到构思）；派写手的 prompt 迁到 agent-calls.md。"
     },
     {
       "path": "skills/story-short-write/references/workflow-revision.md",
-      "budget": 3400,
-      "why": "Phase 4 精修细则由原 SKILL 原文迁入；含最终扫描与交付验收。 +150：给作者的交付说明模板（写了什么/待拍板问题附默认/下一步），自查结果收成一句大白话——实测交付报告逐条列脚本名与表格列数，作者看不懂。 v0.8.2 +1300：Phase 4 精修清单与常见问题由 writing-workflow 迁入，Phase 2 不再连带读取。 v0.8.2 +300：冷门题材公式核对清单放回精修时刻（原在 genre-writing-formulas，上一轮为凑上限误删）。 v0.8.2 −150：「像」与入口完成门槛统一为逐处复核功能、不设硬上限；交付说明的执行细节只进最后一行技术备注；格式清单改指 short-format 文末快速检查、删减原则改指 SKILL 执行规则 3（写正文时刻都已加载，不再复述）。"
+      "budget": 2950,
+      "why": "Phase 4 精修细则由原 SKILL 原文迁入；含最终扫描与交付验收。 +150：给作者的交付说明模板（写了什么/待拍板问题附默认/下一步），自查结果收成一句大白话——实测交付报告逐条列脚本名与表格列数，作者看不懂。 v0.8.2 +1300：Phase 4 精修清单与常见问题由 writing-workflow 迁入，Phase 2 不再连带读取。 v0.8.2 +300：冷门题材公式核对清单放回精修时刻（原在 genre-writing-formulas，上一轮为凑上限误删）。 v0.8.2 −150：「像」与入口完成门槛统一为逐处复核功能、不设硬上限；交付说明的执行细节只进最后一行技术备注；格式清单改指 short-format 文末快速检查、删减原则改指 SKILL 执行规则 3（写正文时刻都已加载，不再复述）。 v0.8.2：派写手去味的 prompt 迁到 agent-calls.md（只在交给写手时读）；冷门公式核对删去要回读公式原文的篇幅与男女频两条（节数由大纲与交付检查守，男女频差异在构思时已记进题材招式）；精修必读项写明 short-format。"
     },
     {
       "path": "skills/story-short-write/references/short-format.md",
@@ -254,6 +254,21 @@
       "path": "skills/story-long-write/references/workflow-outline.md",
       "budget": 8000,
       "why": "v0.8.2：开书按时刻拆出的流程文件，只在该时刻读（也进 story-architect 任务包）。"
+    },
+    {
+      "path": "skills/story-short-write/references/scene-craft.md",
+      "budget": 1000,
+      "why": "v0.8.2：写正文时刻必读的场景写法（三维度揉进、疏密与主语节奏），由 short-craft 迁出，构思不读。"
+    },
+    {
+      "path": "skills/story-short-write/references/agent-calls.md",
+      "budget": 1100,
+      "why": "v0.8.2：短篇派 narrative-writer 写正文或精修去味的 prompt，只在交给写手时读；由 workflow-draft／workflow-revision 迁出。"
+    },
+    {
+      "path": "skills/story-review/references/batch-review.md",
+      "budget": 1000,
+      "why": "v0.8.2：多章分批审查才读的跨批状态、连续性与乱序提醒，由审稿入口迁出。"
     }
   ],
   "paths": [
@@ -871,14 +886,14 @@
       "branches": [
         {
           "label": "世情打脸，无反派/揭露",
-          "budget": 29200,
+          "budget": 28550,
           "files": [
             "skills/story-short-write/references/genre-styles/世情打脸.md"
           ]
         },
         {
           "label": "世情打脸，含反派/揭露",
-          "budget": 31550,
+          "budget": 30800,
           "files": [
             "skills/story-short-write/references/genre-styles/世情打脸.md",
             "skills/story-short-write/references/villain-and-reveal.md"
@@ -886,14 +901,14 @@
         },
         {
           "label": "双男主，无反派/揭露",
-          "budget": 27950,
+          "budget": 27300,
           "files": [
             "skills/story-short-write/references/genre-styles/双男主.md"
           ]
         },
         {
           "label": "双男主，含反派/揭露",
-          "budget": 30300,
+          "budget": 29550,
           "files": [
             "skills/story-short-write/references/genre-styles/双男主.md",
             "skills/story-short-write/references/villain-and-reveal.md"
@@ -901,14 +916,14 @@
         },
         {
           "label": "复仇打脸，无反派/揭露",
-          "budget": 28700,
+          "budget": 28050,
           "files": [
             "skills/story-short-write/references/genre-styles/复仇打脸.md"
           ]
         },
         {
           "label": "复仇打脸，含反派/揭露",
-          "budget": 31000,
+          "budget": 30250,
           "files": [
             "skills/story-short-write/references/genre-styles/复仇打脸.md",
             "skills/story-short-write/references/villain-and-reveal.md"
@@ -916,14 +931,14 @@
         },
         {
           "label": "宅斗宫斗，无反派/揭露",
-          "budget": 29000,
+          "budget": 28350,
           "files": [
             "skills/story-short-write/references/genre-styles/宅斗宫斗.md"
           ]
         },
         {
           "label": "宅斗宫斗，含反派/揭露",
-          "budget": 31350,
+          "budget": 30600,
           "files": [
             "skills/story-short-write/references/genre-styles/宅斗宫斗.md",
             "skills/story-short-write/references/villain-and-reveal.md"
@@ -931,14 +946,14 @@
         },
         {
           "label": "总裁豪门，无反派/揭露",
-          "budget": 29550,
+          "budget": 28850,
           "files": [
             "skills/story-short-write/references/genre-styles/总裁豪门.md"
           ]
         },
         {
           "label": "总裁豪门，含反派/揭露",
-          "budget": 31850,
+          "budget": 31100,
           "files": [
             "skills/story-short-write/references/genre-styles/总裁豪门.md",
             "skills/story-short-write/references/villain-and-reveal.md"
@@ -946,14 +961,14 @@
         },
         {
           "label": "悬疑，无反派/揭露",
-          "budget": 28300,
+          "budget": 27650,
           "files": [
             "skills/story-short-write/references/genre-styles/悬疑.md"
           ]
         },
         {
           "label": "悬疑，含反派/揭露",
-          "budget": 30650,
+          "budget": 29900,
           "files": [
             "skills/story-short-write/references/genre-styles/悬疑.md",
             "skills/story-short-write/references/villain-and-reveal.md"
@@ -961,14 +976,14 @@
         },
         {
           "label": "民俗怪谈，无反派/揭露",
-          "budget": 28100,
+          "budget": 27450,
           "files": [
             "skills/story-short-write/references/genre-styles/民俗怪谈.md"
           ]
         },
         {
           "label": "民俗怪谈，含反派/揭露",
-          "budget": 30400,
+          "budget": 29650,
           "files": [
             "skills/story-short-write/references/genre-styles/民俗怪谈.md",
             "skills/story-short-write/references/villain-and-reveal.md"
@@ -976,14 +991,14 @@
         },
         {
           "label": "沙雕脑洞，无反派/揭露",
-          "budget": 28650,
+          "budget": 27950,
           "files": [
             "skills/story-short-write/references/genre-styles/沙雕脑洞.md"
           ]
         },
         {
           "label": "沙雕脑洞，含反派/揭露",
-          "budget": 30950,
+          "budget": 30200,
           "files": [
             "skills/story-short-write/references/genre-styles/沙雕脑洞.md",
             "skills/story-short-write/references/villain-and-reveal.md"
@@ -991,14 +1006,14 @@
         },
         {
           "label": "甜宠，无反派/揭露",
-          "budget": 27650,
+          "budget": 27000,
           "files": [
             "skills/story-short-write/references/genre-styles/甜宠.md"
           ]
         },
         {
           "label": "甜宠，含反派/揭露",
-          "budget": 30000,
+          "budget": 29250,
           "files": [
             "skills/story-short-write/references/genre-styles/甜宠.md",
             "skills/story-short-write/references/villain-and-reveal.md"
@@ -1006,14 +1021,14 @@
         },
         {
           "label": "追妻火葬场，无反派/揭露",
-          "budget": 29050,
+          "budget": 28400,
           "files": [
             "skills/story-short-write/references/genre-styles/追妻火葬场.md"
           ]
         },
         {
           "label": "追妻火葬场，含反派/揭露",
-          "budget": 31400,
+          "budget": 30650,
           "files": [
             "skills/story-short-write/references/genre-styles/追妻火葬场.md",
             "skills/story-short-write/references/villain-and-reveal.md"
@@ -1021,14 +1036,14 @@
         },
         {
           "label": "冷门题材公式，无反派/揭露",
-          "budget": 31150,
+          "budget": 30500,
           "files": [
             "skills/story-short-write/references/genre-writing-formulas.md"
           ]
         },
         {
           "label": "冷门题材公式，含反派/揭露",
-          "budget": 33500,
+          "budget": 32750,
           "files": [
             "skills/story-short-write/references/genre-writing-formulas.md",
             "skills/story-short-write/references/villain-and-reveal.md"
@@ -1041,7 +1056,7 @@
             "skills/story-short-write/references/villain-and-reveal.md",
             "skills/story-short-write/references/benchmark-recall.md"
           ],
-          "budget": 35000
+          "budget": 34400
         },
         {
           "label": "冷门题材，含反派/揭露，查参考索引",
@@ -1050,10 +1065,10 @@
             "skills/story-short-write/references/villain-and-reveal.md",
             "skills/story-short-write/references/reference-index.md"
           ],
-          "budget": 34800
+          "budget": 34150
         }
       ],
-      "why": "迁出文件保守全额计入（即使条件未命中）；拆分不计作同阶段总量节省。 路径预算显式 +500：迁移入口、路径修正和检查职责传递的路由文字；原技法未扩写。 v0.8.2：对标召回与参考索引只在有对标或选其他资料时读，改为条件分支；Phase 4 精修清单移入 workflow-revision。 v0.8.2：改名为作者时刻「构思」；构思交付把写正文要用的信息写进 设定.md，写正文时刻另计一条路径。"
+      "why": "迁出文件保守全额计入（即使条件未命中）；拆分不计作同阶段总量节省。 路径预算显式 +500：迁移入口、路径修正和检查职责传递的路由文字；原技法未扩写。 v0.8.2：对标召回与参考索引只在有对标或选其他资料时读，改为条件分支；Phase 4 精修清单移入 workflow-revision。 v0.8.2：改名为作者时刻「构思」；构思交付把写正文要用的信息写进 设定.md，写正文时刻另计一条路径。 v0.8.2：场景写法迁出（构思不读）；腾出的字数给设定.md 模板的题材招式、人设速写与各处反转／贯穿道具／导语口径统一。"
     },
     {
       "label": "短篇写正文（Phase 3–4，主会话）",
@@ -1062,13 +1077,14 @@
         "skills/story-short-write/references/workflow-draft.md",
         "skills/story-short-write/references/short-format.md",
         "skills/story-short-write/references/short-craft.md",
+        "skills/story-short-write/references/scene-craft.md",
         "skills/story-long-write/references/style-resolution.md",
         "skills/story-short-write/references/workflow-revision.md"
       ],
       "branches": [
         {
           "label": "世情打脸，主会话自己去味",
-          "budget": 31900,
+          "budget": 31550,
           "files": [
             "skills/story-short-write/references/genre-styles/世情打脸.md",
             "skills/story-short-write/references/short-deslop.md"
@@ -1076,7 +1092,7 @@
         },
         {
           "label": "双男主，主会话自己去味",
-          "budget": 30650,
+          "budget": 30300,
           "files": [
             "skills/story-short-write/references/genre-styles/双男主.md",
             "skills/story-short-write/references/short-deslop.md"
@@ -1084,7 +1100,7 @@
         },
         {
           "label": "复仇打脸，主会话自己去味",
-          "budget": 31400,
+          "budget": 31000,
           "files": [
             "skills/story-short-write/references/genre-styles/复仇打脸.md",
             "skills/story-short-write/references/short-deslop.md"
@@ -1092,7 +1108,7 @@
         },
         {
           "label": "宅斗宫斗，主会话自己去味",
-          "budget": 31750,
+          "budget": 31350,
           "files": [
             "skills/story-short-write/references/genre-styles/宅斗宫斗.md",
             "skills/story-short-write/references/short-deslop.md"
@@ -1100,7 +1116,7 @@
         },
         {
           "label": "总裁豪门，主会话自己去味",
-          "budget": 32250,
+          "budget": 31850,
           "files": [
             "skills/story-short-write/references/genre-styles/总裁豪门.md",
             "skills/story-short-write/references/short-deslop.md"
@@ -1108,7 +1124,7 @@
         },
         {
           "label": "悬疑，主会话自己去味",
-          "budget": 31000,
+          "budget": 30650,
           "files": [
             "skills/story-short-write/references/genre-styles/悬疑.md",
             "skills/story-short-write/references/short-deslop.md"
@@ -1116,7 +1132,7 @@
         },
         {
           "label": "民俗怪谈，主会话自己去味",
-          "budget": 30800,
+          "budget": 30400,
           "files": [
             "skills/story-short-write/references/genre-styles/民俗怪谈.md",
             "skills/story-short-write/references/short-deslop.md"
@@ -1124,7 +1140,7 @@
         },
         {
           "label": "沙雕脑洞，主会话自己去味",
-          "budget": 31350,
+          "budget": 30950,
           "files": [
             "skills/story-short-write/references/genre-styles/沙雕脑洞.md",
             "skills/story-short-write/references/short-deslop.md"
@@ -1132,7 +1148,7 @@
         },
         {
           "label": "甜宠，主会话自己去味",
-          "budget": 30350,
+          "budget": 30000,
           "files": [
             "skills/story-short-write/references/genre-styles/甜宠.md",
             "skills/story-short-write/references/short-deslop.md"
@@ -1140,7 +1156,7 @@
         },
         {
           "label": "追妻火葬场，主会话自己去味",
-          "budget": 31750,
+          "budget": 31400,
           "files": [
             "skills/story-short-write/references/genre-styles/追妻火葬场.md",
             "skills/story-short-write/references/short-deslop.md"
@@ -1148,22 +1164,23 @@
         },
         {
           "label": "冷门题材（按设定.md 记下的公式要点写），主会话自己去味",
-          "budget": 26250,
+          "budget": 25900,
           "files": [
             "skills/story-short-write/references/short-deslop.md"
           ]
         },
         {
           "label": "最重题材包＋情感桥段，去味交给写手",
-          "budget": 32050,
+          "budget": 32700,
           "files": [
             "skills/story-short-write/references/genre-styles/总裁豪门.md",
-            "skills/story-short-write/references/emotional-methods.md"
+            "skills/story-short-write/references/emotional-methods.md",
+            "skills/story-short-write/references/agent-calls.md"
           ]
         },
         {
           "label": "最重题材包＋情感桥段，主会话自己去味（最重组合）",
-          "budget": 35000,
+          "budget": 34700,
           "files": [
             "skills/story-short-write/references/genre-styles/总裁豪门.md",
             "skills/story-short-write/references/emotional-methods.md",
@@ -1171,7 +1188,7 @@
           ]
         }
       ],
-      "why": "v0.8.2：取代「短篇执行指令（不含技法参考）」——那条没算写正文时真正读的格式、底座、题材包与去味清单。写正文是构思之后的新时刻：只读两份设计文件（项目资料，不计）、本条文件与一个题材包；反转、反派、平台基调、冷门公式、对标召回都从 设定.md 取，不重读构思方法论。去味交给写手时主会话不读 short-deslop；emotional-methods 只在写羁绊或余韵时读。参考索引列出的其他按需资料未登记。"
+      "why": "v0.8.2：取代「短篇执行指令（不含技法参考）」——那条没算写正文时真正读的格式、底座、题材包与去味清单。写正文是构思之后的新时刻：只读两份设计文件（项目资料，不计）、本条文件与一个题材包；反转、反派、平台基调、冷门公式、对标召回都从 设定.md 取，不重读构思方法论。去味交给写手时主会话不读 short-deslop；emotional-methods 只在写羁绊或余韵时读。参考索引列出的其他按需资料未登记。 v0.8.2：场景写法随写正文时刻读 scene-craft；派写手的 prompt 只在去味交给写手时读 agent-calls（该分支计入）。"
     },
     {
       "label": "拆文每批（chapter-extractor 每次调用）",
@@ -1213,7 +1230,7 @@
           "files": [
             "skills/story-review/references/quality-rubric.md"
           ],
-          "budget": 20900
+          "budget": 20400
         },
         {
           "label": "平台 rubric",
@@ -1221,7 +1238,7 @@
             "skills/story-review/references/quality-rubric.md",
             "skills/story-review/references/rubrics/zhihu.md"
           ],
-          "budget": 21450
+          "budget": 20850
         },
         {
           "label": "长篇收尾维护追踪",
@@ -1229,10 +1246,20 @@
             "skills/story-review/references/quality-rubric.md",
             "skills/story-review/references/review-tracking.md"
           ],
-          "budget": 21800
+          "budget": 21300
+        },
+        {
+          "label": "分批审查（平台 rubric＋长篇收尾维护追踪）",
+          "files": [
+            "skills/story-review/references/quality-rubric.md",
+            "skills/story-review/references/rubrics/zhihu.md",
+            "skills/story-review/references/review-tracking.md",
+            "skills/story-review/references/batch-review.md"
+          ],
+          "budget": 22700
         }
       ],
-      "why": "v0.8.2：审稿按时刻加载——派子代理的 prompt、solo 流程、追踪维护各自成文件，子代理的去味判据由它自己的读取表读，主会话不摘抄。 作者记忆拆分后参考表多一行维护文件指路。"
+      "why": "v0.8.2：审稿按时刻加载——派子代理的 prompt、solo 流程、追踪维护各自成文件，子代理的去味判据由它自己的读取表读，主会话不摘抄。 作者记忆拆分后参考表多一行维护文件指路。 v0.8.2：综合裁决、full/lean 报告模板与 story-explorer 预查询只在派子代理时用，随 agent-prompts 读；分批审查的跨批规则拆到 batch-review，另计分支。"
     },
     {
       "label": "审稿 solo（主会话一人审）",
@@ -1241,23 +1268,32 @@
         "skills/story-review/references/style-resolution.md",
         "skills/story-review/references/solo.md",
         "skills/story-review/references/anti-ai-writing.md",
-        "skills/story-review/references/quality-rubric.md"
+        "skills/story-review/references/quality-rubric.md",
+        "skills/story-review/references/banned-words.md"
       ],
       "branches": [
         {
           "label": "通用 rubric",
           "files": [],
-          "budget": 31850
+          "budget": 33550
         },
         {
           "label": "平台 rubric",
           "files": [
             "skills/story-review/references/rubrics/zhihu.md"
           ],
-          "budget": 32250
+          "budget": 34000
+        },
+        {
+          "label": "分批审查（平台 rubric）",
+          "files": [
+            "skills/story-review/references/rubrics/zhihu.md",
+            "skills/story-review/references/batch-review.md"
+          ],
+          "budget": 34950
         }
       ],
-      "why": "v0.8.2：一人审时 AI 味判断读 anti-ai-writing 的检测部分；一级词表由预检脚本承担，不再另读 banned-words。 作者记忆拆分后参考表多一行维护文件指路。"
+      "why": "v0.8.2：一人审恢复读 banned-words——预检脚本对高频套话只做密度统计，一级词不逐个报；AI 味判断读 anti-ai-writing 的「AI写作指纹」「10 种 AI 写作模式检测」。为容纳它，审稿入口把只在派子代理时用的综合裁决、报告模板、story-explorer 预查询迁到 agent-prompts，把只在分批时用的跨批规则迁到 batch-review（另计分支）。 作者记忆拆分后参考表多一行维护文件指路。"
     },
     {
       "label": "去AI味主会话",

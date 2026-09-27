@@ -60,7 +60,7 @@ metadata: {"openclaw":{"source":"https://github.com/zenstory-ai/oh-story-claudec
 
 问用户：**「你想让读者读完什么感觉？有没有想写的题材方向或灵感？」**
 
-如果用户有明确想法 → 直接进入 Phase 2。
+用户已说清读者读完的感觉 → 直接进入 Phase 2；只给了题材或梗、没说情绪 → 从下表带一个推荐情绪问一句，作者点头再进。
 
 如果用户只有模糊想法 → 帮用户做情绪选择：
 

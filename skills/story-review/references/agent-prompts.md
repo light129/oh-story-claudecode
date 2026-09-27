@@ -1,10 +1,18 @@
-# story-review：full/lean 模式派子代理的调用方式
+# story-review：full/lean 模式派子代理与综合
 
 只有实际模式仍是 full/lean 时才读本文件。
 
-使用当前运行时的 Agent 工具并行调用（Codex 原生子代理使用 `agent_type`，Claude Code 使用 `subagent_type`，OpenCode 使用 `subagent` 工具的 `agent` 参数，Antigravity 使用 `invoke_subagent` + 同名 `TypeName`；实际字段以当前 CLI 暴露的工具为准）。每个 Agent 不继承父对话上下文，prompt 必须自包含项目路径、审查范围、文件路径、必要摘录、审查基准包摘要、Rubric Source 和统一 Findings Schema。
+使用当前运行时的 Agent 工具并行调用（Codex 原生子代理使用 `agent_type`，Claude Code 使用 `subagent_type`，OpenCode 使用 `subagent` 工具的 `agent` 参数，Antigravity 使用 `invoke_subagent` + 同名 `TypeName`；实际字段以当前 CLI 暴露的工具为准）。每个 Agent 不继承父对话上下文，prompt 必须自包含项目路径、审查范围、文件路径、必要摘录和统一 Findings Schema。审稿视角的三个 prompt 还要内联审查基准包摘要与 Rubric Source，不要求子 Agent 必须读 `story-review/references/*` 才能完成任务（如需补充只读本 Skill 的 references）；consistency-checker 例外，它只核对事实，按自己的检查项审，不带审查基准包。所有 reviewer 只读：不改任何文件，只输出结果。
 
 **调用规则**：执行 Phase 0 后，只有实际模式仍是 full/lean 时才 spawn。不要 spawn 缺失 Agent。
+
+**story-explorer 预查询（可选）**。仅当 `Effective Mode` 仍为 `full`/`lean`、当前允许 spawn 且当前运行时的 Agent 工具可用时，才可在对应 canonical agent 目录下确认 `story-explorer` 已部署并 spawn；Antigravity 检查 `.agents/agents/story-explorer/agent.md`，用 `invoke_subagent` + `TypeName: "story-explorer"`。`solo` 或子代理递归保护场景下不得 spawn，只能直接读取/检索。Prompt 示例：
+
+```text
+项目目录：{dir}
+查询类型：setting_appearances
+查询参数：{审查涉及的设定关键词}
+```
 
 **Agent 1: story-architect**（subagent_type: story-architect）
 - full/lean 均调用。
@@ -32,7 +40,7 @@
   8. 伏笔密度、连载期待和结构信息量是否合理？（伏笔密度通常只作为 S4 结构风险，除非已造成理解混乱）
   9. 按平台 rubric 或通用内容 rubric 逐项对照，标记 PASS/FAIL。
   10. 继承的开放项里，本批本该兑现的钩子/伏笔是否落空？
-  11. 开头同质化（仅当本章是全书开篇/前 3 章）：开局切口是不是同题材的默认套路（穿越即退婚、系统绑定、末世第一天、开场即打脸等），能不能原样换到任意同类书？"有钩子/非天气开场"不等于不同质。对照 references/plot-core-methods.md「噱头分类与开篇流程」判断——能整体换到同类书=同质化（撞题材模板至少 S2；套路化但有具体人物/处境微差 S3）。
+  11. 开头同质化（仅当本章是全书开篇/前 3 章）：开局切口是不是同题材的默认套路（穿越即退婚、系统绑定、末世第一天、开场即打脸等），能不能原样换到任意同类书？"有钩子/非天气开场"不等于不同质。对照 `story-review/references/plot-core-methods.md`「噱头分类与开篇流程」判断——能整体换到同类书=同质化（撞题材模板至少 S2；套路化但有具体人物/处境微差 S3）。
   12. 结尾总结：章尾是总结/升华/复述式收尾（"就这样……""他终于明白……""这一夜注定……"），还是落在动作/画面/悬念上？检测器已判 blocking 的（`trailer-summary`）按上面「blocking 一律 S2」处理，不重复定级；检测器没覆盖的总结/升华/复述式收尾按影响定 S2/S3（改写走 /story-deslop：章尾预告与章尾状态总结归 Gate F，其余 blocking 并入 Gate B；本 skill 只标问题不改写）。
 
   输出格式：
@@ -79,6 +87,7 @@
   ```
   你是 narrative-writer，从文字质量层面审查以下内容。
   你的任务是【找问题】，不是验证正确性。以最严苛的标准审视。
+  只读审查：不改任何文件（含正文），只输出下方 VERDICT / FINDINGS / RECOMMENDATIONS。
   项目路径：{项目根}
   审查范围：{文件路径/章节/必要摘录}
   文风路径：{本书文风全文路径，无则写无}
@@ -131,4 +140,45 @@
   REASONING_CHAINS: [仅列推理型 finding 的前提/规则 -> 触发事件 -> 矛盾点 -> 需裁决问题]
   ```
 
----
+## 综合裁决
+
+1. 收集实际执行的 reviewer VERDICT 和 FINDINGS。
+2. 合并去重：按 `severity` 排序（S1 > S2 > S3 > S4），同级内按影响范围排序。
+3. **可选事实核查**：如果审查内容涉及需要验证的外部事实（历史年代、地理方位、职业细节等），只有在 `Effective Mode` 仍为 `full`/`lean`、当前不是子 Agent、当前运行时的 Agent 工具可用且对应 canonical agent 目录下的 `story-researcher` 已部署时，才可额外 spawn；Antigravity 检查 `.agents/agents/story-researcher/agent.md`，用 `invoke_subagent` + `TypeName: "story-researcher"`。`solo`、missing/malformed/stale/spawn failed 降级或子代理递归保护场景下不得 spawn，只能在报告中标记“需人工事实核查”。
+4. **分歧呈现**：如果 reviewer 间有冲突意见，明确呈现分歧让用户裁决；不要自动妥协。
+5. 按 SKILL.md「报告面向作者」输出综合审查报告：开头说明审查方式与范围，证据不足项写成作者能补的材料，执行路径只进技术备注行。
+
+## 报告模板
+
+只有实际模式确实为 `full` 或 `lean` 时才使用本模板；如果 Phase 0 或运行时失败导致降级 `solo`，必须改用 solo 模式模板。lean 排除的视角写进「这次怎么审的」；full/lean 必需 reviewer 缺失或 spawn 失败时降级 solo，不在本模板里标「未看」后继续综合。
+
+<!-- author-report -->
+```md
+=== 《{书名}》{审查范围}审查 ===
+这次怎么审的：{结构、人物、文字、设定一致性四个视角分头看 | 精简审：结构和设定一致性两个视角}，按{番茄 | 起点 | 知乎盐言 | 通用网文}的标准。
+
+总体判断：{可以发 | 改完下面几处再发 | 这一章需要重写}——{一句话理由，用读者感受说}
+
+## 必须改（{n} 处）
+1. 第{N}章「{原文引用}」
+   问题：{读者会怎么想、哪里读不通}
+   建议：{具体改法}
+
+## 建议改（{n} 处）
+{同上格式}
+
+## 可以不改（{n} 处）
+{一行一条：位置 + 问题 + 改法；风格微调也放这里}
+
+## 需要你决定
+{审稿视角有分歧、或事实需要你裁定时，写成问题 + 选项 + 我的建议，例如「第12章写左臂受伤、第15章写右臂，统一成哪边？建议左臂（第12章交代了伤的来历）」；没有就写"无"}
+
+## 没法判断的地方
+{缺哪份设定或大纲导致没法核对、需要人工查证的外部事实；没有就写"无"}
+
+## 下一批接着核对
+{仅分批审查：留到下一批回头看的问题 + 预计在哪几章兑现；否则删掉本节}
+
+下一步：{例如「说"改第12章"，我按必须改的几处动手」「AI 味集中的段落可以说"去 AI 味"」}
+技术备注：Mode {full | lean}→{full | lean} · Fallback none · Rubric {…} ({file | embedded})
+```

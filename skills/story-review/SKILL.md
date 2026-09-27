@@ -131,21 +131,6 @@ AI 味 / 禁用词 fallback 速查：
 - 起点：设定自洽、升级路径、长线期待、世界观承载力。
 - 知乎盐言：短篇钩子、反转密度、情绪兑现、信息差推进。
 
-### 传给子 Agent 的规则
-
-full/lean 模式下，主会话必须把“审查基准包摘要”直接写进每个 Agent prompt。**不要要求子 Agent 必须读取 `story-review/references/*` 才能完成任务**；如需补充，只读取本 Skill 的 `story-review/references/*`，最终遵守注入的 rubric 摘要和统一 Findings Schema。
-
-### 跨批审查落盘契约（所有模式）
-
-只要多章/整卷/整本审查被拆成两批及以上，full、lean、solo 都维护 **{项目根}/.story-review/state.md**：
-
-1. 首批确定本次完整审查范围和批次顺序。每批综合裁决后，用同目录临时文件 + rename 原子重写 state.md，不能只把结果留在对话里。
-2. state.md 只记录完整审查范围、已完成范围、下一批，以及“上一批未解决 findings 摘要”。摘要项保留 location、issue 和预计核查/兑现范围。
-3. 下一批开始前先读取 state.md，把未解决摘要注入 reviewer prompt；已解决或用户明确不处理的项不再继承，但须在本批输出中说明。
-4. 每个项目同时只维护一条跨批审查；若新一轮与 state.md 中未完成范围不同，先说明会丢弃的旧进度并征得用户确认，确认后在首批完成时覆盖。续接时 state.md 缺失、损坏或本批超出既定范围，应明确报告并停止，不猜测旧内容；非分批审查不创建它。
-
-**.story-review/** 只保存审查状态，不属于小说事实追踪；不得借此修改正文、设定、大纲或 `追踪/`。
-
 ---
 
 ## Phase 1：收集待审查内容
@@ -156,9 +141,7 @@ full/lean 模式下，主会话必须把“审查基准包摘要”直接写进�
 2. **范围传递策略**：
    - 优先把文件路径、章节名、行号范围传给 reviewer，不要把整本或大量章节完整复制进每个 prompt。
    - 单文件或短片段可附 300-1200 字关键摘录。
-   - 多章/整卷/整本审查必须分批：按章节或文件组拆分，每批输出独立 findings，再综合。
-   - **跨批连续性（分批必做）**：审每一批前，先读 `追踪/伏笔.md` 中状态为 `已埋` 且计划回收章 ≤ 本批末章的当前行，再按需读取相关 `追踪/逐章记录/第NNN章.md` 查变更原因；同时读取涉及角色的独立快照，并按上方契约把 state.md 的上一批未解决 findings 摘要作为「继承的开放项」注入 reviewer / consistency-checker prompt。新发现但尚未登记的开放钩子先列为维护候选，收尾时必须有正文证据才能进入修订事务。
-   - **乱序/重叠审查提醒**：若已审过靠后的范围（如先审 300-400），之后审靠前的范围（200-300）时，只有当本批**新增/改动了一个开放项、且其预计兑现章落在已审过的靠后范围内**，才提醒用户「200-300 的改动可能影响已审的 300-400」，并让用户选择复审受影响章节 / 全量复审 / 仅记为待办——**默认记为待办，不盲目全量重跑**。无具体跨范围依赖时不提醒。
+   - 多章/整卷/整本审查必须分批：按章节或文件组拆分，每批输出独立 findings，再综合；分批前先完整读 [references/batch-review.md](references/batch-review.md)（跨批状态、连续性、乱序提醒）。
 3. **读取相关支撑材料**：正文、相关设定、角色档案、大纲、追踪/上下文、伏笔文件；缺失时在报告中标记证据不足。
 4. **识别目标平台并加载 rubric**：
    - 优先使用用户显式指定的平台。
@@ -179,22 +162,14 @@ full/lean 模式下，主会话必须把“审查基准包摘要”直接写进�
    - `check-ai-patterns.js` 的 findings 合并进 `prose`：severity=blocking 的类别一律按 S2（当前为 `not-is-comparison` / `em-dash` / `voice-contrast` / `negation-parade` / `reverse-not-is` / `trailer-ending` / `trailer-summary`），修法直接采用检测器输出的建议（删否定铺垫/反差腔/排比否定/章尾预告腔/章尾状态总结句，直接写后项或具体动作；破折号按功能改成动作/短句/逗号/冒号）。
    - 其余 prose findings（advisory）统一按 S3：只指出读感风险，不替代人工判断；功能性写法标 `[需复核]` 并保留。完整类别和修法见 `anti-ai-writing.md`。
    - `check-degeneration.js` 报告模型退化（逐字复读/截断/占位符/工程词泄漏），每条带 `severity: blocking|advisory`：blocking（复读/截断/tier1 工程词）作为 S1/S2 `prose` findings，修复建议是「重新生成该段，不是改写」；advisory（tier2 章节/歧义词）作为 S3。
-   - 这三个预检脚本只读；`story-review` **不修改正文、设定或大纲文件**，需要自动修复正文时建议转 `/story-deslop`。full / lean 模式只有下方「追踪文件维护」允许修改 `追踪/`；分批审查的所有模式都可按上方契约写 **.story-review/state.md**，solo 除该状态外不写项目内容。
+   - 这三个预检脚本只读；`story-review` **不修改正文、设定或大纲文件**，需要自动修复正文时建议转 `/story-deslop`。full / lean 模式只有下方「追踪文件维护」允许修改 `追踪/`；分批审查的所有模式都可按 batch-review.md 写 **.story-review/state.md**，solo 除该状态外不写项目内容。
    - 默认 `--quote-mode keep`，不把知乎盐言短篇的 `「」` 当作问题；只有项目明确指定引号风格时才检查对应转换建议。
-
-**story-explorer 预查询（可选）**。仅当 `Effective Mode` 仍为 `full`/`lean`、当前允许 spawn 且当前运行时的 Agent 工具可用时，才可在对应 canonical agent 目录下确认 `story-explorer` 已部署并 spawn；Antigravity 检查 `.agents/agents/story-explorer/agent.md`，用 `invoke_subagent` + `TypeName: "story-explorer"`。`solo` 或子代理递归保护场景下不得 spawn，只能直接读取/检索。Prompt 示例：
-
-```text
-项目目录：{dir}
-查询类型：setting_appearances
-查询参数：{审查涉及的设定关键词}
-```
 
 ---
 
 ## 统一 Findings Schema（所有模式必须使用）
 
-所有 reviewer（包括 solo）输出问题时必须使用统一结构，方便综合排序；它只在 reviewer 与综合裁决之间流转，给作者的报告按 Phase 4 模板转写。`location` 必须使用工具读取结果显示的原始文件行号；不要删除空行后重新编号。
+所有 reviewer（包括 solo）输出问题时必须使用统一结构，方便综合排序；它只在 reviewer 与综合裁决之间流转，给作者的报告按 Phase 4 或 solo 模板转写。`location` 必须使用工具读取结果显示的原始文件行号；不要删除空行后重新编号。
 
 对 `consistency` / `factual` / `causal` / `rule_boundary` 类 finding，`fix` 字段只写事实统一方向（例如“统一为左臂旧伤，并同步正文/设定中冲突处”或“需在 A/B 时间线中裁定一个来源”），不要写文学创作建议。
 
@@ -217,52 +192,15 @@ full/lean 模式下，主会话必须把“审查基准包摘要”直接写进�
 
 ## Phase 2：并行 Spawn Agent（full/lean 模式）
 
-执行 Phase 0 后实际模式仍是 full/lean 时，读 [references/agent-prompts.md](references/agent-prompts.md) 按其中的调用规则与四个 prompt 并行 spawn；不 spawn 缺失的 Agent。每个 Agent 不继承父对话上下文，prompt 自包含路径、范围与统一 Findings Schema。
+执行 Phase 0 后实际模式仍是 full/lean 时，读 [references/agent-prompts.md](references/agent-prompts.md) 按其中的调用规则与四个 prompt 并行 spawn，综合裁决与报告模板也在其中；不 spawn 缺失的 Agent。每个 Agent 不继承父对话上下文，prompt 自包含路径、范围与统一 Findings Schema。
 
-## Phase 3：综合裁决
+## Phase 3：综合裁决（full / lean 模式）
 
-1. 收集实际执行的 reviewer VERDICT 和 FINDINGS。
-2. 合并去重：按 `severity` 排序（S1 > S2 > S3 > S4），同级内按影响范围排序。
-3. **可选事实核查**：如果审查内容涉及需要验证的外部事实（历史年代、地理方位、职业细节等），只有在 `Effective Mode` 仍为 `full`/`lean`、当前不是子 Agent、当前运行时的 Agent 工具可用且对应 canonical agent 目录下的 `story-researcher` 已部署时，才可额外 spawn；Antigravity 检查 `.agents/agents/story-researcher/agent.md`，用 `invoke_subagent` + `TypeName: "story-researcher"`。`solo`、missing/malformed/stale/spawn failed 降级或子代理递归保护场景下不得 spawn，只能在报告中标记“需人工事实核查”。
-4. **分歧呈现**：如果 reviewer 间有冲突意见，明确呈现分歧让用户裁决；不要自动妥协。
-5. 按「报告面向作者」输出综合审查报告：开头说明审查方式与范围，证据不足项写成作者能补的材料，执行路径只进技术备注行。
-
----
+收齐 reviewer 结果后按 agent-prompts.md「综合裁决」合并、去重、呈现分歧。
 
 ## Phase 4：输出报告（full / lean 模式）
 
-只有实际模式确实为 `full` 或 `lean` 时才使用本模板；如果 Phase 0 或运行时失败导致降级 `solo`，必须改用 solo 模式模板。lean 排除的视角写进「这次怎么审的」；full/lean 必需 reviewer 缺失或 spawn 失败时降级 solo，不在本模板里标「未看」后继续综合。
-
-<!-- author-report -->
-```md
-=== 《{书名}》{审查范围}审查 ===
-这次怎么审的：{结构、人物、文字、设定一致性四个视角分头看 | 精简审：结构和设定一致性两个视角}，按{番茄 | 起点 | 知乎盐言 | 通用网文}的标准。
-
-总体判断：{可以发 | 改完下面几处再发 | 这一章需要重写}——{一句话理由，用读者感受说}
-
-## 必须改（{n} 处）
-1. 第{N}章「{原文引用}」
-   问题：{读者会怎么想、哪里读不通}
-   建议：{具体改法}
-
-## 建议改（{n} 处）
-{同上格式}
-
-## 可以不改（{n} 处）
-{一行一条：位置 + 问题 + 改法；风格微调也放这里}
-
-## 需要你决定
-{审稿视角有分歧、或事实需要你裁定时，写成问题 + 选项 + 我的建议，例如「第12章写左臂受伤、第15章写右臂，统一成哪边？建议左臂（第12章交代了伤的来历）」；没有就写"无"}
-
-## 没法判断的地方
-{缺哪份设定或大纲导致没法核对、需要人工查证的外部事实；没有就写"无"}
-
-## 下一批接着核对
-{仅分批审查：留到下一批回头看的问题 + 预计在哪几章兑现；否则删掉本节}
-
-下一步：{例如「说"改第12章"，我按必须改的几处动手」「AI 味集中的段落可以说"去 AI 味"」}
-技术备注：Mode {full | lean}→{full | lean} · Fallback none · Rubric {…} ({file | embedded})
-```
+实际模式确为 full/lean 时用 agent-prompts.md 的报告模板；降级 solo 时改用 solo.md 模板。
 
 ---
 

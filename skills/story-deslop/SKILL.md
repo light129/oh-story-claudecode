@@ -178,7 +178,7 @@ node scripts/check-ai-patterns.js --check --fail-on=blocking <正文文件...>
 
 #### Gate 规则入口
 
-实际执行者在逐项清除前读取 [references/deslop-gates.md](references/deslop-gates.md) 的删除保护与所选 Gate 细则；inline 与 agent 使用同源规则。按上文「改写顺序」排所选 Gate 的先后，不另起一次全篇去味。
+实际执行者逐项清除前读 [references/deslop-gates.md](references/deslop-gates.md) 的删除保护、所选 Gate 细则与「写法抽查」；inline 与 agent 使用同源规则。按上文「改写顺序」排所选 Gate 的先后，不另起一次全篇去味。
 
 ### Phase 4：确定性收尾（文件模式）
 
