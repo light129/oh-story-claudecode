@@ -52,6 +52,11 @@ Four throughlines: reverse-engineering hits · modular plot recombination · lay
 
 ## Installation
 
+### ClawHub
+
+ClawHub distribution is governed by the repository's [explicit publish inventory](.clawhub/publish.json), with discovery through [ClawHub](https://clawhub.ai/). A skill-specific link is added here only after its publisher, version, and anonymous accessibility are verified, so this README never presents a nonexistent listing as live.
+
+
 ```bash
 npx skills add zenstory-ai/oh-story-claudecode -y -g
 ```

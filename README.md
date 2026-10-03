@@ -49,6 +49,11 @@ Oh Story 覆盖长篇与短篇网络小说的全流程：**扫榜选材 → 拆�
 
 ## 安装
 
+### ClawHub
+
+ClawHub 分发由仓库中的 [显式发布清单](.clawhub/publish.json) 管理，并通过 [ClawHub](https://clawhub.ai/) 提供发现入口。具体 skill 链接只有在发布者、版本和匿名访问均验证后才会写入本文档，避免把尚不存在的条目当成已上架。
+
+
 ```bash
 npx skills add zenstory-ai/oh-story-claudecode -y -g
 ```
