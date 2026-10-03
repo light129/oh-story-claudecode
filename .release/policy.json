@@ -20,6 +20,21 @@
       "path": ".claude-plugin/marketplace.json",
       "format": "json",
       "pointer": "/plugins/0/version"
+    },
+    {
+      "path": ".zcode-plugin/plugin.json",
+      "format": "json",
+      "pointer": "/version"
+    },
+    {
+      "path": "marketplace.json",
+      "format": "json",
+      "pointer": "/plugins/0/version"
+    },
+    {
+      "path": "reasonix-plugin.json",
+      "format": "json",
+      "pointer": "/version"
     }
   ],
   "changelog": "CHANGELOG.md",
@@ -40,10 +55,14 @@
     "skills/story/SKILL.md",
     "skills/story/VERSION",
     ".claude-plugin/plugin.json",
-    ".claude-plugin/marketplace.json"
+    ".claude-plugin/marketplace.json",
+    ".agents/skills",
+    ".zcode-plugin/plugin.json",
+    "marketplace.json",
+    "reasonix-plugin.json"
   ],
   "excludePaths": [
-    ".agents",
+    ".agents/notes",
     ".clawhub",
     ".github",
     ".release"
