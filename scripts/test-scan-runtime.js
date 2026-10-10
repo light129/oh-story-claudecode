@@ -724,6 +724,327 @@ function testQimaoPartialTargetStatus() {
   assert.match(run.stderr, /七猫采集 partial: wrote 1\/2; failed 1/);
 }
 
+// ---------------------------------------------------------------------------
+// 七猫书库（--source library）：走 Node https，不开 Chrome。预加载把 https.get 换成按 URL
+// 查夹具的替身，并把 sleep / ab 换成记账，断言请求顺序、限速和「全程没碰 CDP」。
+// ---------------------------------------------------------------------------
+
+const QIMAO_SCRAPER = path.join(
+  repoRoot,
+  "skills/story-long-scan/scripts/qimao-rank-scraper.js"
+);
+const QIMAO_LIBRARY_STUB = `// 预加载：书库测试一律离线
+const fs = require("fs");
+const https = require("https");
+const { EventEmitter } = require("events");
+const { PassThrough } = require("stream");
+const routes = JSON.parse(fs.readFileSync(process.env.SCAN_FAKE_HTTPS_ROUTES, "utf8"));
+const record = (line) => fs.appendFileSync(process.env.SCAN_FAKE_CALLS, line + "\\n");
+const utils = require(process.env.SCAN_TEST_UTILS);
+utils.sleep = (ms) => record("sleep " + ms);
+utils.ab = () => { record("ab"); throw new Error("library mode must not touch CDP"); };
+https.get = function fakeGet(url, options, callback) {
+  const target = String(url);
+  record("GET " + target);
+  const req = new EventEmitter();
+  req.destroy = (err) => setImmediate(() => req.emit("error", err || new Error("destroyed")));
+  setImmediate(() => {
+    // 真站的响应头有折行，Node 严格解析器会在这里报错（实测）；替身照样拒绝严格解析的请求。
+    if (!options || options.insecureHTTPParser !== true) {
+      req.emit("error", new Error("Parse Error: Unexpected whitespace after header value"));
+      return;
+    }
+    const route = routes[target];
+    if (!route) {
+      req.emit("error", new Error("no fixture for " + target));
+      return;
+    }
+    const res = new PassThrough();
+    res.statusCode = route.status || 200;
+    res.headers = route.location ? { location: route.location } : {};
+    callback(res);
+    res.end(route.body || "");
+  });
+  return req;
+};
+`;
+
+const QM_PAGE = (n) => `https://www.qimao.com/shuku/a-a-a-1-1-a-0-click-${n}/`;
+const QM_CATEGORY = (id) => `https://www.qimao.com/shuku/a-${id}-a-a-a-a-a-click-1/`;
+const QM_TITLE = "3天内更新-30万以下-连载中-七猫免费小说-七猫中文网";
+const QM_MAINS = {
+  203: ["都市", "203", "都市异能"],
+  1: ["现代言情", "1", "总裁豪门"],
+  207: ["N次元", "207", "衍生同人"],
+  202: ["玄幻奇幻", "202", "东方玄幻"],
+};
+
+/** 书库一本书：照真实页面结构（data-v 属性、换行简介、绝对链接）。 */
+function qmBook(id, main = 203, overrides = {}) {
+  const [, mainId, sub] = QM_MAINS[main];
+  return {
+    id,
+    title: `书${id}`,
+    author: `作者${id}`,
+    mainId,
+    subId: "301",
+    sub,
+    status: "连载中",
+    words: "12.3万字",
+    update: "2026-10-09更新",
+    desc: `第一行简介${id}\n第二行`,
+    ...overrides,
+  };
+}
+
+function qmShukuHtml({ page, books, maxPage = 67, title = QM_TITLE, sort = "按点击量" }) {
+  const v = "data-v-3e833f26";
+  const items = books.map((b) => {
+    const words = b.words === null ? "" : ` <em class="s-words-num" ${v}>${b.words}</em>`;
+    return (
+      `<li class="qm-cover-text-item horizontal spacing-16 font-size-1" ${v}>` +
+      `<div class="cover-content left-col" ${v}><a href="https://www.qimao.com/shuku/${b.id}/" target="_blank"><img alt="${b.title}"></a></div> ` +
+      `<div class="text-content right-col" ${v}><div class="text-top-row" ${v}>` +
+      `<span class="s-tit" ${v}><a href="https://www.qimao.com/shuku/${b.id}/" target="_blank" ${v}>${b.title}</a></span> ` +
+      `<span class="tags-gather" ${v}><a href="https://www.qimao.com/shuku/a-${b.mainId}-${b.subId}-a-a-a-a-click-1/" target="" class="s-category" ${v}>${b.sub}</a> ` +
+      `<em class="s-status" ${v}>${b.status}</em>${words}</span> ` +
+      `<span class="s-desc" ${v}>\n                        ${b.desc}\n                    </span></div> ` +
+      `<div class="text-bottom-row" ${v}><span ${v}><a href="https://www.qimao.com/zuozhe/x/" target="_blank" class="s-author" ${v}>${b.author}</a> ` +
+      `<em class="s-update-time" ${v}>${b.update}</em></span></div></div> </li>`
+    );
+  });
+  const sortTabs = ["按点击量", "按总字数", "最近更新", "按收藏数"]
+    .map(
+      (label) =>
+        `<li class="qm-tab-list-item"><div class="tab-inner${label === sort ? " active" : ""}" data-v-223ba5bd>` +
+        `<span class="radio-icon"></span> <span>${label}</span> <!----></div></li>`
+    )
+    .join("");
+  const pager = [...new Set([1, 2, 3, maxPage].filter((n) => n <= maxPage))]
+    .map(
+      (n) =>
+        `<li class="page-number-item"><div class="number-item"><span class="page-btn num${n === page ? " active" : ""}" data-v-29399e2c>${n}</span></div></li>`
+    )
+    .join("");
+  return (
+    `<!doctype html><html><head><title>${title}</title></head><body>` +
+    `<ul class="qm-tab-list clearfix">${sortTabs}</ul>` +
+    `<ul class="qm-cover-text-list">${items.join("")}</ul>` +
+    `<div class="qm-page"><ul class="qm-page-number-list clearfix">${pager}</ul></div></body></html>`
+  );
+}
+
+function qmCategoryHtml(name) {
+  return `<!doctype html><html><head><title>${name}小说-好看的${name}小说-${name}小说排行榜--七猫免费小说-七猫中文网</title></head><body></body></html>`;
+}
+
+function qmCategoryRoutes(...mains) {
+  return Object.fromEntries(
+    mains.map((main) => [QM_CATEGORY(QM_MAINS[main][1]), { body: qmCategoryHtml(QM_MAINS[main][0]) }])
+  );
+}
+
+function runQimaoLibrary(args, routes) {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "story-scan-qimao-library-"));
+  try {
+    const preload = path.join(tmpDir, "stub-https.js");
+    fs.writeFileSync(preload, QIMAO_LIBRARY_STUB, "utf8");
+    const routesFile = path.join(tmpDir, "routes.json");
+    fs.writeFileSync(routesFile, JSON.stringify(routes), "utf8");
+    const callsFile = path.join(tmpDir, "calls.log");
+    const outdir = path.join(tmpDir, "out");
+    const result = spawnSync(
+      process.execPath,
+      ["--require", preload, QIMAO_SCRAPER, ...args, "--outdir", outdir],
+      {
+        cwd: repoRoot,
+        encoding: "utf8",
+        timeout: 60000,
+        env: {
+          ...process.env,
+          SCAN_TEST_UTILS: path.join(path.dirname(QIMAO_SCRAPER), "cdp-utils.js"),
+          SCAN_FAKE_HTTPS_ROUTES: routesFile,
+          SCAN_FAKE_CALLS: callsFile,
+        },
+      }
+    );
+    const files = fs.existsSync(outdir) ? fs.readdirSync(outdir).sort() : [];
+    const contents = files.map((name) => fs.readFileSync(path.join(outdir, name), "utf8"));
+    const calls = fs.existsSync(callsFile)
+      ? fs.readFileSync(callsFile, "utf8").split("\n").filter(Boolean)
+      : [];
+    return { ...result, files, contents, calls, gets: calls.filter((c) => c.startsWith("GET ")).map((c) => c.slice(4)) };
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+// 翻页：名次跨页连续、按 bookId 去重、某页没有新书就停；主类按分类页标题查且每类只查一次；
+// 请求之间限速；一份文件、首行能被聚合认成「七猫」平台的新书榜。
+function testQimaoLibraryPagedCollection() {
+  const page1 = Array.from({ length: 15 }, (_, i) => qmBook(1001 + i, [203, 1, 207][i % 3]));
+  page1[0] = qmBook(1001, 203, { title: "风&amp;雨&#x4E66;", desc: "甲&lt;乙&gt;\n丙" });
+  const page2 = [
+    page1[13],
+    page1[14],
+    ...Array.from({ length: 13 }, (_, i) => qmBook(2001 + i, 203)),
+  ];
+  const page3 = page2.slice(2, 7);
+  const run = runQimaoLibrary(["--source", "library", "--pages", "4"], {
+    [QM_PAGE(1)]: { status: 302, location: "/shuku/a-a-a-1-1-a-0-click-1/?r=1" },
+    [`${QM_PAGE(1)}?r=1`]: { body: qmShukuHtml({ page: 1, books: page1 }) },
+    [QM_PAGE(2)]: { body: qmShukuHtml({ page: 2, books: page2 }) },
+    [QM_PAGE(3)]: { body: qmShukuHtml({ page: 3, books: page3 }) },
+    ...qmCategoryRoutes(203, 1, 207),
+  });
+  assert.strictEqual(run.status, 0, `书库采集应成功:\n${run.stdout}\n${run.stderr}`);
+  assert.deepStrictEqual(run.gets, [
+    QM_PAGE(1),
+    `${QM_PAGE(1)}?r=1`,
+    QM_PAGE(2),
+    QM_PAGE(3),
+    QM_CATEGORY(203),
+    QM_CATEGORY(1),
+    QM_CATEGORY(207),
+  ], "第 3 页没有新书就停，不请求第 4 页；每个主类只查一次");
+  assert(!run.calls.includes("ab"), "书库模式不得调用 agent-browser");
+  const sleeps = run.calls.filter((c) => c.startsWith("sleep "));
+  assert.strictEqual(sleeps.length, 5, `3 页 + 3 个主类之间各隔一次: ${run.calls.join(" | ")}`);
+  assert(sleeps.every((c) => Number(c.slice(6)) >= 800), `请求间隔不得低于 800ms: ${sleeps}`);
+
+  assert.strictEqual(run.files.length, 1);
+  assert.match(run.files[0], /^七猫全站书库点击新书_\d{8}\.md$/);
+  const md = run.contents[0];
+  assert.strictEqual(md.split("\n")[0], "# 七猫 · 全站书库点击新书");
+  assert.match(md, /数据质量：\[OK\]/);
+  assert.match(md, /问题摘要：无/);
+  assert.match(md, /有效条目：28 \/ 28/);
+  assert.match(md, /来源：https:\/\/www\.qimao\.com\/shuku\/a-a-a-1-1-a-0-click-1\//);
+  assert.match(md, /筛选：.*3天内更新.*连载中.*按点击量.*没有热度/);
+  assert(!md.includes("[待补]"), "字段齐全时不得出现占位");
+  assert(!/^## /m.test(md), "不按页写分组标题");
+
+  const ranks = [...md.matchAll(/^### #(\d+) /gm)].map((m) => Number(m[1]));
+  assert.deepStrictEqual(ranks, Array.from({ length: 28 }, (_, i) => i + 1), "名次跨页连续");
+  const ids = [...md.matchAll(/^\[作品页\]\(https:\/\/www\.qimao\.com\/shuku\/(\d+)\/\)$/gm)].map((m) => m[1]);
+  assert.deepStrictEqual(ids, [
+    ...Array.from({ length: 15 }, (_, i) => String(1001 + i)),
+    ...Array.from({ length: 13 }, (_, i) => String(2001 + i)),
+  ], "跨页重复的书只保留首次出现");
+
+  assert.match(md, /^### #1 风&雨书$/m, "书名里的 HTML 实体要解码");
+  assert.match(md, /^\*作者1001 · 都市 · 都市异能 · 连载中 · 12\.3万字\*$/m);
+  assert.match(md, /^\*作者1002 · 现代言情 · 总裁豪门 · 连载中 · 12\.3万字\*$/m);
+  assert.match(md, /^\*作者1003 · N次元 · 衍生同人 · 连载中 · 12\.3万字\*$/m);
+  assert.match(md, /^\*\*最新更新：\*\* 2026-10-09更新$/m);
+  assert.match(md, /^甲<乙> 丙$/m, "简介换行压成空格、实体解码");
+}
+
+// 失败分级：第 1 页失败、筛选没生效、一本没采到 → exit 1 且不写文件；
+// 后面某页失败 → 保留已采到的页，exit 2，文件头写清第几页、为什么。
+function testQimaoLibraryPageFailures() {
+  const page1 = Array.from({ length: 15 }, (_, i) => qmBook(1001 + i));
+  const okPage1 = { [QM_PAGE(1)]: { body: qmShukuHtml({ page: 1, books: page1 }) } };
+  const fatal = [
+    ["第 1 页 HTTP 500", { [QM_PAGE(1)]: { status: 500 } }, /七猫采集 failed: 第 1 页没取到：HTTP 500/],
+    [
+      "第 1 页被转去别的站",
+      { [QM_PAGE(1)]: { status: 302, location: "https://passport.qimao.com/login" } },
+      /第 1 页没取到：被重定向到 passport\.qimao\.com\/login/,
+    ],
+    [
+      "筛选标题不符",
+      { [QM_PAGE(1)]: { body: qmShukuHtml({ page: 1, books: page1, title: "7天内更新-30万以下-连载中-七猫免费小说" }) } },
+      /第 1 页没取到：.*缺少「3天内更新」.*筛选没生效/,
+    ],
+    [
+      "排序不是按点击量",
+      { [QM_PAGE(1)]: { body: qmShukuHtml({ page: 1, books: page1, sort: "按总字数" }) } },
+      /第 1 页没取到：页面排序是「按总字数」/,
+    ],
+    [
+      "第 1 页一本书都没有",
+      { [QM_PAGE(1)]: { body: qmShukuHtml({ page: 1, books: [] }) } },
+      /七猫采集 failed: 书库第 1 页一本书都没解析出来/,
+    ],
+  ];
+  for (const [label, routes, message] of fatal) {
+    const run = runQimaoLibrary(["--source", "library", "--pages", "3"], { ...routes, ...qmCategoryRoutes(203) });
+    assert.strictEqual(run.status, 1, `${label} 必须 exit 1:\n${run.stderr}`);
+    assert.match(run.stderr, message, label);
+    assert.strictEqual(run.files.length, 0, `${label} 不得写文件`);
+    assert.deepStrictEqual(run.gets, [QM_PAGE(1)], `${label} 不得继续翻页、查主类或跟去别的站`);
+  }
+
+  const partial = [
+    ["第 2 页 HTTP 503", { status: 503 }, /第 2 页没取到：HTTP 503/],
+    [
+      "第 2 页被站点退回第 1 页",
+      { body: qmShukuHtml({ page: 1, books: page1 }) },
+      /第 2 页没取到：请求第 2 页，页面停在第 1 页/,
+    ],
+  ];
+  for (const [label, page2, reason] of partial) {
+    const run = runQimaoLibrary(["--source", "library", "--pages", "3"], {
+      ...okPage1,
+      [QM_PAGE(2)]: page2,
+      ...qmCategoryRoutes(203),
+    });
+    assert.strictEqual(run.status, 2, `${label} 应保留第 1 页并 exit 2:\n${run.stderr}`);
+    assert.match(run.stderr, new RegExp(`七猫采集 partial: wrote 1/1; ${reason.source}`));
+    assert.strictEqual(run.files.length, 1, `${label} 已采到的页必须落盘`);
+    assert(!run.gets.includes(QM_PAGE(3)), `${label} 后不再翻页`);
+    const md = run.contents[0];
+    assert.match(md, /数据质量：\[存在问题\]/);
+    assert.match(md, new RegExp(`问题摘要：.*${reason.source}`));
+    assert.match(md, /有效条目：15 \/ 15/);
+  }
+}
+
+// 页数以分页器为准提前停；主类查不到时题材位退用子分类并记进问题摘要；缺字段、条目太少都要标出来。
+function testQimaoLibraryFallbacksAndQuality() {
+  const books = [
+    qmBook(1001, 203),
+    qmBook(1002, 202),
+    qmBook(1003, 203, { words: null }),
+  ];
+  const run = runQimaoLibrary(["--source", "library"], {
+    [QM_PAGE(1)]: { body: qmShukuHtml({ page: 1, books, maxPage: 1 }) },
+    ...qmCategoryRoutes(203),
+    [QM_CATEGORY(202)]: { status: 500 },
+  });
+  assert.strictEqual(run.status, 0, `只缺主类不算采集失败:\n${run.stderr}`);
+  assert.deepStrictEqual(run.gets, [QM_PAGE(1), QM_CATEGORY(203), QM_CATEGORY(202)], "书库只有 1 页时不再翻页");
+  const md = run.contents[0];
+  assert.match(md, /数据质量：\[存在问题\]/);
+  assert.match(md, /问题摘要：.*主类未解析 1 条/);
+  assert.match(md, /问题摘要：.*字数缺失 1 条/);
+  assert.match(md, /问题摘要：.*\[数据稀疏\] 实际采集 3 条/);
+  assert(!/热度/.test(md.split("---")[0].replace(/没有热度数字/, "")), "书库没有热度，不得把缺热度记成问题");
+  assert.match(md, /^\*作者1002 · 东方玄幻 · 连载中 · 12\.3万字\*$/m, "主类缺失时题材位退用子分类");
+  assert.match(md, /^\*作者1003 · 都市 · 都市异能 · 连载中 · \[待补\]\*$/m);
+}
+
+// 书库参数在联网前就要拒绝：不发请求、不碰 CDP、不写文件。
+function testQimaoLibraryArgumentValidation() {
+  const cases = [
+    [["--source", "library", "--pages", "0"], /未知 --pages: 0/],
+    [["--source", "library", "--pages", "11"], /未知 --pages: 11/],
+    [["--source", "library", "--pages", "abc"], /未知 --pages: abc/],
+    [["--source", "bogus"], /未知 --source: bogus/],
+    [["--source", "library", "--type", "hot"], /--source library 不能配 --type/],
+    [["--source", "library", "--channel=male", "--period", "day"], /--source library 不能配 --channel、--period/],
+    [["--pages", "3"], /--pages 只用于 --source library/],
+  ];
+  for (const [args, message] of cases) {
+    const run = runQimaoLibrary(args, {});
+    assert.strictEqual(run.status, 1, `${args.join(" ")} 必须 exit 1: ${run.stderr}`);
+    assert.match(run.stderr, message);
+    assert.strictEqual(run.files.length, 0, `${args.join(" ")} 不得写文件`);
+    assert.deepStrictEqual(run.calls, [], `${args.join(" ")} 不得联网或打开浏览器`);
+  }
+}
+
 // 参数错误必须在打开浏览器/进入 per-target 容错前快速失败，给出具体参数名和值。
 function testLongScanArgumentValidation() {
   const cases = [
@@ -1432,6 +1753,10 @@ testQidianRankIsolation();
 testQidianFieldContractAndDescriptionLimit();
 testQimaoPeriodPlan();
 testQimaoPartialTargetStatus();
+testQimaoLibraryPagedCollection();
+testQimaoLibraryPageFailures();
+testQimaoLibraryFallbacksAndQuality();
+testQimaoLibraryArgumentValidation();
 testLongScanArgumentValidation();
 testHeiyanFieldDriftAndWordFormat();
 testCdpPlainReuseUnchanged();
