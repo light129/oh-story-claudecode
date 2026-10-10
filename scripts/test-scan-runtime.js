@@ -158,6 +158,13 @@ if (js.indexOf("result={channels:[]}") > -1) {
   }
   out({ channels: [{ name: "古代言情", books }] });
 }
+if (js.indexOf("qdLibraryPageSnapshot") > -1) {
+  // 起点书库列表页：载荷末尾是 (页码))，按页码取 SCAN_FAKE_QD_LIBRARY 里的页面快照
+  const page = (js.match(/\\)\\((\\d+)\\)\\)\\s*$/) || [])[1];
+  const file = process.env.SCAN_FAKE_QD_LIBRARY;
+  const pages = file ? JSON.parse(require("fs").readFileSync(file, "utf8")) : {};
+  out(pages[page] || {});
+}
 if (js.indexOf("blocked") > -1) out({ blocked: false, reason: "" });
 if (js.indexOf("book-img-text") > -1) {
   out([
@@ -534,6 +541,11 @@ function testQidianRankIsolation() {
     !run.files.some((name) => name.startsWith("起点畅销榜_")),
     "打不开的榜单不该写出空文件"
   );
+  // 书库只走 CDP，不进 --type all（all 默认不需要 Chrome；9/10 也靠这一条）
+  assert(
+    !run.files.some((name) => name.startsWith("起点男频书库")),
+    `--type all 不该带上书库: ${run.files.join(", ")}`
+  );
 
   // 参数错误仍要快速失败，不能被 per-榜单隔离吞掉
   const badMode = runScraper(scraper, ["--type", "all", "--mode", "bogus"], {});
@@ -597,6 +609,467 @@ function testQidianFieldContractAndDescriptionLimit() {
   for (const label of ["字数", "总推荐", "签约", "收费模式"]) {
     assert.match(missing, new RegExp(`${label}：\\[待补\\]`));
   }
+}
+
+// ---------------------------------------------------------------------------
+// 起点书库（--type library）：反爬字体解码、翻页、名次、去重、partial。全程离线：
+// 列表页走假 agent-browser（按 qdLibraryPageSnapshot 分派），字体与移动端作品页走
+// 预加载替身的 https.get，字体在这里现场合成，不提交任何真实 .ttf。
+// ---------------------------------------------------------------------------
+
+const QD_SCRAPER = path.join(repoRoot, "skills/story-long-scan/scripts/qidian-rank-scraper.js");
+const QD_FONT_URL = (name) => `https://qdfepccdn.qidian.com/gtimg/qd_anti_spider/${name}.ttf`;
+const QD_CIPHER_RE = /[\uE000-\uF8FF\u{17000}-\u{18D8F}\u{F0000}-\u{10FFFF}]/u;
+
+/** Mac 标准字形序里用得到的几个下标（post 2.0 下标 < 258） */
+const TEST_MAC_GLYPH_INDEX = {
+  ".notdef": 0,
+  period: 17,
+  zero: 19,
+  one: 20,
+  two: 21,
+  three: 22,
+  four: 23,
+  five: 24,
+  six: 25,
+  seven: 26,
+  eight: 27,
+  nine: 28,
+};
+const TEST_DIGIT_GLYPHS = {
+  0: "zero",
+  1: "one",
+  2: "two",
+  3: "three",
+  4: "four",
+  5: "five",
+  6: "six",
+  7: "seven",
+  8: "eight",
+  9: "nine",
+  ".": "period",
+};
+
+/**
+ * 合成一个最小 TrueType：表目录 + cmap（format 12 或 4）+ post 2.0。
+ * entries 是 [码点, 字形名]；customNames 里的名字即便有 Mac 标准下标也写成 Pascal 串（走 >=258 分支）。
+ */
+function buildTestFont({ entries, cmapFormat = 12, customNames = [], postVersion = 0x00020000, magic = 0x00010000 }) {
+  const glyphs = [".notdef"];
+  const gidOf = {};
+  for (const [, name] of entries) {
+    if (!(name in gidOf)) {
+      gidOf[name] = glyphs.length;
+      glyphs.push(name);
+    }
+  }
+  const extra = [];
+  const indices = glyphs.map((name) => {
+    if (name in TEST_MAC_GLYPH_INDEX && !customNames.includes(name)) return TEST_MAC_GLYPH_INDEX[name];
+    extra.push(name);
+    return 258 + extra.length - 1;
+  });
+  const post = Buffer.alloc(34 + indices.length * 2 + extra.reduce((n, s) => n + 1 + s.length, 0));
+  post.writeUInt32BE(postVersion, 0);
+  post.writeUInt16BE(glyphs.length, 32);
+  indices.forEach((idx, i) => post.writeUInt16BE(idx, 34 + i * 2));
+  let at = 34 + indices.length * 2;
+  for (const name of extra) {
+    post.writeUInt8(name.length, at);
+    post.write(name, at + 1, "latin1");
+    at += 1 + name.length;
+  }
+
+  const pairs = entries.map(([cp, name]) => [cp, gidOf[name]]).sort((a, b) => a[0] - b[0]);
+  let sub;
+  if (cmapFormat === 12) {
+    sub = Buffer.alloc(16 + pairs.length * 12);
+    sub.writeUInt16BE(12, 0);
+    sub.writeUInt32BE(sub.length, 4);
+    sub.writeUInt32BE(pairs.length, 12);
+    pairs.forEach(([cp, gid], i) => {
+      sub.writeUInt32BE(cp, 16 + i * 12);
+      sub.writeUInt32BE(cp, 20 + i * 12);
+      sub.writeUInt32BE(gid, 24 + i * 12);
+    });
+  } else {
+    const segs = [...pairs, [0xffff, null]];
+    const n = segs.length;
+    sub = Buffer.alloc(16 + n * 8);
+    sub.writeUInt16BE(4, 0);
+    sub.writeUInt16BE(sub.length, 2);
+    sub.writeUInt16BE(n * 2, 6);
+    segs.forEach(([cp, gid], i) => {
+      sub.writeUInt16BE(cp, 14 + i * 2);
+      sub.writeUInt16BE(cp, 16 + n * 2 + i * 2);
+      sub.writeUInt16BE(gid === null ? 1 : (gid - cp) & 0xffff, 16 + n * 4 + i * 2);
+    });
+  }
+  const cmapHead = Buffer.alloc(12);
+  cmapHead.writeUInt16BE(1, 2);
+  cmapHead.writeUInt16BE(3, 4);
+  cmapHead.writeUInt16BE(cmapFormat === 12 ? 10 : 1, 6);
+  cmapHead.writeUInt32BE(12, 8);
+  const tables = [
+    ["cmap", Buffer.concat([cmapHead, sub])],
+    ["post", post],
+  ];
+  const head = Buffer.alloc(12 + tables.length * 16);
+  head.writeUInt32BE(magic, 0);
+  head.writeUInt16BE(tables.length, 4);
+  let offset = head.length;
+  const bodies = [];
+  tables.forEach(([tag, body], i) => {
+    const rec = 12 + i * 16;
+    head.write(tag, rec, "latin1");
+    head.writeUInt32BE(offset, rec + 8);
+    head.writeUInt32BE(body.length, rec + 12);
+    const padded = Buffer.alloc(Math.ceil(body.length / 4) * 4);
+    body.copy(padded);
+    bodies.push(padded);
+    offset += padded.length;
+  });
+  return Buffer.concat([head, ...bodies]);
+}
+
+/** 一套「数字 → 密文码点」的乱序表，生成对应字体与密文 */
+function makeCipher(base, order) {
+  const codeOf = {};
+  order.split("").forEach((ch, i) => {
+    codeOf[ch] = base + i;
+  });
+  return {
+    font: (opts = {}) =>
+      buildTestFont({
+        entries: Object.entries(codeOf).map(([ch, cp]) => [cp, TEST_DIGIT_GLYPHS[ch]]),
+        ...opts,
+      }),
+    encode: (text) => text.split("").map((ch) => codeOf[ch]),
+  };
+}
+
+function testQidianLibraryFontDecoding() {
+  const qidian = loadFresh(QD_SCRAPER);
+  // 码点顺序故意打乱（0x187b7 起依次是 8、2、1、6…），和真实字体一样不按数字顺序排
+  const order = "8216405973.";
+  assert.strictEqual(new Set(order).size, 11);
+  const real = makeCipher(0x187b7, order);
+
+  // format 12 + post 2.0：密文码点在辅助平面，必须靠 format 12
+  const map = qidian.parseAntiSpiderFont(real.font());
+  assert.strictEqual(map.size, 11);
+  assert.strictEqual(qidian.decodeLibraryWords(real.encode("12.34"), "万字", map), "12.34万字");
+  assert.strictEqual(qidian.decodeLibraryWords(real.encode("8000"), "字", map), "8000字");
+
+  // 字形名存成 Pascal 串（下标 >= 258）也要认得
+  const custom = qidian.parseAntiSpiderFont(real.font({ customNames: ["one", "period"] }));
+  assert.strictEqual(qidian.decodeLibraryWords(real.encode("1.1"), "万字", custom), "1.1万字");
+
+  // format 4（BMP 私用区）同样能解
+  const bmp = makeCipher(0xe100, order);
+  const bmpMap = qidian.parseAntiSpiderFont(bmp.font({ cmapFormat: 4 }));
+  assert.strictEqual(qidian.decodeLibraryWords(bmp.encode("26.14"), "万字", bmpMap), "26.14万字");
+
+  // 解不出来一律返回 ""：未知码点、单位不明、拼出来不是数字、字形名不在白名单
+  assert.strictEqual(qidian.decodeLibraryWords([...real.encode("12"), 0x18000], "万字", map), "");
+  assert.strictEqual(qidian.decodeLibraryWords(real.encode("12"), "", map), "");
+  assert.strictEqual(qidian.decodeLibraryWords(real.encode("1..2"), "万字", map), "");
+  const bogus = buildTestFont({
+    entries: [
+      [0x18800, "one"],
+      [0x18801, "bogus"],
+    ],
+  });
+  const bogusMap = qidian.parseAntiSpiderFont(bogus);
+  assert.strictEqual(qidian.decodeLibraryWords([0x18800], "万字", bogusMap), "1万字");
+  assert.strictEqual(
+    qidian.decodeLibraryWords([0x18800, 0x18801], "万字", bogusMap),
+    "",
+    "白名单外的字形名不能被当成数字"
+  );
+
+  // 坏字体一律抛错（调用方据此写 [待补]）
+  const good = real.font();
+  const badMagic = Buffer.from(good);
+  badMagic.writeUInt32BE(0xdeadbeef, 0);
+  assert.throws(() => qidian.parseAntiSpiderFont(badMagic), /不是 TrueType/);
+  assert.throws(() => qidian.parseAntiSpiderFont(good.subarray(0, 40)), /越界/);
+  assert.throws(() => qidian.parseAntiSpiderFont(Buffer.from("not a font")), /太短/);
+  assert.throws(
+    () => qidian.parseAntiSpiderFont(real.font({ postVersion: 0x00030000 })),
+    /post 表版本/
+  );
+  assert.throws(
+    () => qidian.parseAntiSpiderFont(buildTestFont({ entries: [[0x18800, "bogus"]] })),
+    /没有可识别的数字字形/
+  );
+}
+
+const QD_LIBRARY_HTTPS_STUB = `// 预加载：https.get 离线替身（字体与 m.qidian.com 作品页），按 URL 查计划表
+"use strict";
+const fs = require("fs");
+const https = require("https");
+const { EventEmitter } = require("events");
+const { PassThrough } = require("stream");
+const plan = JSON.parse(fs.readFileSync(process.env.QD_LIBRARY_HTTPS_PLAN, "utf8"));
+https.get = function (url, options, callback) {
+  const href = String(url);
+  fs.appendFileSync(process.env.QD_LIBRARY_HTTPS_LOG, href + "\\n");
+  const req = new EventEmitter();
+  req.destroy = (err) => { if (err) process.nextTick(() => req.emit("error", err)); };
+  process.nextTick(() => {
+    const hit = plan[href];
+    if (!hit) { req.emit("error", new Error("offline stub: unexpected " + href)); return; }
+    const res = new PassThrough();
+    res.statusCode = hit.status || 200;
+    res.headers = {};
+    callback(res);
+    res.end(hit.base64 ? Buffer.from(hit.base64, "base64") : Buffer.from(hit.text || "", "utf8"));
+  });
+  return req;
+};
+`;
+
+/** 跑起点书库 CLI：pages 是 {页码: 列表页快照}，https 是 {URL: {status, text|base64}} */
+function runQidianLibrary(args, { pages = {}, https = {}, env = {} } = {}) {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "story-qd-library-"));
+  try {
+    const preload = makeScraperHarness(tmpDir);
+    const stub = path.join(tmpDir, "stub-https.js");
+    fs.writeFileSync(stub, QD_LIBRARY_HTTPS_STUB, "utf8");
+    const pagesFile = path.join(tmpDir, "pages.json");
+    fs.writeFileSync(pagesFile, JSON.stringify(pages), "utf8");
+    const planFile = path.join(tmpDir, "https-plan.json");
+    fs.writeFileSync(planFile, JSON.stringify(https), "utf8");
+    const logFile = path.join(tmpDir, "https.log");
+    fs.writeFileSync(logFile, "", "utf8");
+    const outdir = path.join(tmpDir, "out");
+    const result = spawnSync(
+      process.execPath,
+      ["--require", preload, "--require", stub, QD_SCRAPER, ...args, "--outdir", outdir],
+      {
+        cwd: repoRoot,
+        encoding: "utf8",
+        timeout: 60000,
+        env: {
+          ...process.env,
+          PATH: `${tmpDir}${path.delimiter}${process.env.PATH}`,
+          SCAN_TEST_UTILS: path.join(path.dirname(QD_SCRAPER), "cdp-utils.js"),
+          SCAN_FAKE_QD_LIBRARY: pagesFile,
+          QD_LIBRARY_HTTPS_PLAN: planFile,
+          QD_LIBRARY_HTTPS_LOG: logFile,
+          ...env,
+        },
+      }
+    );
+    const files = fs.existsSync(outdir) ? fs.readdirSync(outdir).sort() : [];
+    const contents = files.map((name) => fs.readFileSync(path.join(outdir, name), "utf8"));
+    const requests = fs.readFileSync(logFile, "utf8").split("\n").filter(Boolean);
+    return { ...result, files, contents, requests };
+  } finally {
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
+const QD_GOOD_FILTERS = ["全部", "连载", "全部", "30万字以下", "全部", "三日内", "全部", "全部"];
+
+function qdLibraryPage(page, fontName, books, overrides = {}) {
+  return {
+    qdLibraryPage: page,
+    path: page === 1 ? "/all/action0-size1-update1/" : `/all/action0-size1-update1-page${page}/`,
+    site: "男生",
+    filters: QD_GOOD_FILTERS,
+    sort: "人气排序",
+    pager: String(page),
+    pagerMax: 50,
+    fontUrls: { [fontName]: QD_FONT_URL(fontName) },
+    items: books.map((b, i) => ({
+      rid: String(i + 1),
+      bookId: String(b.id),
+      title: `书${b.id}`,
+      author: `作者${b.id}`,
+      genre: "玄幻",
+      subGenre: "东方玄幻",
+      status: "连载",
+      intro: `简介${b.id}`,
+      wordsFont: fontName,
+      wordsCodes: b.codes,
+      wordsUnit: "万字",
+      latestChapter: `第${b.id}章`,
+    })),
+    ...overrides,
+  };
+}
+
+function qdMobileBookHtml(info) {
+  const ctx = { pageContext: { pageProps: { pageData: { bookInfo: info } } } };
+  return `<html><script id="vite-plugin-ssr_pageContext" type="application/json">${JSON.stringify(ctx)}</script></html>`;
+}
+
+function qdMobilePlan(ids, { missing = [] } = {}) {
+  const plan = {};
+  for (const id of ids) {
+    plan[`https://m.qidian.com/book/${id}/`] = missing.includes(id)
+      ? { status: 404, text: "gone" }
+      : {
+          text: qdMobileBookHtml({
+            bookId: id,
+            recomAll: id,
+            signStatus: "签约作品",
+            isVip: 1,
+            wordsCnt: 123456,
+            updTime: "3小时前",
+          }),
+        };
+  }
+  return plan;
+}
+
+const range = (from, to) => Array.from({ length: to - from + 1 }, (_, i) => from + i);
+
+function testQidianLibraryPagingE2E() {
+  const fontA = makeCipher(0x187b7, "8216405973.");
+  const fontB = makeCipher(0x18800, "7.093826154");
+  const page1 = range(1001, 1020).map((id) => ({ id, codes: fontA.encode("12.34") }));
+  // 1005 的密文里混进一个字体里没有的码点：解不出来就用详情页字数兜底，不输出乱码
+  page1[4].codes = [...fontA.encode("12"), 0x18d00];
+  // 第 2 页开头两本是第 1 页的书（翻页时名次变动）：去重后按首次出现编号
+  const page2 = [1019, 1020, ...range(1021, 1038)].map((id) => ({ id, codes: fontB.encode("5.6") }));
+  const page3 = page2.slice(0, 5);
+  const ids = range(1001, 1038);
+  const https = {
+    [QD_FONT_URL("QdTestAa")]: { base64: fontA.font().toString("base64") },
+    [QD_FONT_URL("QdTestBb")]: { base64: fontB.font().toString("base64") },
+    ...qdMobilePlan(ids, { missing: [1030] }),
+  };
+  const pages = {
+    1: qdLibraryPage(1, "QdTestAa", page1),
+    2: qdLibraryPage(2, "QdTestBb", page2),
+    3: qdLibraryPage(3, "QdTestBb", page3),
+  };
+
+  // --pages 10（上限），但第 3 页没有新书就停：第 4 页一旦被打开就会失败（exit 2），
+  // 所以 exit 0 证明没翻过去
+  const run = runQidianLibrary(["--type", "library", "--pages", "10"], {
+    pages,
+    https,
+    env: { SCAN_FAKE_FAIL_OPEN: "update1-page4/" },
+  });
+  assert.strictEqual(run.status, 0, `书库正常采集应 exit 0:\n${run.stdout}\n${run.stderr}`);
+  assert.strictEqual(run.files.length, 1, run.files.join(", "));
+  assert.match(run.files[0], /^起点男频书库人气新书_\d{8}\.md$/);
+  const md = run.contents[0];
+  assert.strictEqual(md.split("\n")[0], "# 起点 · 男频书库人气新书", "首行决定聚合的平台与「新书榜」列");
+  assert.match(md, /- 来源：https:\/\/www\.qidian\.com\/all\/action0-size1-update1\/\n/);
+  assert.match(md, /- 抓取方式：cdp-pc\n/);
+  assert.match(md, /- 筛选：男生·连载·30万字以下·三日内更新；人气排序，取前 10 页\n/);
+  assert.match(md, /- 实际翻页：3 页（第 3 页没有新书，停止翻页）\n/);
+  assert.match(md, /- 条目数：38\n/);
+  assert.match(md, /- 字数来源：反爬字体解码 37 条，详情页兜底 1 条，缺失 0 条\n/);
+  assert.match(md, /- 详情补全：成功 37 \/ 共 38\n/);
+  assert.match(md, /- 数据质量：\[OK\]\n- 问题摘要：无\n/);
+
+  const ranks = [...md.matchAll(/^## #(\d+) /gm)].map((m) => Number(m[1]));
+  assert.deepStrictEqual(ranks, range(1, 38), "名次跨页连续，不按页重排");
+  assert.strictEqual((md.match(/^## #\d+ 书1020$/gm) || []).length, 1, "跨页重复的书只出现一次");
+  assert.match(md, /^## #20 书1020$/m);
+  assert.match(md, /^## #21 书1021$/m, "去重后第 2 页的第一本新书接着第 1 页编号");
+  assert(!/^## .*\n/m.test(md.split("---")[0]), "文件头里不能有按页的分组标题");
+
+  const entry = (id) => md.slice(md.indexOf(` 书${id}\n`), md.indexOf("\n---", md.indexOf(` 书${id}\n`)));
+  assert.match(entry(1001), /\*作者1001 · 玄幻·东方玄幻 · 连载\*/);
+  assert.match(entry(1001), /\*\*字数：12\.34万字\*\*/);
+  assert.match(entry(1001), /\*\*总推荐：1001\*\*/);
+  assert.match(entry(1001), /\*\*签约：签约作品\*\*/);
+  assert.match(entry(1001), /\*\*收费模式：VIP\*\*/);
+  assert.match(entry(1001), /\*\*最新更新：\*\* 第1001章 · 3小时前/);
+  assert.match(entry(1001), /\[作品页\]\(https:\/\/www\.qidian\.com\/book\/1001\/\)/);
+  assert.match(entry(1005), /\*\*字数：12\.35万字\*\*/, "字体解不出时用详情页 wordsCnt 兜底");
+  assert.match(entry(1021), /\*\*字数：5\.6万字\*\*/, "每页的字体各自解码");
+  assert.match(entry(1030), /\*\*总推荐：\[待补\]\*\*/, "单本详情失败写 [待补]");
+  assert.match(entry(1030), /\*\*签约：\[待补\]\*\*/);
+  assert(!QD_CIPHER_RE.test(md), "输出里不能出现反爬密文字符");
+
+  // 字体只从白名单 host 下载、同名字体只下一次；详情只打 m.qidian.com
+  assert.strictEqual(run.requests.filter((u) => u === QD_FONT_URL("QdTestAa")).length, 1);
+  assert.strictEqual(run.requests.filter((u) => u === QD_FONT_URL("QdTestBb")).length, 1);
+  for (const url of run.requests) {
+    assert.match(url, /^https:\/\/(qdfepccdn\.qidian\.com\/gtimg\/qd_anti_spider\/|m\.qidian\.com\/book\/)/);
+  }
+
+  // 第 2 页打不开（URL 形状 -page2/）：保留第 1 页、写文件、exit 2，并写明原因；不传 --pages 默认 3 页
+  const partial = runQidianLibrary(["--type", "library"], {
+    pages,
+    https,
+    env: { SCAN_FAKE_FAIL_OPEN: "/all/action0-size1-update1-page2/" },
+  });
+  assert.strictEqual(partial.status, 2, `部分页失败必须 exit 2:\n${partial.stdout}\n${partial.stderr}`);
+  assert.match(partial.stderr, /起点采集 partial: wrote 1\/1; 男频书库人气新书: 第 2 页没取到/);
+  assert.strictEqual(partial.files.length, 1);
+  assert.match(partial.contents[0], /- 条目数：20\n/);
+  assert.match(partial.contents[0], /取前 3 页\n/);
+  assert.match(partial.contents[0], /- 数据质量：\[存在问题\]/);
+  assert.match(partial.contents[0], /- 问题摘要：第 2 页没取到：.*（已保留前 1 页）/);
+
+  // 第 1 页实际选中的频道/筛选/排序对不上：不能写成「男频书库人气新书」，exit 1、不写文件
+  for (const [override, message] of [
+    [{ sort: "总收藏" }, /排序是「总收藏」/],
+    [{ site: "女生" }, /频道是「女生」/],
+    [{ filters: ["全部", "连载", "全部", "30万字以下", "全部", "七日内"] }, /没选中「三日内」/],
+  ]) {
+    const wrong = runQidianLibrary(["--type", "library"], {
+      pages: { ...pages, 1: { ...pages[1], ...override } },
+      https,
+    });
+    assert.strictEqual(wrong.status, 1, wrong.stderr);
+    assert.strictEqual(wrong.files.length, 0);
+    assert.match(wrong.stderr, /第 1 页没取到：筛选状态不符（/);
+    assert.match(wrong.stderr, message);
+    assert.match(wrong.stderr, /起点采集 failed: no output was written/);
+  }
+
+  // 站点静默退回第 1 页（分页器停在 1）：第 2 页不能当成新的 20 本写进去
+  const fellBack = runQidianLibrary(["--type", "library", "--pages", "2"], {
+    pages: { ...pages, 2: { ...pages[1], qdLibraryPage: 2, pager: "1" } },
+    https,
+  });
+  assert.strictEqual(fellBack.status, 2, fellBack.stderr);
+  assert.match(fellBack.stderr, /第 2 页没取到：筛选状态不符（分页停在第「1」页）/);
+  assert.match(fellBack.contents[0], /- 条目数：20\n/);
+
+  // 第 1 页一本都没有：exit 1、不写空文件
+  const empty = runQidianLibrary(["--type", "library"], {
+    pages: { 1: qdLibraryPage(1, "QdTestAa", []) },
+    https,
+  });
+  assert.strictEqual(empty.status, 1, empty.stderr);
+  assert.strictEqual(empty.files.length, 0);
+  assert.match(empty.stderr, /书库列表页一本都没抓到/);
+
+  // 字体地址不在白名单（换了 host）：不下载；某本详情也失败时字数写 [待补] 并进问题摘要，
+  // 绝不把密文写出去。替身其实能答这个地址——下载了就会解出字数，断言就会红
+  // 同一页里一条缺作者（宁可不收，免得元信息错位）、一条书名混进密文字符（要剥掉）
+  const evilFont = "https://qdfepccdn.qidian.com.evil.example/gtimg/qd_anti_spider/QdTestAa.ttf";
+  const dirtyItems = pages[1].items.map((item) => ({ ...item }));
+  dirtyItems[5].author = "";
+  dirtyItems[6].title = "书1007\u{187B9}";
+  const noFont = runQidianLibrary(["--type", "library", "--pages", "1"], {
+    pages: { 1: { ...pages[1], items: dirtyItems, fontUrls: { QdTestAa: evilFont } } },
+    https: {
+      [evilFont]: { base64: fontA.font().toString("base64") },
+      ...qdMobilePlan(range(1001, 1020), { missing: [1003] }),
+    },
+  });
+  assert.strictEqual(noFont.status, 0, noFont.stderr);
+  assert(!noFont.requests.includes(evilFont), "白名单外的字体地址不得请求");
+  const md2 = noFont.contents[0];
+  assert.match(md2, /- 条目数：19\n/);
+  assert.match(md2, /- 字数来源：反爬字体解码 0 条，详情页兜底 18 条，缺失 1 条\n/);
+  assert.match(md2, /- 数据质量：\[存在问题\]\n- 问题摘要：字数缺失 1 条.*；缺书名\/作者\/题材的条目 1 条，已跳过/);
+  assert.match(md2, /## #3 书1003\n[^#]*\*\*字数：\[待补\]\*\*/);
+  assert(!md2.includes("书1006"), "缺作者的条目不该写进去");
+  assert.match(md2, /^## #6 书1007$/m, "跳过的条目不占名次，书名里的密文字符被剥掉");
+  assert(!QD_CIPHER_RE.test(md2), "字体解不出时不能把密文写进输出");
 }
 
 // 七猫大热榜：日/月必须是显式采集维度，并进入文件名；非大热榜只采一次。
@@ -734,6 +1207,15 @@ function testLongScanArgumentValidation() {
     ["jjwxc-rank-scraper.js", ["--channel", "bogus"], /未知 --channel: bogus/],
     ["jjwxc-rank-scraper.js", ["--channel", "999"], /未知 --channel: 999/],
     ["qidian-rank-scraper.js", ["--type", "bogus", "--mode", "cdp"], /未知 --type: bogus/],
+    // 起点书库只能走 CDP；--pages 取 1-10 的整数，且只对书库有效（其他榜单传了报错而不是静默忽略）
+    ["qidian-rank-scraper.js", ["--type", "library", "--mode", "mobile"], /--type library 不支持 --mode mobile/],
+    ["qidian-rank-scraper.js", ["--type", "library", "--pages", "0"], /未知 --pages: 0（取 1-10 的整数）/],
+    ["qidian-rank-scraper.js", ["--type", "library", "--pages", "11"], /未知 --pages: 11/],
+    ["qidian-rank-scraper.js", ["--type", "library", "--pages", "abc"], /未知 --pages: abc/],
+    ["qidian-rank-scraper.js", ["--type", "library", "--pages", "2.5"], /未知 --pages: 2\.5/],
+    ["qidian-rank-scraper.js", ["--type", "library", "--pages="], /未知 --pages: （空）/],
+    ["qidian-rank-scraper.js", ["--type", "hotsales", "--mode", "cdp", "--pages", "2"], /--pages 只用于 --type library/],
+    ["qidian-rank-scraper.js", ["--type", "all", "--mode", "cdp", "--pages", "2"], /--pages 只用于 --type library/],
   ];
 
   for (const [name, args, message] of cases) {
@@ -1430,6 +1912,8 @@ testCliResultGate(longUtilsPath);
 testJjwxcDetailFailureIsolation();
 testQidianRankIsolation();
 testQidianFieldContractAndDescriptionLimit();
+testQidianLibraryFontDecoding();
+testQidianLibraryPagingE2E();
 testQimaoPeriodPlan();
 testQimaoPartialTargetStatus();
 testLongScanArgumentValidation();
