@@ -1375,7 +1375,7 @@ function runQimaoLibrary(args, routes) {
 // 请求之间限速；一份文件、首行能被聚合认成「七猫」平台的新书榜。
 function testQimaoLibraryPagedCollection() {
   const page1 = Array.from({ length: 15 }, (_, i) => qmBook(1001 + i, [203, 1, 207][i % 3]));
-  page1[0] = qmBook(1001, 203, { title: "风&amp;雨&#x4E66;", desc: "甲&lt;乙&gt;\n丙" });
+  page1[0] = qmBook(1001, 203, { title: "风&amp;雨&#x4E66;", desc: "甲&lt;乙&gt;\n丙<!<!---->--" });
   const page2 = [
     page1[13],
     page1[14],
@@ -1429,7 +1429,8 @@ function testQimaoLibraryPagedCollection() {
   assert.match(md, /^\*作者1002 · 现代言情 · 总裁豪门 · 连载中 · 12\.3万字\*$/m);
   assert.match(md, /^\*作者1003 · N次元 · 衍生同人 · 连载中 · 12\.3万字\*$/m);
   assert.match(md, /^\*\*最新更新：\*\* 2026-10-09更新$/m);
-  assert.match(md, /^甲<乙> 丙$/m, "简介换行压成空格、实体解码");
+  assert.match(md, /^甲<乙> 丙$/m, "简介换行压成空格、实体解码，嵌套注释删干净");
+  assert(!md.includes("<!--"), "嵌套、没闭合的注释删一遍会拼出新的「<!--」，不能留进输出");
 }
 
 // 失败分级：第 1 页失败、筛选没生效、一本没采到 → exit 1 且不写文件；

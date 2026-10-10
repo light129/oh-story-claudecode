@@ -381,10 +381,17 @@ function decodeEntities(text) {
   });
 }
 
-/** 去标签、解实体、压空白：先去标签再解实体，&lt;b&gt; 这样的书名原样保留。 */
+/** 去标签、解实体、压空白：先去标签再解实体，&lt;b&gt; 这样的书名原样保留。
+ *  注释和标签反复删到不再变化，再删掉散落的尖括号：「<!<!---->--」这类嵌套、没闭合的写法
+ *  删一遍会拼出新的「<!--」。正文里真正的尖括号在源码中都是实体，最后解码才还原，不会误删。 */
 function htmlText(html) {
-  const stripped = String(html || "").replace(/<!--[\s\S]*?-->/g, "").replace(/<[^>]*>/g, " ");
-  return decodeEntities(stripped).replace(/\s+/g, " ").trim();
+  let stripped = String(html || "");
+  for (let previous = null; stripped !== previous; ) {
+    previous = stripped;
+    // 没闭合的注释照 HTML 规则一直注释到结尾
+    stripped = stripped.replace(/<!--[\s\S]*?(?:-->|$)/g, "").replace(/<[^>]*>/g, " ");
+  }
+  return decodeEntities(stripped.replace(/[<>]/g, "")).replace(/\s+/g, " ").trim();
 }
 
 function attrValue(attrs, name) {
