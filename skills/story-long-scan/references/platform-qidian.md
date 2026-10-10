@@ -1,6 +1,6 @@
 # 起点：采集与分析
 
-作者选了起点才读本文。默认不需要 Chrome：脚本先读 `https://m.qidian.com` 移动端 SSR pageContext，移动端不可用时才回退 CDP/PC 页面，文件头 `抓取方式` 标 `mobile-ssr` 或 `cdp-pc`。
+作者选了起点才读本文。默认不需要 Chrome：脚本先读 `https://m.qidian.com` 移动端 SSR pageContext，移动端不可用时才回退 CDP/PC 页面，文件头 `抓取方式` 标 `mobile-ssr` 或 `cdp-pc`。书库新书除外：只能走 Chrome，先 `/browser-cdp`，开之前告诉作者。
 
 ## 榜单与命令
 
@@ -20,6 +20,16 @@
 | 原创推荐榜 | recom | qidian.com/rank/recom/ | 平台推荐 |
 
 默认组合：新人签约新书榜 + 签约作者新书榜 + 月票榜 + 畅销榜。文件名 `起点{榜单}_{YYYYMMDD}.md`。
+
+### 书库新书
+
+作者说「新书」「最近冒头」「什么在起量」时再加，不进默认组合（要开 Chrome）。全部作品筛选页 qidian.com/all/action0-size1-update1/（第 N 页 `-page{N}/`）：男生、连载、30 万字以下、三日内更新，按人气排，每页 20 本。能补上已下新书榜、还在更新的新书。
+
+```bash
+node scripts/qidian-rank-scraper.js --type library --pages 3 --outdir {输出目录}   # 前 3 页（默认 3，最多 10），不进 --type all
+```
+
+所有页写进一份 `起点男频书库人气新书_{YYYYMMDD}.md`，名次接着排，就是人气排名。页面上的字数是加密字体，脚本解码后写入；总推荐、签约、收费从移动端作品页补，补不到写 `[待补]`。跟作者说「起点最近三天还在更新的 30 万字以内新书，按人气取前 3 页，要开浏览器」。
 
 ## 字段
 
