@@ -201,9 +201,12 @@ function extractDetail(port) {
  * 起点常见拦截页面特征：页面中出现验证码关键词，或页面缺少榜单 DOM 元素。
  * @returns {{ blocked: boolean, reason: string } | null} 若被拦截返回原因对象，否则 null
  */
-function isCaptchaPage(port) {
-  const js =
+function captchaCheckJS() {
+  return (
     "JSON.stringify((()=>{" +
+    // 页面上已有成片的作品链接就是正常列表页：书库页前 3000 字里有整段简介和章节名，
+    // 书里写到「验证」「拖动」之类的字不能当成被拦（会白等重试和 120 秒人工验证）。
+    "if(document.querySelectorAll('a[href*=\"/book/\"]').length>=5)return {blocked:false,reason:''};" +
     "var bodyText=document.body?(document.body.innerText||'').substring(0,3000):'';" +
     "var lower=bodyText.toLowerCase();" +
     "var keywords=['验证','captcha','verify','安全验证','滑块','拖动','请完成验证'," +
@@ -220,8 +223,12 @@ function isCaptchaPage(port) {
     "  return {blocked:true,reason:'页面无榜单内容(可能被拦截)'};" +
     "}" +
     "return {blocked:false,reason:''};" +
-    "})())";
-  const result = evalJSON(port, js);
+    "})())"
+  );
+}
+
+function isCaptchaPage(port) {
+  const result = evalJSON(port, captchaCheckJS());
   return result && result.blocked === true ? result : null;
 }
 
@@ -396,7 +403,10 @@ function renderMarkdown(rt, books, url, sourceMode, extraLines = []) {
       value === undefined || value === null || value === "" ? "[待补]" : String(value);
     lines.push(`**字数：${required(b.words)}**`);
     if (b.rankValue) lines.push(`**榜单值：${b.rankValue}**`);
-    lines.push(`**总推荐：${required(b.totalRecommendations)}**`);
+    // 书库新书的总推荐只有几千到几万，和月票、畅销榜的老书混算会把题材热度中位拉低两个数量级；
+    // 换个行名单列，聚合不把它当热度口径（书库按名次即人气排名），数字留在原始条目里供抽样看。
+    if (b.library) lines.push(`**新书总推荐：${required(b.newBookRecom)}**`);
+    else lines.push(`**总推荐：${required(b.totalRecommendations)}**`);
     lines.push(`**签约：${required(b.signing)}**`);
     lines.push(`**收费模式：${required(b.pricing)}**`);
     if (b.updateText) lines.push(`**最新更新：** ${b.updateText}`);
@@ -1025,11 +1035,16 @@ async function scrapeLibrary(port, pages) {
   if (skipped) problems.push(`缺书名/作者/题材的条目 ${skipped} 条，已跳过`);
   if (books.length < 15) problems.push(`[数据稀疏] 实际采集 ${books.length} 条`);
 
+  for (const b of books) {
+    b.library = true;
+    b.newBookRecom = b.totalRecommendations;
+  }
   const extraLines = [
     `- 筛选：${LIBRARY_SITE}·${LIBRARY_FILTERS.slice(0, 2).join("·")}·${LIBRARY_FILTERS[2]}更新；${LIBRARY_SORT}，取前 ${pages} 页`,
     `- 实际翻页：${lastPage} 页${notes.length ? `（${notes.join("；")}）` : ""}`,
     `- 字数来源：反爬字体解码 ${decoded} 条，详情页兜底 ${books.filter((b) => b.wordsFromDetail).length} 条，缺失 ${missingWords} 条`,
     `- 详情补全：成功 ${detailOk} / 共 ${books.length}`,
+    "- 热度：名次即人气排名；作品页的总推荐单列为「新书总推荐」，不进聚合的热度口径",
     `- 数据质量：${problems.length ? "[存在问题]" : "[OK]"}`,
     `- 问题摘要：${problems.length ? problems.join("；") : "无"}`,
   ];
@@ -1208,4 +1223,5 @@ module.exports = {
   renderMarkdown,
   parseAntiSpiderFont,
   decodeLibraryWords,
+  captchaCheckJS,
 };

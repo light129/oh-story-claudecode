@@ -748,6 +748,23 @@ function makeCipher(base, order) {
   };
 }
 
+function testQidianCaptchaCheckIgnoresBookText() {
+  // 书库页前 3000 字里有整段简介和章节名：书里写到「验证」「拖动」不能当成被拦，
+  // 否则白等 3 次重试和 120 秒人工验证；真被拦（没有作品链接）时照旧判拦。
+  const qidian = loadFresh(QD_SCRAPER);
+  const run = (bookLinks, text, hasContainer) => JSON.parse(require("vm").runInNewContext(qidian.captchaCheckJS(), {
+    document: {
+      body: { innerText: text },
+      querySelectorAll: (selector) => (selector.includes("/book/") ? new Array(bookLinks).fill({}) : []),
+      querySelector: () => (hasContainer ? {} : null),
+    },
+  }));
+  assert.deepStrictEqual(run(20, "第88章 身份验证 拖动滑块解谜", true), { blocked: false, reason: "" });
+  assert.strictEqual(run(0, "请完成验证后继续访问", false).blocked, true);
+  assert.strictEqual(run(0, "请完成验证后继续访问", true).blocked, true, "只有容器、没有作品链接时关键词照样生效");
+  assert.strictEqual(run(0, "", false).reason, "页面无榜单内容(可能被拦截)");
+}
+
 function testQidianLibraryFontDecoding() {
   const qidian = loadFresh(QD_SCRAPER);
   // 码点顺序故意打乱（0x187b7 起依次是 8、2、1、6…），和真实字体一样不按数字顺序排
@@ -979,14 +996,16 @@ function testQidianLibraryPagingE2E() {
   const entry = (id) => md.slice(md.indexOf(` 书${id}\n`), md.indexOf("\n---", md.indexOf(` 书${id}\n`)));
   assert.match(entry(1001), /\*作者1001 · 玄幻·东方玄幻 · 连载\*/);
   assert.match(entry(1001), /\*\*字数：12\.34万字\*\*/);
-  assert.match(entry(1001), /\*\*总推荐：1001\*\*/);
+  assert.match(entry(1001), /\*\*新书总推荐：1001\*\*/);
+  assert(!/^\*\*总推荐：/m.test(md), "书库条目的总推荐单列为新书总推荐，不能进聚合的热度口径");
+  assert.match(md, /^- 热度：名次即人气排名/m);
   assert.match(entry(1001), /\*\*签约：签约作品\*\*/);
   assert.match(entry(1001), /\*\*收费模式：VIP\*\*/);
   assert.match(entry(1001), /\*\*最新更新：\*\* 第1001章 · 3小时前/);
   assert.match(entry(1001), /\[作品页\]\(https:\/\/www\.qidian\.com\/book\/1001\/\)/);
   assert.match(entry(1005), /\*\*字数：12\.35万字\*\*/, "字体解不出时用详情页 wordsCnt 兜底");
   assert.match(entry(1021), /\*\*字数：5\.6万字\*\*/, "每页的字体各自解码");
-  assert.match(entry(1030), /\*\*总推荐：\[待补\]\*\*/, "单本详情失败写 [待补]");
+  assert.match(entry(1030), /\*\*新书总推荐：\[待补\]\*\*/, "单本详情失败写 [待补]");
   assert.match(entry(1030), /\*\*签约：\[待补\]\*\*/);
   assert(!QD_CIPHER_RE.test(md), "输出里不能出现反爬密文字符");
 
@@ -2233,6 +2252,7 @@ testCliResultGate(longUtilsPath);
 testJjwxcDetailFailureIsolation();
 testQidianRankIsolation();
 testQidianFieldContractAndDescriptionLimit();
+testQidianCaptchaCheckIgnoresBookText();
 testQidianLibraryFontDecoding();
 testQidianLibraryPagingE2E();
 testQimaoPeriodPlan();
